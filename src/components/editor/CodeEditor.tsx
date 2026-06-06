@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useLayoutEffect } from 'react'
 import CodeMirror, { EditorView, type Extension } from '@uiw/react-codemirror'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
-import { languages } from '@codemirror/language-data'
+import type { LanguageDescription } from '@codemirror/language'
 import { html } from '@codemirror/lang-html'
 
 interface CodeEditorProps {
@@ -36,15 +36,33 @@ export function CodeEditor({
   onScrollerReady,
   language = 'markdown',
 }: CodeEditorProps) {
+  const [codeLangs, setCodeLangs] = useState<LanguageDescription[]>([])
+
+  // 按需加载语言包，并裁剪出常用集合，降低主包体积与运行时代价
+  useLayoutEffect(() => {
+    if (language === 'markdown') {
+      import('@codemirror/language-data').then((m) => {
+        const COMMON = [
+          'c', 'c++', 'css', 'go', 'html', 'java', 'javascript', 'json', 'jsx', 'markdown',
+          'php', 'python', 'rust', 'sql', 'tsx', 'typescript', 'xml', 'yaml', 'shell', 'bash', 'sh', 'vue'
+        ]
+        const filtered = m.languages.filter((l) =>
+          COMMON.includes(l.name.toLowerCase()) || l.alias.some((a) => COMMON.includes(a.toLowerCase()))
+        )
+        setCodeLangs(filtered)
+      })
+    }
+  }, [language])
+
   // 缓存扩展：避免每次 render 都生成新的语言扩展与数组，
   // 否则 @uiw/react-codemirror 会在每次输入时重新 reconfigure，导致输入/选择卡顿
   const extensions = useMemo<Extension[]>(() => {
     const langExtension =
       language === 'html'
         ? html()
-        : markdown({ base: markdownLanguage, codeLanguages: languages })
+        : markdown({ base: markdownLanguage, codeLanguages: codeLangs })
     return [langExtension, EditorView.lineWrapping]
-  }, [language])
+  }, [language, codeLangs])
 
   return (
     <CodeMirror

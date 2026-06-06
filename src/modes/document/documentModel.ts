@@ -36,7 +36,6 @@ export interface DocumentSettings {
   marginLeft: number
   headerHeight: number
   footerHeight: number
-  contentHeight: number
   headerLeft: string
   headerRight: string
   footerText: string
@@ -54,7 +53,6 @@ export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
   marginLeft: 72,
   headerHeight: 36,
   footerHeight: 34,
-  contentHeight: 925,
   headerLeft: '',
   headerRight: '',
   footerText: '第 {page} / {total} 页',
@@ -185,11 +183,12 @@ export function fontScaleFactor(scale: DocumentSettings['fontScale']): number {
 
 export function paginateDocumentBlocks(
   blocks: DocumentBlock[],
-  settings: Pick<DocumentSettings, 'contentHeight' | 'fontScale'>,
+  settings: Pick<DocumentSettings, 'pageHeight' | 'marginTop' | 'marginBottom' | 'fontScale'>,
   actualHeights?: Record<string, number>
 ): DocumentPage[] {
   const scale = fontScaleFactor(settings.fontScale ?? 'normal')
-  const effectiveHeight = settings.contentHeight / scale
+  const contentHeight = settings.pageHeight - settings.marginTop - settings.marginBottom
+  const effectiveHeight = contentHeight / scale
   const pages: DocumentPage[] = []
   let current: DocumentBlock[] = []
   let usedHeight = 0
@@ -236,7 +235,7 @@ export function paginateDocumentBlocks(
 
 export function createDocumentModel(markdown: string, meta: ContentMeta, settings = DEFAULT_DOCUMENT_SETTINGS) {
   const blocks = splitMarkdownBlocks(meta.contentMarkdown || markdown)
-  const pages = paginateDocumentBlocks(blocks, { contentHeight: settings.contentHeight, fontScale: settings.fontScale })
+  const pages = paginateDocumentBlocks(blocks, settings)
   return {
     filename: buildDocumentFilename(meta.title, meta.contentMarkdown || markdown),
     blocks,

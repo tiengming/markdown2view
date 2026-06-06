@@ -37,7 +37,7 @@ describe('documentModel', () => {
       { id: 'c', kind: 'paragraph' as const, markdown: 'c', estimatedHeight: 500, avoidBreak: true },
     ]
 
-    const pages = paginateDocumentBlocks(blocks, { ...DEFAULT_DOCUMENT_SETTINGS, contentHeight: 900 })
+    const pages = paginateDocumentBlocks(blocks, { ...DEFAULT_DOCUMENT_SETTINGS, pageHeight: 900, marginTop: 0, marginBottom: 0 })
 
     expect(pages).toHaveLength(2)
     expect(pages[0].blocks.map((b) => b.id)).toEqual(['a', 'b'])
@@ -52,7 +52,7 @@ describe('documentModel', () => {
       { id: 'tail', kind: 'paragraph' as const, markdown: 'tail', estimatedHeight: 200, avoidBreak: true },
     ]
 
-    const pages = paginateDocumentBlocks(blocks, { ...DEFAULT_DOCUMENT_SETTINGS, contentHeight: 900 })
+    const pages = paginateDocumentBlocks(blocks, { ...DEFAULT_DOCUMENT_SETTINGS, pageHeight: 900, marginTop: 0, marginBottom: 0 })
 
     expect(pages.map((p) => p.blocks.map((b) => b.id))).toEqual([['p'], ['img'], ['tail']])
     expect(pages[1].oversized).toBe(true)

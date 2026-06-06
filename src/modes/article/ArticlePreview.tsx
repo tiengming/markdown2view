@@ -4,6 +4,9 @@ import { copyText, copyRichText, copyHtmlSource } from '@/lib/clipboard'
 import { buildAiGuide } from '@/lib/aiGuide'
 import { exportLongImage } from '@/lib/export/longImage'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
+import { useStore } from '@/lib/store'
+import { getFontFamilyCss } from '@/lib/fonts'
 
 interface ArticlePreviewProps {
   rendered: MarkdownRenderResult
@@ -19,6 +22,8 @@ interface ArticlePreviewProps {
 export function ArticlePreview({ rendered, scrollRef, markdown, onToast }: ArticlePreviewProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const { html, meta } = rendered
+  const articleFont = useStore((s) => s.articleFont)
+  const setArticleFont = useStore((s) => s.setArticleFont)
 
   const handleCopyTitle = async () => {
     const ok = await copyText(meta.title)
@@ -75,6 +80,16 @@ export function ArticlePreview({ rendered, scrollRef, markdown, onToast }: Artic
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={articleFont}
+            onChange={(e) => setArticleFont(e.target.value as any)}
+          >
+            <option value="songti">宋体</option>
+            <option value="fangsong">仿宋</option>
+            <option value="heiti">黑体</option>
+            <option value="lxgwwenkai">霞鹜文楷</option>
+          </Select>
+          <div className="w-px h-4 bg-slate-200 mx-1" />
           <Button onClick={handleCopyGuide} title="复制一段语法说明，发给 AI 让它按支持的排版语法输出长图文">
             ✨ 复制 AI 指令
           </Button>
@@ -146,7 +161,7 @@ export function ArticlePreview({ rendered, scrollRef, markdown, onToast }: Artic
               color: '#333',
               fontSize: 15,
               lineHeight: 1.8,
-              fontFamily: '"LXGW WenKai Lite", "PingFang SC", "Microsoft YaHei", sans-serif',
+              fontFamily: getFontFamilyCss(articleFont),
               wordWrap: 'break-word',
               overflowWrap: 'break-word',
               backgroundColor: '#fff',

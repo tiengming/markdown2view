@@ -216,11 +216,11 @@ function chipsHtml(chips: string[], t: ThemeColors): string {
  * 结构：橙色徽章 → 大标题(==橙==+暖黑) + 波浪线 → 摘要(撑满、末尾渐隐) →
  * 可选黑色高亮条 → 话题标签 → 页脚(字数·分钟 + 品牌)。右上 / 左下点缀星点。
  */
-export function buildCover(meta: XhsMeta, aspect: XhsAspect, t: ThemeColors): string {
+export function buildCover(meta: XhsMeta, aspect: XhsAspect, t: ThemeColors, fontFamily: string): string {
   const { w, h } = ASPECTS[aspect]
   const contentW = w - PAD_X * 2
 
-  let html = `<section style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;background:${XHS.bg};padding:${PAD_TOP}px ${PAD_X}px ${PAD_BOTTOM}px;overflow:hidden;display:flex;flex-direction:column;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">`
+  let html = `<section style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;background:${XHS.bg};padding:${PAD_TOP}px ${PAD_X}px ${PAD_BOTTOM}px;overflow:hidden;display:flex;flex-direction:column;font-family:${fontFamily}">`
 
   // 角标星点
   html += `<section style="position:absolute;top:20px;right:24px">${star(22, t.accent)}</section>`
@@ -271,11 +271,12 @@ export function buildContentCard(
   total: number,
   brand: string,
   t: ThemeColors,
+  fontFamily: string,
 ): string {
   const { w, h } = ASPECTS[aspect]
   const footerBand = 44
 
-  let html = `<section style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;background:#fff;overflow:hidden;font-family:${FONT_STACK};color:#333">`
+  let html = `<section style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;background:#fff;overflow:hidden;font-family:${fontFamily};color:#333">`
   html += `<section class="social-card-render" style="box-sizing:border-box;height:${h - footerBand}px;overflow:hidden;padding:${PAD_TOP}px ${PAD_X}px 0;font-size:15px;line-height:1.8;word-wrap:break-word;overflow-wrap:break-word">`
   html += contentHtml
   html += `</section>`

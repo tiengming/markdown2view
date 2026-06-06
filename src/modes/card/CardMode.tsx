@@ -17,6 +17,8 @@ import { createCardModel, type CardPlatform } from './cardModel'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
+import { useStore } from '@/lib/store'
+import { getFontFamilyCss } from '@/lib/fonts'
 
 interface CardModeProps {
   markdown: string
@@ -48,6 +50,8 @@ export function CardMode({
 }: CardModeProps) {
   const [aspect, setAspect] = useState<XhsAspect>('3:4')
   const [exporting, setExporting] = useState(false)
+  const cardFont = useStore((s) => s.cardFont)
+  const setCardFont = useStore((s) => s.setCardFont)
   const [authorName, setAuthorName] = useState('')
   const cardRefs = useRef<Record<string, HTMLElement | null>>({})
 
@@ -111,7 +115,7 @@ export function CardMode({
         id: 'cover',
         label: '封面图',
         kind: 'cover',
-        html: buildCover({ ...model.meta, brand: finalBrand }, aspect, colors),
+        html: buildCover({ ...model.meta, brand: finalBrand }, aspect, colors, getFontFamilyCss(cardFont)),
       },
       ...model.pages.map((page, index) => ({
         id: page.id,
@@ -124,10 +128,11 @@ export function CardMode({
           total,
           finalBrand,
           colors,
+          getFontFamilyCss(cardFont)
         ),
       })),
     ]
-  }, [model, aspect, colors])
+  }, [model, aspect, colors, cardFont])
 
   const exportOne = async (card: PreviewCard, index: number) => {
     const node = cardRefs.current[card.id]
@@ -253,6 +258,15 @@ export function CardMode({
                 <option value="3:4">3:4比例</option>
                 <option value="9:16">9:16比例</option>
               </Select>
+              <Select
+                value={cardFont}
+                onChange={(e) => setCardFont(e.target.value as any)}
+              >
+                <option value="songti">宋体</option>
+                <option value="fangsong">仿宋</option>
+                <option value="heiti">黑体</option>
+                <option value="lxgwwenkai">霞鹜文楷</option>
+              </Select>
               <div className="w-px h-4 bg-slate-200 mx-1" />
               <Button onClick={copyCaption} disabled={!model.caption}>
                 复制文案
@@ -306,7 +320,7 @@ export function CardMode({
                 lineHeight: 1.8,
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word',
-                fontFamily: `-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif`,
+                fontFamily: getFontFamilyCss(cardFont),
               }}
             >
               {model.rawBlocks?.map((block, i) => (

@@ -5,6 +5,7 @@ import {
   DEFAULT_DOCUMENT_SETTINGS,
   type DocumentSettings,
 } from '@/modes/document/documentModel'
+import type { FontFamilyOption } from '@/lib/fonts'
 
 // 渲染场景：通用 Markdown 渲染内核 + 不同交付场景适配。
 export type RenderMode = 'article' | 'document' | 'card' | 'html'
@@ -16,6 +17,8 @@ const THEME_STORAGE_KEY = 'm2v-theme'
 const HTML_STORAGE_KEY = 'm2v-html'
 const DOCUMENT_SETTINGS_STORAGE_KEY = 'm2v-document-settings'
 const MODE_STORAGE_KEY = 'm2v-mode'
+const ARTICLE_FONT_KEY = 'm2v-article-font'
+const CARD_FONT_KEY = 'm2v-card-font'
 
 function loadMarkdown(): string {
   if (typeof localStorage === 'undefined') return DEMO_CONTENT
@@ -62,6 +65,15 @@ function loadDocumentSettings(): DocumentSettings {
   }
 }
 
+function loadFont(key: string, defaultVal: FontFamilyOption): FontFamilyOption {
+  if (typeof localStorage === 'undefined') return defaultVal
+  const saved = localStorage.getItem(key)
+  if (saved && ['songti', 'fangsong', 'heiti', 'lxgwwenkai'].includes(saved)) {
+    return saved as FontFamilyOption
+  }
+  return defaultVal
+}
+
 interface AppState {
   markdown: string
   html: string
@@ -69,6 +81,8 @@ interface AppState {
   inputType: InputType
   platform: PlatformPreset
   documentSettings: DocumentSettings
+  articleFont: FontFamilyOption
+  cardFont: FontFamilyOption
   accent: string
   accentDark: string
   colors: ThemeColors
@@ -78,6 +92,8 @@ interface AppState {
   setInputType: (type: InputType) => void
   setPlatform: (platform: PlatformPreset) => void
   updateDocumentSettings: (patch: Partial<DocumentSettings>) => void
+  setArticleFont: (f: FontFamilyOption) => void
+  setCardFont: (f: FontFamilyOption) => void
   setTheme: (accent: string, dark: string) => void
 }
 
@@ -99,6 +115,8 @@ export const useStore = create<AppState>((set) => ({
   inputType: loadMode() === 'html' ? 'html' : 'markdown',
   platform: loadMode() === 'card' ? 'xiaohongshu' : 'longform',
   documentSettings: initDocumentSettings,
+  articleFont: loadFont(ARTICLE_FONT_KEY, 'lxgwwenkai'),
+  cardFont: loadFont(CARD_FONT_KEY, 'heiti'),
   accent: initTheme.accent,
   accentDark: initTheme.dark,
   colors: makeColors(initTheme.accent, initTheme.dark),
@@ -128,6 +146,14 @@ export const useStore = create<AppState>((set) => ({
       }
       return { documentSettings: next }
     }),
+  setArticleFont: (f) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(ARTICLE_FONT_KEY, f)
+    set({ articleFont: f })
+  },
+  setCardFont: (f) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(CARD_FONT_KEY, f)
+    set({ cardFont: f })
+  },
   setTheme: (accent, dark) => {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ accent, dark }))

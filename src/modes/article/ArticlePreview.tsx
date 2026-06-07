@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import type { MarkdownRenderResult } from '@/lib/render/markdown'
 import { copyText, copyRichText, copyHtmlSource } from '@/lib/clipboard'
-import { buildAiGuide } from '@/lib/aiGuide'
+import { buildArticleAiGuide } from '@/lib/aiGuide'
 import { exportLongImage } from '@/lib/export/longImage'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
@@ -36,12 +36,12 @@ export function ArticlePreview({ rendered, scrollRef, markdown, onToast }: Artic
   }
 
   const handleCopyGuide = async () => {
-    const ok = await copyText(buildAiGuide())
+    const ok = await copyText(buildArticleAiGuide())
     onToast(ok ? '已复制长图文 AI 排版指令，可发给 AI 使用' : '复制失败，请重试')
   }
 
   const handleCopyGuideWithContent = async () => {
-    const ok = await copyText(`${buildAiGuide()}\n\n---\n\n以下是待处理内容：\n\n${markdown}`)
+    const ok = await copyText(`${buildArticleAiGuide()}\n\n---\n\n以下是待处理内容：\n\n${markdown}`)
     onToast(ok ? '已复制 AI 指令和当前 Markdown 内容' : '复制失败，请重试')
   }
 

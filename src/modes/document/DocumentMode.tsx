@@ -10,7 +10,7 @@ import {
   paginateDocumentBlocks,
   type DocumentSettings,
 } from './documentModel'
-import { buildAiGuide } from '@/lib/aiGuide'
+import { buildDocumentAiGuide } from '@/lib/aiGuide'
 import { copyText } from '@/lib/clipboard'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -127,7 +127,7 @@ export function DocumentMode({
   }
 
   const copyGuide = async () => {
-    const ok = await copyText(`${buildAiGuide()}\n\n---\n\n以下是待处理内容：\n\n${markdown}`)
+    const ok = await copyText(`${buildDocumentAiGuide()}\n\n---\n\n以下是待处理内容：\n\n${markdown}`)
     onToast(ok ? '已复制指令和当前 Markdown 内容' : '复制失败，请重试')
   }
 

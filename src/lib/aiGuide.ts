@@ -2,8 +2,6 @@ import { components, type ComponentDef } from '@engine'
 
 // 生成「长图文排版 Markdown 语法指令」纯文本，供用户复制后发给其它 AI，
 // 让 AI 在输出长图文内容时能正确使用本系统支持的扩展语法与组件。
-//
-// 块级组件部分由 components 元数据自动生成，新增/修改组件后指令会自动同步。
 
 function renderAttrs(attrs: ComponentDef['attrs']): string {
   if (!attrs || attrs.length === 0) return '  （无属性）'
@@ -18,7 +16,6 @@ function renderAttrs(attrs: ComponentDef['attrs']): string {
 }
 
 function renderComponents(): string {
-  // 按 tag 分组（title/steps/compare/engage 有多种变体）
   const groups = new Map<string, ComponentDef[]>()
   for (const c of components) {
     const list = groups.get(c.tag) ?? []
@@ -33,13 +30,11 @@ function renderComponents(): string {
     const lines: string[] = []
     lines.push(`### ${idx}. <${tag}>  ${names}`)
 
-    // 每个变体的示例
     list.forEach((c) => {
       const variant = list.length > 1 ? `（${c.id}）` : ''
       if (c.example) lines.push(`示例${variant}：\n${c.example}`)
     })
 
-    // 合并所有变体的属性（按 key 去重）
     const attrMap = new Map<string, NonNullable<ComponentDef['attrs']>[number]>()
     list.forEach((c) => c.attrs?.forEach((a) => { if (!attrMap.has(a.key)) attrMap.set(a.key, a) }))
     lines.push('属性：')
@@ -67,17 +62,15 @@ const INLINE_SECTION = `## 二、行内强调语法（写在正文里）
 - ^文字^          上标（如 m^2^）
 - \`文字\`          行内代码`
 
-const STANDARD_SECTION = `## 一、标准 Markdown
+const ARTICLE_STANDARD_SECTION = `## 一、标准 Markdown
 
 - 标题：# 一级 / ## 二级 / ### 三级 / #### 四级
 - 无序列表用 - ，有序列表用 1. ；支持引用 > 、表格、分隔线
-- 强制分页：使用 \\\`<page-break>\\\` 或 \\\`<page-break />\\\` （主要用于 A4 文档模式单独输出封面、目录或新章节页面）
 - 任务列表：- [x] 已完成   - [ ] 未完成
 - 代码块：用三个反引号包裹，必须标注语言，例如 \`\`\`javascript
   - 系统会自动做代码高亮和自动换行，不需要额外写 HTML 样式
 - 图片：![描述](图片地址)
   - 限制尺寸：![描述](图片地址)[100% 250px]  （格式为 [宽度 高度]，可超出部分滚动）
-- 图表题注自动居中与间距贴合：系统支持题注识别。如果是图片题注（如 \`图 1: xxxx\`），请写在**图片下方**；如果是表格题注（如 \`表 1: xxxx\`），请写在**表格上方**（支持图/表/Fig/Table/Figure + 数字/中文数字 + 冒号/点/空格）。系统将自动将其渲染为居中的小字置灰，并微调间距贴合图表。
 - 多图横向并排（左右滑动）：< ![图1](地址1), ![图2](地址2), ![图3](地址3) >
 - 脚注链接：[显示文字](链接地址 "脚注说明")  —— 带引号说明的链接会自动汇总到文末"参考资料"`
 
@@ -114,7 +107,7 @@ $$
 $$
 - 公式语法遵循 LaTeX / KaTeX 规范。`
 
-const RULES_SECTION = `## 六、使用规则（重要）
+const ARTICLE_RULES_SECTION = `## 六、使用规则（重要）
 
 1. 只能使用上面列出的语法与标签，不要发明新标签或新属性。
 2. 组件标签写法与普通 HTML 一致：<tag 属性="值">内容</tag> 或自闭合 <tag ...></tag>。
@@ -124,7 +117,29 @@ const RULES_SECTION = `## 六、使用规则（重要）
 6. 直接输出可粘贴的 Markdown 正文，不要额外解释，不要用代码块把整篇文章包起来。
 7. 合理搭配组件：开头可用 <title> 或 <breaking>，结尾可用 <engage>，正文穿插 <statement>、<steps>、<timeline> 等增强可读性。`
 
-export function buildAiGuide(): string {
+// A4 文档专属排版与题注规范
+const DOCUMENT_STANDARD_SECTION = `## 一、标准 Markdown 与文档规范
+
+- 标题：# 一级标题（用作文档主标题）/ ## 二级标题 / ### 三级标题 / #### 四级标题
+  - 说明：系统支持“标题居中”设置，开启时仅有最大的主标题（一级标题 #）会居中对齐，子标题保持左对齐。
+- 列表与引用：无序列表用 - ，有序列表用 1. ；支持引用 > 以及水平分割线。
+- 强制分页：在需要强行换页（例如分隔封面页、目录页、以及新章节）处，写一行 \\\`<page-break>\\\` 或 \\\`<page-break />\\\`。
+- 代码块：使用三个反引号包裹并标注语言，例如 \`\`\`javascript
+- 图片与表格题注（Caption）自动居中：
+  - **图片题注**：请写在**图片下方**，形如 \`图 1: xxxx\` 或 \`Fig. 2. xxxx\`。
+  - **表格题注**：请写在**表格上方**，形如 \`表 1: xxxx\` 或 \`Table 2. xxxx\`。
+  - **系统表现**：系统会自动识别这些符合前缀的单独行，并将其渲染为居中、灰色小字，且自动贴合相邻的图表（首行缩进对其无效）。
+- 脚注链接：[显示文字](链接地址 "脚注说明")  —— 带引号说明的链接会自动汇总到文末"参考资料"并生成规范列表。`
+
+const DOCUMENT_RULES_SECTION = `## 四、排版规范与要求（重要）
+
+1. **不要使用**长图文（WeChat）里的花哨社交互动标签（如 <breaking>、<timeline>、<engage> 等），保持文档正式、严谨的商业或学术排版风貌。
+2. 表格首行（表头）内容默认会强制居中，表格体内容默认左对齐。
+3. 适当在章节交界处插入 \\\`<page-break />\\\`，以防内容被截断在不雅观的位置。
+4. 直接输出可粘贴的 Markdown 正文，不要有任何多余的解释，不要用代码块包住整篇文档。`
+
+
+export function buildArticleAiGuide(): string {
   return [
     '# 长图文排版 Markdown 语法指令',
     '',
@@ -133,7 +148,7 @@ export function buildAiGuide(): string {
     '',
     META_SECTION,
     '',
-    STANDARD_SECTION,
+    ARTICLE_STANDARD_SECTION,
     '',
     INLINE_SECTION,
     '',
@@ -145,7 +160,25 @@ export function buildAiGuide(): string {
     '',
     MATH_SECTION,
     '',
-    RULES_SECTION,
+    ARTICLE_RULES_SECTION,
+    '',
+  ].join('\n')
+}
+
+export function buildDocumentAiGuide(): string {
+  return [
+    '# A4 文档排版 Markdown 语法指令',
+    '',
+    '你是一位专业的 A4 PDF 文档排版助手。请严格使用标准 Markdown 及以下排版规范来输出文档内容，',
+    '以便于文档在打印及导出 PDF 时能保证版面端庄、严谨、格式规整。',
+    '',
+    META_SECTION,
+    '',
+    DOCUMENT_STANDARD_SECTION,
+    '',
+    MATH_SECTION,
+    '',
+    DOCUMENT_RULES_SECTION,
     '',
   ].join('\n')
 }
@@ -181,4 +214,9 @@ export function buildCardAiGuide(platform: string, aspect: string): string {
     '- 不要直接输出 HTML 样式；需要强调时使用 ==重点==、!!标签!!、^^强强调^^ 等行内语法。',
     '- 不要额外解释，只输出可粘贴回编辑器的 Markdown。',
   ].join('\n')
+}
+
+// 兼容老代码的导出函数
+export function buildAiGuide(): string {
+  return buildArticleAiGuide()
 }

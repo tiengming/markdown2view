@@ -40,8 +40,12 @@ export default function App() {
 
   const handleRestoreDemo = () => {
     if (window.confirm('确定要恢复示例文件吗？这将会覆盖你当前所有的输入内容。')) {
-      import('@/data/demoContent').then(({ DEMO_CONTENT }) => {
+      Promise.all([
+        import('@/data/demoContent'),
+        import('@/data/demoHtml')
+      ]).then(([ { DEMO_CONTENT }, { DEMO_HTML } ]) => {
         setMarkdown(DEMO_CONTENT)
+        setHtml(DEMO_HTML)
         showToast('已恢复示例文件')
       })
     }

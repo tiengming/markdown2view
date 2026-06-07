@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { THEMES, makeColors, type ThemeColors } from '@engine'
 import { DEMO_CONTENT } from '@/data/demoContent'
+import { DEMO_HTML } from '@/data/demoHtml'
 import {
   DEFAULT_DOCUMENT_SETTINGS,
   type DocumentSettings,
@@ -26,8 +27,8 @@ function loadMarkdown(): string {
 }
 
 function loadHtml(): string {
-  if (typeof localStorage === 'undefined') return ''
-  return localStorage.getItem(HTML_STORAGE_KEY) ?? ''
+  if (typeof localStorage === 'undefined') return DEMO_HTML
+  return localStorage.getItem(HTML_STORAGE_KEY) ?? DEMO_HTML
 }
 
 function loadMode(): RenderMode {

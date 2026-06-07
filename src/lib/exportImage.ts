@@ -1,3 +1,9 @@
+/**
+ * Portions of this file are derived from html-anything (https://github.com/nexu-io/open-design),
+ * licensed under the Apache License, Version 2.0.
+ * Modified by ZhongXiandou/markdown2view contributors.
+ */
+
 import { domToBlob, waitUntilLoad } from 'modern-screenshot'
 
 // 把 iframe（srcdoc 构建）内容渲染为 PNG Blob。

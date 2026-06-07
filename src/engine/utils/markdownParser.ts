@@ -28,6 +28,57 @@ import { Engage_DA02 } from '@engine/editor-components/Engage_DA02'
 import { Timeline_DA01 } from '@engine/editor-components/Timeline_DA01'
 import { Slider_DA01 } from '@engine/editor-components/Slider_DA01'
 
+function isImageLine(line: string | undefined): boolean {
+  if (!line) return false
+  const trimmed = line.trim()
+  return /^\s*(<!\[|!\[|<img)/i.test(trimmed)
+}
+
+function isTableStartLine(lines: string[], idx: number): boolean {
+  if (idx < 0 || idx >= lines.length) return false
+  const line = lines[idx]
+  if (line.indexOf('|') < 0) return false
+  // 寻找下一个非空行，判断是否为表格的分隔符行
+  let nextIdx = idx + 1
+  while (nextIdx < lines.length && lines[nextIdx].trim() === '') {
+    nextIdx++
+  }
+  if (nextIdx >= lines.length) return false
+  return /\|[\s-:]+\|/.test(lines[nextIdx])
+}
+
+function hasImageAbove(lines: string[], index: number): boolean {
+  let steps = 0
+  for (let i = index - 1; i >= 0 && steps < 3; i--) {
+    const line = lines[i].trim()
+    if (line === '') {
+      continue
+    }
+    steps++
+    if (isImageLine(line)) {
+      return true
+    }
+    break
+  }
+  return false
+}
+
+function hasTableBelow(lines: string[], index: number): boolean {
+  let steps = 0
+  for (let i = index + 1; i < lines.length && steps < 3; i++) {
+    const line = lines[i].trim()
+    if (line === '') {
+      continue
+    }
+    steps++
+    if (isTableStartLine(lines, i)) {
+      return true
+    }
+    break
+  }
+  return false
+}
+
 export function parseMarkdown(md: string, t: ThemeColors): string {
   // 先抽取数学公式（$$...$$ / $...$）为占位符，避免被后续 Markdown 规则破坏
   const { text: mathText, store: mathStore } = extractMath(md)
@@ -557,7 +608,39 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
     }
 
     // 普通段落
-    html += `<section style="margin:0px 0px 24px"><p style="margin:0px;font-size:16px;color:rgb(51,65,85);line-height:1.85;letter-spacing:0.5px;text-align:justify;overflow-wrap:break-word">${inlineFormat(line, t)}</p></section>`
+    const trimmedLine = line.trim()
+    // 去除加粗、斜体等排版包裹字符后进行匹配，例如 **图 1: xxxx**
+    const cleanLine = trimmedLine.replace(/^(\*\*|\*|__|_)*/, '').replace(/(\*\*|\*|__|_)*$/, '').trim()
+    const separatorMatch = cleanLine.match(/^\s*(图|表|Fig|Table|Figure)\.?\s*(\d+|[一二三四五六七八九十百]+)([:：.\-\—\s]+)/i)
+    
+    let isCaption = false
+    let isTableCaption = false
+    
+    if (separatorMatch) {
+      isTableCaption = /^\s*(表|Table)/i.test(cleanLine)
+      const separator = separatorMatch[3]
+      const isOnlySpace = /^\s+$/.test(separator)
+      const hasVerb = /展示|显示|展现|是|有|如下图|如下表/g.test(cleanLine)
+      
+      // 如果分隔符仅为空格，限制其长度与内容以防止把描述句误认为题注
+      const isValidPattern = !(isOnlySpace && (cleanLine.length > 60 || hasVerb))
+      
+      if (isValidPattern) {
+        if (isTableCaption) {
+          isCaption = hasTableBelow(lines, i)
+        } else {
+          isCaption = hasImageAbove(lines, i)
+        }
+      }
+    }
+
+    if (isCaption) {
+      const captionClass = isTableCaption ? 'document-caption document-caption-table' : 'document-caption document-caption-image'
+      const sectionStyle = isTableCaption ? 'margin:16px 0px 8px' : 'margin:8px 0px 16px'
+      html += `<section style="${sectionStyle}"><p class="${captionClass}" style="margin:0px;font-size:13px;color:rgb(100,116,139);line-height:1.5;text-align:center;overflow-wrap:break-word">${inlineFormat(trimmedLine, t)}</p></section>`
+    } else {
+      html += `<section style="margin:0px 0px 24px"><p style="margin:0px;font-size:16px;color:rgb(51,65,85);line-height:1.85;letter-spacing:0.5px;text-align:justify;overflow-wrap:break-word">${inlineFormat(line, t)}</p></section>`
+    }
     i++
   }
 

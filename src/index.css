@@ -108,6 +108,7 @@ body {
 .document-block th {
   background-color: #f8fafc !important;
   font-weight: 700 !important;
+  text-align: center !important;
 }
 
 
@@ -177,6 +178,32 @@ body {
 .document-block blockquote {
   font-size: var(--doc-font-size, 15px) !important;
   line-height: var(--doc-line-height, 1.9) !important;
+}
+
+/* Document Mode Heading Centering */
+.document-center-title .document-block h1 {
+  text-align: center !important;
+}
+
+/* Document Mode Paragraph Indentation */
+.document-indent-paragraph .document-block p:not(.document-caption) {
+  text-indent: 2em !important;
+}
+
+/* Captions centering and sizing */
+.document-page .document-caption {
+  text-align: center !important;
+  font-size: 13px !important;
+  color: #64748b !important;
+  text-indent: 0 !important; /* Ensure captions do not get indented even if paragraph indentation is on */
+}
+
+.document-page .document-caption-table {
+  margin: 16px 0 8px !important;
+}
+
+.document-page .document-caption-image {
+  margin: 8px 0 16px !important;
 }
 
 @media print {

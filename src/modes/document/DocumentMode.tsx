@@ -195,6 +195,25 @@ export function DocumentMode({
                 ))}
               </div>
               <div className="w-px h-4 bg-slate-200 mx-1" />
+              <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={settings.centerTitle}
+                  onChange={(e) => updateSettings({ centerTitle: e.target.checked })}
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                标题居中
+              </label>
+              <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={settings.indentParagraph}
+                  onChange={(e) => updateSettings({ indentParagraph: e.target.checked })}
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                首行缩进
+              </label>
+              <div className="w-px h-4 bg-slate-200 mx-1" />
               <Button onClick={copyGuide} title="复制 AI 指令">
                 ✨ 复制指令
               </Button>
@@ -208,7 +227,7 @@ export function DocumentMode({
           {/* 隐藏测量容器 */}
           <div
             ref={measuringRef}
-            className={`document-page document-content document-theme-${settings.theme} document-font-${settings.fontFamily} document-fontscale-${settings.fontScale}`}
+            className={`document-page document-content document-theme-${settings.theme} document-font-${settings.fontFamily} document-fontscale-${settings.fontScale} ${settings.centerTitle ? 'document-center-title' : ''} ${settings.indentParagraph ? 'document-indent-paragraph' : ''}`}
             style={{
               position: 'absolute',
               visibility: 'hidden',
@@ -230,7 +249,7 @@ export function DocumentMode({
           {pages.map((page) => (
             <article
               key={page.pageNumber}
-              className={`document-page document-theme-${settings.theme} document-font-${settings.fontFamily} document-fontscale-${settings.fontScale}`}
+              className={`document-page document-theme-${settings.theme} document-font-${settings.fontFamily} document-fontscale-${settings.fontScale} ${settings.centerTitle ? 'document-center-title' : ''} ${settings.indentParagraph ? 'document-indent-paragraph' : ''}`}
               style={{
                 width: settings.pageWidth,
                 height: settings.pageHeight,

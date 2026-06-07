@@ -42,6 +42,8 @@ export interface DocumentSettings {
   theme: 'formal' | 'business'
   fontFamily: 'songti' | 'fangsong' | 'heiti' | 'lxgwwenkai'
   fontScale: 'small' | 'normal' | 'large'
+  centerTitle: boolean
+  indentParagraph: boolean
 }
 
 export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
@@ -59,6 +61,8 @@ export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
   theme: 'business',
   fontFamily: 'songti',
   fontScale: 'normal',
+  centerTitle: false,
+  indentParagraph: false,
 }
 
 const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g

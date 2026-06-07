@@ -75,6 +75,54 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     return () => iframe.removeEventListener('load', check)
   }, [html, refreshKey])
 
+  // 多页模式：只显示当前页，隐藏其他页
+  useEffect(() => {
+    if (pages.length === 0) return
+    pages.forEach((p, i) => {
+      p.node.style.display = i === currentPage ? '' : 'none'
+    })
+  }, [pages, currentPage])
+
+  // 键盘翻页支持
+  useEffect(() => {
+    if (pages.length === 0) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 避免输入框冲突
+      const active = document.activeElement
+      if (active?.tagName === 'TEXTAREA' || active?.tagName === 'INPUT' || active?.closest('.cm-editor')) {
+        return
+      }
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        setCurrentPage((prev) => {
+          const next = Math.min(prev + 1, pages.length - 1)
+          if (next !== prev) e.preventDefault()
+          return next
+        })
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        setCurrentPage((prev) => {
+          const next = Math.max(prev - 1, 0)
+          if (next !== prev) e.preventDefault()
+          return next
+        })
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    const iframeDoc = iframeRef.current?.contentDocument
+    if (iframeDoc) {
+      iframeDoc.addEventListener('keydown', handleKeyDown)
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      if (iframeDoc) {
+        iframeDoc.removeEventListener('keydown', handleKeyDown)
+      }
+    }
+  }, [pages])
+
   const handleExport = async () => {
     if (!iframeRef.current) {
       onToast('预览尚未就绪')
@@ -241,7 +289,6 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
                 onClick={() => {
                   const prev = Math.max(0, currentPage - 1)
                   setCurrentPage(prev)
-                  if (iframeRef.current?.contentDocument) scrollToPage(iframeRef.current.contentDocument, prev)
                 }}
                 disabled={currentPage === 0}
                 className="px-2"
@@ -250,9 +297,8 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
               </Button>
               <Button
                 onClick={() => {
-                  const next = Math.min(pages.length - 1, currentPage + 1)
+                  const next = Math.min(currentPage + 1, pages.length - 1)
                   setCurrentPage(next)
-                  if (iframeRef.current?.contentDocument) scrollToPage(iframeRef.current.contentDocument, next)
                 }}
                 disabled={currentPage === pages.length - 1}
                 className="px-2"

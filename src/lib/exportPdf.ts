@@ -15,6 +15,11 @@ export async function exportElementsToPdf(
     
     const el = elements[i]
     
+    const originalDisplay = el.style.display
+    if (originalDisplay === 'none') {
+      el.style.display = ''
+    }
+
     // 如果没有传入固定尺寸，就动态读取当前 DOM 的实际宽高
     const w = opts?.width || el.offsetWidth
     const h = opts?.height || el.offsetHeight
@@ -26,6 +31,10 @@ export async function exportElementsToPdf(
       // modern-screenshot 会等待图片加载，我们可以在这里设置 fetch 参数等
     })
     
+    if (originalDisplay === 'none') {
+      el.style.display = 'none'
+    }
+
     if (!pdf) {
       // 初始化 PDF（单位 px，尺寸等于当前页或传入的 DOM 宽高）
       pdf = new jsPDF({

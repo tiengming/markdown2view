@@ -388,47 +388,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
   }
 
-  // 浏览器原生打印（文字可选可搜索）
-  const handleBrowserPrint = () => {
-    const iframe = iframeRef.current
-    if (!iframe?.contentWindow || !iframe.contentDocument) {
-      onToast('预览尚未就绪')
-      return
-    }
 
-    const doc = iframe.contentDocument
-
-    // 临时重置缩放
-    const oldZoom = doc.body.style.zoom
-    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-    doc.body.style.zoom = '1'
-    doc.documentElement.style.setProperty('--auto-scale', '1')
-
-    // 多页模式：打印前显示所有页面（@media print 的 break-after 会自动分页）
-    const originalDisplays: string[] = []
-    if (pages.length > 0) {
-      pages.forEach((p, i) => {
-        originalDisplays[i] = p.node.style.display
-        p.node.style.display = ''
-      })
-    }
-
-    // 监听 afterprint 事件恢复状态
-    const restore = () => {
-      if (pages.length > 0) {
-        pages.forEach((p, i) => {
-          p.node.style.display = originalDisplays[i]
-        })
-      }
-      doc.body.style.zoom = oldZoom || ''
-      if (oldScale) doc.documentElement.style.setProperty('--auto-scale', oldScale)
-      iframe.contentWindow?.removeEventListener('afterprint', restore)
-    }
-    iframe.contentWindow.addEventListener('afterprint', restore)
-
-    // 触发 iframe 内的打印
-    iframe.contentWindow.print()
-  }
 
   const handleCopyPrompt = async (style: DesignStyle) => {
     const ok = await copyText(buildDesignPrompt(style))
@@ -481,9 +441,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           <Button onClick={handleExportPdf} disabled={exporting} title="截图式高保真导出，视觉完全一致">
             🖨️ 高保真 PDF
           </Button>
-          <Button onClick={handleBrowserPrint} title="浏览器打印，文字可选可搜索">
-            📄 可选文字 PDF
-          </Button>
+
           {pages.length > 0 ? (
             <>
               <Button onClick={handleExportCurrentPage} disabled={exporting}>

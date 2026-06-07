@@ -146,7 +146,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         
         if (rawW && rawH) {
           const scale = Math.min(viewW / rawW, viewH / rawH)
-          doc.documentElement.style.setProperty('--auto-scale', \`\${scale}\`)
+          doc.documentElement.style.setProperty('--auto-scale', scale.toString())
         }
       } else {
         // 单页模式：适应宽度
@@ -160,7 +160,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         const rawW = wrapper.offsetWidth
         if (rawW) {
           const scale = viewW / rawW
-          doc.body.style.zoom = \`\${scale}\`
+          doc.body.style.zoom = scale.toString()
         } else {
           doc.body.style.zoom = oldZoom
         }

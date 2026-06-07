@@ -1,14 +1,14 @@
-import { iframeToBlob, elementToBlob, resolveBackground } from './exportImage'
+import { iframeToBlob, elementToBlob, resolveBackground, captureElementInIframeToBlob } from './exportImage'
 
 /**
  * 基于 iframe 截图的 PDF 导出。
  * 
- * 核心思路：逐页让 iframe 只显示一页内容 → 用 elementToBlob 在 iframe 原生
+ * 核心思路：逐页让 iframe 只显示一页内容 → 用 captureElementInIframeToBlob 在 iframe 原生
  * 样式上下文中截取单页完整渲染（含字体、背景）→ 贴入 jsPDF 页面。
  *
  * 与之前 domToJpeg 方案的区别：domToJpeg 是在主页面上下文克隆 DOM 节点，
  * 会丢失 iframe 内的 <style>、<link>、Google Fonts 等样式引用。
- * elementToBlob 传入 iframe 内的节点，能保留所有样式。
+ * captureElementInIframeToBlob 传入 iframe 内的节点，并临时调整尺寸，能保留所有样式并消除留白。
  */
 
 /** 将 iframe 中的多页内容导出为 PDF（多页模式） */
@@ -44,15 +44,15 @@ export async function exportIframeToPdf(
       const bgColor = resolveBackground(doc, iframe.contentWindow!)
 
       // 仅对当前可见的页面节点进行截图，避免截取外层的 margin 和空白区域
-      const blob = await elementToBlob(pageNodes[i], { 
+      const blob = await captureElementInIframeToBlob(iframe, pageNodes[i], { 
         scale: 3, 
         type: 'image/jpeg',
         backgroundColor: bgColor
       })
 
       // 读取当前可见页的实际尺寸
-      const w = pageNodes[i].offsetWidth
-      const h = pageNodes[i].offsetHeight
+      const w = pageNodes[i].offsetWidth || pageNodes[i].scrollWidth
+      const h = pageNodes[i].offsetHeight || pageNodes[i].scrollHeight
 
       // 将 Blob 转为 data URL
       const dataUrl = await blobToDataUrl(blob)
@@ -97,7 +97,7 @@ export async function exportSinglePageToPdf(
   const bgColor = resolveBackground(doc, iframe.contentWindow!)
 
   // 仅截取实际内容区域，避免截取外层的留白
-  const blob = await elementToBlob(wrapper as HTMLElement, { 
+  const blob = await captureElementInIframeToBlob(iframe, wrapper as HTMLElement, { 
     scale: 3, 
     type: 'image/jpeg',
     backgroundColor: bgColor
@@ -119,6 +119,7 @@ export async function exportSinglePageToPdf(
   pdf.addImage(dataUrl, 'JPEG', 0, 0, w, h)
   pdf.save(filename)
 }
+
 
 /** 保留旧的 exportElementsToPdf 供非 iframe 场景（如 A4 文档模式）使用 */
 export async function exportElementsToPdf(

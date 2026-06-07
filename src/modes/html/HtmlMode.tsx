@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { HtmlSandbox } from '@/components/preview/HtmlSandbox'
-import { downloadIframeAsImage, iframeToBlob, elementToBlob, downloadBlob, resolveBackground } from '@/lib/exportImage'
+import { downloadIframeAsImage, iframeToBlob, elementToBlob, downloadBlob, resolveBackground, captureElementInIframeToBlob } from '@/lib/exportImage'
 import { downloadAsZip, type ZipEntry } from '@/lib/export/zipDownload'
 import { copyText } from '@/lib/clipboard'
 import { buildDesignPrompt, type DesignStyle } from '@/data/designPrompts'
@@ -187,16 +187,19 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
     setExporting(true)
     const doc = iframeRef.current.contentDocument
-    const oldZoom = doc?.body.style.zoom
-    const oldScale = doc?.documentElement.style.getPropertyValue('--auto-scale')
-    if (doc) {
-      doc.body.style.zoom = '1'
-      doc.documentElement.style.setProperty('--auto-scale', '1')
+    if (!doc) {
+      onToast('预览尚未就绪')
+      setExporting(false)
+      return
     }
+    const oldZoom = doc.body.style.zoom
+    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
+    doc.body.style.zoom = '1'
+    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
       const wrapper = doc.querySelector('body > div') || doc.querySelector('body > main') || doc.querySelector('body > section') || doc.body
       const bgColor = resolveBackground(doc, iframeRef.current.contentWindow!)
-      const blob = await elementToBlob(wrapper as HTMLElement, {
+      const blob = await captureElementInIframeToBlob(iframeRef.current, wrapper as HTMLElement, {
         scale: 2,
         backgroundColor: bgColor
       })
@@ -215,20 +218,18 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
 
   const handleExportCurrentPage = async () => {
     const iframe = iframeRef.current
-    if (!iframe?.contentDocument || !pages.length) return
+    const doc = iframe?.contentDocument
+    if (!doc || !pages.length) return
     const page = pages[currentPage]
     if (!page) return
     
     setExporting(true)
     const allNodes = pages.map(p => p.node)
     const originalStyles = allNodes.map(n => n.style.display)
-    const doc = iframe.contentDocument
-    const oldZoom = doc?.body.style.zoom
-    const oldScale = doc?.documentElement.style.getPropertyValue('--auto-scale')
-    if (doc) {
-      doc.body.style.zoom = '1'
-      doc.documentElement.style.setProperty('--auto-scale', '1')
-    }
+    const oldZoom = doc.body.style.zoom
+    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
+    doc.body.style.zoom = '1'
+    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
       // Hide all other pages
       allNodes.forEach((n, i) => {
@@ -236,7 +237,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       })
       
       const bgColor = resolveBackground(doc, iframe.contentWindow!)
-      const blob = await elementToBlob(page.node, { 
+      const blob = await captureElementInIframeToBlob(iframe, page.node, { 
         scale: 2,
         backgroundColor: bgColor
       })
@@ -258,18 +259,16 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
 
   const handleExportAllPages = async () => {
     const iframe = iframeRef.current
-    if (!iframe?.contentDocument || !pages.length) return
+    const doc = iframe?.contentDocument
+    if (!doc || !pages.length) return
     
     setExporting(true)
     const allNodes = pages.map(p => p.node)
     const originalStyles = allNodes.map(n => n.style.display)
-    const doc = iframe.contentDocument
-    const oldZoom = doc?.body.style.zoom
-    const oldScale = doc?.documentElement.style.getPropertyValue('--auto-scale')
-    if (doc) {
-      doc.body.style.zoom = '1'
-      doc.documentElement.style.setProperty('--auto-scale', '1')
-    }
+    const oldZoom = doc.body.style.zoom
+    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
+    doc.body.style.zoom = '1'
+    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
       for (let i = 0; i < pages.length; i++) {
         // Hide all except current
@@ -280,7 +279,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         // Wait a frame for layout
         await new Promise(r => requestAnimationFrame(r))
         
-        const blob = await iframeToBlob(iframe, { scale: 2 })
+        const bgColor = resolveBackground(doc, iframe.contentWindow!)
+        const blob = await captureElementInIframeToBlob(iframe, pages[i].node, {
+          scale: 2,
+          backgroundColor: bgColor
+        })
         downloadBlob(blob, `html-page-${i + 1}.png`)
       }
 
@@ -301,18 +304,16 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
 
   const handleExportPagesZip = async () => {
     const iframe = iframeRef.current
-    if (!iframe?.contentDocument || !pages.length) return
+    const doc = iframe?.contentDocument
+    if (!doc || !pages.length) return
     
     setExporting(true)
     const allNodes = pages.map(p => p.node)
     const originalStyles = allNodes.map(n => n.style.display)
-    const doc = iframe.contentDocument
-    const oldZoom = doc?.body.style.zoom
-    const oldScale = doc?.documentElement.style.getPropertyValue('--auto-scale')
-    if (doc) {
-      doc.body.style.zoom = '1'
-      doc.documentElement.style.setProperty('--auto-scale', '1')
-    }
+    const oldZoom = doc.body.style.zoom
+    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
+    doc.body.style.zoom = '1'
+    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
       const entries: ZipEntry[] = []
       
@@ -324,7 +325,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         await new Promise(r => requestAnimationFrame(r))
         
         const bgColor = resolveBackground(doc, iframe.contentWindow!)
-        const blob = await elementToBlob(pages[i].node, { 
+        const blob = await captureElementInIframeToBlob(iframe, pages[i].node, { 
           scale: 2,
           backgroundColor: bgColor
         })
@@ -348,22 +349,19 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       setExporting(false)
     }
   }
-
   const handleExportPdf = async () => {
     const iframe = iframeRef.current
-    if (!iframe?.contentDocument) {
+    const doc = iframe?.contentDocument
+    if (!doc) {
       onToast('预览尚未就绪')
       return
     }
 
     setExporting(true)
-    const doc = iframe.contentDocument
-    const oldZoom = doc?.body.style.zoom
-    const oldScale = doc?.documentElement.style.getPropertyValue('--auto-scale')
-    if (doc) {
-      doc.body.style.zoom = '1'
-      doc.documentElement.style.setProperty('--auto-scale', '1')
-    }
+    const oldZoom = doc.body.style.zoom
+    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
+    doc.body.style.zoom = '1'
+    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
       if (pages.length > 0) {
         // 多页模式：在 iframe 内逐页截图，保留完整样式

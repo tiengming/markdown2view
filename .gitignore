@@ -16,3 +16,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Excluded folders
+r-markdown/
+html-anything/
+.agent/skills/
+

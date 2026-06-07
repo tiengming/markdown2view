@@ -88,13 +88,24 @@ export async function exportSinglePageToPdf(
   filename: string
 ) {
   const { jsPDF } = await import('jspdf')
-
-  // 在 iframe 原生上下文中截图
-  const blob = await iframeToBlob(iframe, { scale: 3, type: 'image/jpeg' })
-
   const doc = iframe.contentDocument!
-  const w = doc.documentElement.clientWidth || iframe.clientWidth
-  const h = doc.documentElement.scrollHeight || iframe.clientHeight
+
+  // 单页模式：尝试找到内部第一层包裹器，如果没有就用 body
+  const wrapper = doc.querySelector('body > div') || doc.querySelector('body > main') || doc.querySelector('body > section') || doc.body
+
+  // 提取背景色，防止 wrapper 本身透明导致背景丢失
+  const bgColor = resolveBackground(doc, iframe.contentWindow!)
+
+  // 仅截取实际内容区域，避免截取外层的留白
+  const blob = await elementToBlob(wrapper as HTMLElement, { 
+    scale: 3, 
+    type: 'image/jpeg',
+    backgroundColor: bgColor
+  })
+
+  // 读取实际内容尺寸
+  const w = (wrapper as HTMLElement).offsetWidth || doc.documentElement.clientWidth
+  const h = (wrapper as HTMLElement).offsetHeight || doc.documentElement.scrollHeight
 
   const dataUrl = await blobToDataUrl(blob)
 

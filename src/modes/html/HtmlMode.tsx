@@ -194,7 +194,13 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       doc.documentElement.style.setProperty('--auto-scale', '1')
     }
     try {
-      await downloadIframeAsImage(iframeRef.current, 'html')
+      const wrapper = doc.querySelector('body > div') || doc.querySelector('body > main') || doc.querySelector('body > section') || doc.body
+      const bgColor = resolveBackground(doc, iframeRef.current.contentWindow!)
+      const blob = await elementToBlob(wrapper as HTMLElement, {
+        scale: 2,
+        backgroundColor: bgColor
+      })
+      downloadBlob(blob, `html-${Date.now()}.png`)
       onToast('已导出 PNG')
     } catch (e) {
       onToast(`导出失败：${e instanceof Error ? e.message : '未知错误'}`)

@@ -518,10 +518,11 @@ ${style}
 3. **导出友好**：所有核心内容必须在初始状态可见，不要依赖 hover、点击、滚动触发动画后才出现；避免视频、音频、iframe、远程 canvas 作为关键信息载体。
 4. **资源约束**：图片优先使用稳定的 https URL，必须设置 \`max-width:100%\` 与明确尺寸或比例；不要使用跨域受限图片、登录后图片或会过期的私有链接。
 5. **响应式与流式输出**：移动端自适应，所有组件应当使用 Flex/Grid 弹性布局；正文不可横向溢出，长单词/代码需 \`overflow-wrap:anywhere\` 或横向滚动容器。
-6. 如果设计是**单页网页/长图**：允许自然高度，但 \`body\` 必须 \`margin:0\`，页面主容器建议 \`max-width\` 控制阅读宽度。
+6. 根据业务场景，如果你设计的是**单页网页/海报长图**：
+   允许自然延伸高度，但 \`body\` 必须 \`margin:0\`，且内容请务必包裹在一个主容器内（如 \`<main>\` 或 \`<div>\`），页面主容器建议使用 \`max-width\` 控制阅读宽度。
 7. 如果设计是**多页图文/幻灯片/多卡片报告**：
-   【强制分页与打印支持】每一页（每一帧）**必须**被独立容器完全包裹，使用 \`<section class="page">\`（竖版图文）、\`<section class="slide">\`（横版幻灯片）或 \`<section class="card">\`（独立卡片）。严禁将所有内容堆叠在一个无约束容器内！
-   系统将根据该 class 切割导出多页 PDF 或 ZIP，务必配合本渲染器的识别机制。
+   【强制分页】每一页（每一帧）**必须**独立使用 \`<section class="page">\`（竖版图文）、\`<section class="slide">\`（横版幻灯片）或 \`<section class="card">\`（独立卡片）完全包裹。
+   这是为了配合渲染器的导出机制自动切割 PDF，严禁省略包裹层或全部堆叠在一起！
    推荐尺寸示例：
    - 小红书/竖版卡片：\`.page{width:min(100vw,720px);aspect-ratio:3/4;overflow:hidden;margin:0 auto 24px;}\`
    - 9:16 竖版故事：\`.page{width:min(100vw,540px);aspect-ratio:9/16;overflow:hidden;margin:0 auto 24px;}\`

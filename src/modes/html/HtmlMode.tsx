@@ -186,6 +186,42 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
   }
 
+  const handleExportPdf = async () => {
+    const iframe = iframeRef.current
+    if (!iframe?.contentDocument) {
+      onToast('预览尚未就绪')
+      return
+    }
+
+    setExporting(true)
+    try {
+      const { exportElementsToPdf } = await import('@/lib/exportPdf')
+      
+      let elementsToExport: HTMLElement[] = []
+      
+      if (pages.length > 0) {
+        // 多页模式：导出所有识别到的 page 节点
+        elementsToExport = pages.map(p => p.node)
+      } else {
+        // 单页模式：尝试找到内部第一层包裹器，如果没有就用 body
+        const doc = iframe.contentDocument
+        // 优先找带有限制宽高的内层容器，如果只是一段纯文本，则降级为 body
+        const wrapper = doc.querySelector('body > div') || doc.querySelector('body > main') || doc.querySelector('body > section') || doc.body
+        elementsToExport = [wrapper as HTMLElement]
+      }
+
+      await exportElementsToPdf(
+        elementsToExport,
+        `html-${Date.now()}.pdf`
+      )
+      onToast('PDF 导出成功')
+    } catch (e) {
+      onToast(`PDF 导出失败：${e instanceof Error ? e.message : '未知错误'}`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const handleCopyPrompt = async (style: DesignStyle) => {
     const ok = await copyText(buildDesignPrompt(style))
     onToast(ok ? `已复制「${style.name}」风格指令` : '复制失败，请重试')
@@ -236,7 +272,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           <Button onClick={() => iframeRef.current?.requestFullscreen?.()} title="全屏查看展示区内容">
             📺 全屏
           </Button>
-          <Button onClick={() => iframeRef.current?.contentWindow?.print()}>
+          <Button onClick={handleExportPdf} disabled={exporting}>
             🖨️ 导出 PDF
           </Button>
           {pages.length > 0 ? (

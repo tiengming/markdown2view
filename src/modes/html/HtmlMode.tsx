@@ -153,11 +153,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           const scaleW = viewW / rawW
           const scaleH = viewH / rawH
           const scale = Math.min(scaleW, scaleH)
-          doc.body.style.zoom = \`\${scale}\`
+          doc.body.style.zoom = `${scale}`
         } else {
           // 单页模式：适应宽度
           const scale = viewW / rawW
-          doc.body.style.zoom = \`\${scale}\`
+          doc.body.style.zoom = `${scale}`
         }
       } else {
         doc.body.style.zoom = oldZoom

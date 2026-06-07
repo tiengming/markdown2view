@@ -1,14 +1,14 @@
-import { iframeToBlob } from './exportImage'
+import { iframeToBlob, elementToBlob, resolveBackground } from './exportImage'
 
 /**
  * 基于 iframe 截图的 PDF 导出。
  * 
- * 核心思路：逐页让 iframe 只显示一页内容 → 用 iframeToBlob 在 iframe 原生
- * 样式上下文中截取完整渲染（含字体、渐变、背景）→ 贴入 jsPDF 页面。
+ * 核心思路：逐页让 iframe 只显示一页内容 → 用 elementToBlob 在 iframe 原生
+ * 样式上下文中截取单页完整渲染（含字体、背景）→ 贴入 jsPDF 页面。
  *
  * 与之前 domToJpeg 方案的区别：domToJpeg 是在主页面上下文克隆 DOM 节点，
- * 会丢失 iframe 内的 <style>、<link>、Google Fonts 等样式引用，导致背景
- * 丢失、字号不一致。iframeToBlob 则直接在 iframe 内部完成截图，样式完整。
+ * 会丢失 iframe 内的 <style>、<link>、Google Fonts 等样式引用。
+ * elementToBlob 传入 iframe 内的节点，能保留所有样式。
  */
 
 /** 将 iframe 中的多页内容导出为 PDF（多页模式） */
@@ -40,8 +40,15 @@ export async function exportIframeToPdf(
       // 等待一帧让布局生效
       await new Promise(r => requestAnimationFrame(r))
 
-      // 在 iframe 原生上下文中截图，保留所有样式
-      const blob = await iframeToBlob(iframe, { scale: 3, type: 'image/jpeg' })
+      // 提取背景色，因为如果背景色写在 body 上，单独截图 pageNode 会变成透明/白色
+      const bgColor = resolveBackground(doc, iframe.contentWindow!)
+
+      // 仅对当前可见的页面节点进行截图，避免截取外层的 margin 和空白区域
+      const blob = await elementToBlob(pageNodes[i], { 
+        scale: 3, 
+        type: 'image/jpeg',
+        backgroundColor: bgColor
+      })
 
       // 读取当前可见页的实际尺寸
       const w = pageNodes[i].offsetWidth

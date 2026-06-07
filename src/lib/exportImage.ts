@@ -79,7 +79,7 @@ async function waitForDocumentReady(doc: Document, win: Window): Promise<void> {
   await NEXT_FRAME()
 }
 
-function resolveBackground(doc: Document, win: Window, override?: string): string {
+export function resolveBackground(doc: Document, win: Window, override?: string): string {
   if (override) return override
   const tryColor = (c?: string | null) => {
     if (!c) return null

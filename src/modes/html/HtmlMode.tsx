@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { HtmlSandbox } from '@/components/preview/HtmlSandbox'
-import { downloadIframeAsImage, iframeToBlob, downloadBlob } from '@/lib/exportImage'
+import { downloadIframeAsImage, iframeToBlob, elementToBlob, downloadBlob, resolveBackground } from '@/lib/exportImage'
 import { downloadAsZip, type ZipEntry } from '@/lib/export/zipDownload'
 import { copyText } from '@/lib/clipboard'
 import { buildDesignPrompt, type DesignStyle } from '@/data/designPrompts'
@@ -229,7 +229,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         if (i !== currentPage) n.style.display = 'none'
       })
       
-      const blob = await iframeToBlob(iframe, { scale: 2 })
+      const bgColor = resolveBackground(doc, iframe.contentWindow!)
+      const blob = await elementToBlob(page.node, { 
+        scale: 2,
+        backgroundColor: bgColor
+      })
       downloadBlob(blob, `html-page-${currentPage + 1}.png`)
       onToast(`已导出 ${page.label}`)
     } catch (e) {
@@ -313,7 +317,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         
         await new Promise(r => requestAnimationFrame(r))
         
-        const blob = await iframeToBlob(iframe, { scale: 2 })
+        const bgColor = resolveBackground(doc, iframe.contentWindow!)
+        const blob = await elementToBlob(pages[i].node, { 
+          scale: 2,
+          backgroundColor: bgColor
+        })
         entries.push({
           filename: `html-page-${String(i + 1).padStart(2, '0')}.png`,
           blob,

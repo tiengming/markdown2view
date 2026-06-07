@@ -520,8 +520,8 @@ ${style}
 5. **响应式与流式输出**：移动端自适应，所有组件应当使用 Flex/Grid 弹性布局；正文不可横向溢出，长单词/代码需 \`overflow-wrap:anywhere\` 或横向滚动容器。
 6. 如果设计是**单页网页/长图**：允许自然高度，但 \`body\` 必须 \`margin:0\`，页面主容器建议 \`max-width\` 控制阅读宽度。
 7. 如果设计是**多页图文/幻灯片/多卡片报告**：
-   每一页（每一帧）**必须**被独立容器包裹，使用 \`<section class="page">\`（竖版图文）、\`<section class="slide">\`（横版幻灯片）或 \`<section class="card">\`（独立卡片）。
-   每个页面容器必须有固定比例与隐藏溢出，以便系统精准识别、翻页、导出当前页或打包 ZIP。
+   【强制分页与打印支持】每一页（每一帧）**必须**被独立容器完全包裹，使用 \`<section class="page">\`（竖版图文）、\`<section class="slide">\`（横版幻灯片）或 \`<section class="card">\`（独立卡片）。严禁将所有内容堆叠在一个无约束容器内！
+   系统将根据该 class 切割导出多页 PDF 或 ZIP，务必配合本渲染器的识别机制。
    推荐尺寸示例：
    - 小红书/竖版卡片：\`.page{width:min(100vw,720px);aspect-ratio:3/4;overflow:hidden;margin:0 auto 24px;}\`
    - 9:16 竖版故事：\`.page{width:min(100vw,540px);aspect-ratio:9/16;overflow:hidden;margin:0 auto 24px;}\`

@@ -47,10 +47,32 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-// 保证存在闭合标签，便于 iframe 增量渲染。
+// 保证存在闭合标签，便于 iframe 增量渲染，并注入专门供 PDF 导出使用的多页分离打印样式。
 export function previewHtml(input: string): string {
-  const html = extractHtml(input)
+  let html = extractHtml(input)
   if (!html) return ''
+  
+  // 注入打印所需的强制换页 CSS
+  const printCss = `
+<style>
+@media print {
+  .page, .slide, .card {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+  body { margin: 0 !important; }
+}
+</style>
+`
+  
+  if (/<\/head>/i.test(html)) {
+    html = html.replace(/<\/head>/i, `${printCss}</head>`)
+  } else if (/<body/i.test(html)) {
+    html = html.replace(/(<body[^>]*>)/i, `${printCss}$1`)
+  } else {
+    html = printCss + html
+  }
+
   if (/<\/html>/i.test(html)) return html
   return html + '\n</body>\n</html>'
 }

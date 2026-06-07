@@ -233,6 +233,9 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           <Button onClick={() => setRefreshKey((n) => n + 1)} title="重新渲染预览">
             🔄 刷新
           </Button>
+          <Button onClick={() => iframeRef.current?.requestFullscreen?.()} title="全屏查看展示区内容">
+            📺 全屏
+          </Button>
           <Button onClick={() => iframeRef.current?.contentWindow?.print()}>
             🖨️ 导出 PDF
           </Button>

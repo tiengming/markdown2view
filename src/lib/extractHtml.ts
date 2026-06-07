@@ -51,6 +51,13 @@ function escapeHtml(s: string): string {
 export function previewHtml(input: string): string {
   let html = extractHtml(input)
   if (!html) return ''
+
+  // 自动为所有样式表 link 标签注入 crossorigin="anonymous"，确保截图库 (modern-screenshot) 可以绕过跨域限制读取其中的 @font-face 规则进行 Base64 字体嵌入。
+  html = html.replace(/<link\s+([^>]*rel=["']?stylesheet["']?[^>]*)(?=[ >])/gi, (match) => {
+    if (/crossorigin/i.test(match)) return match;
+    return match + ' crossorigin="anonymous"';
+  });
+
   
   // 注入打印所需的强制换页 CSS 与屏幕居中预览 CSS，以及防御性排版样式（防截图乱码/折行）
   const injectedCss = `

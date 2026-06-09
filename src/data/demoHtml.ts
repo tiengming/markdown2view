@@ -1,547 +1,1651 @@
 export const DEMO_HTML = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>markdown2view · 多场景排版与导出工作台</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>markdown2view — 纯前端排版与导出工作台</title>
 <style>
-  :root{
-    /* ============ 主题色: 🖋 墨水经典 ============ */
-    --ink:#0a0a0b;
-    --ink-rgb:10,10,11;
-    --paper:#f1efea;
-    --paper-rgb:241,239,234;
-    --paper-tint:#e8e5de;
-    --ink-tint:#18181a;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* ============ 字体 ============ */
-    --mono:"IBM Plex Mono",ui-monospace,monospace;
-    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
-    --serif-body-en:"Source Serif 4",Georgia,serif;
-    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
-    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+:root {
+  --paper: #f0e8db;
+  --paper-light: #f5f0e8;
+  --ink: #1a1714;
+  --ink-soft: #3a3530;
+  --ink-muted: #6b6560;
+  --ink-faint: #9b9590;
+  --accent: #2c4a8c;
+  --accent-warm: #8c3a20;
+  --rule: rgba(26,23,20,0.12);
+  --code-bg: #1e1c18;
+  --code-fg: #d4c89a;
+
+  --serif: 'Noto Serif SC', Georgia, serif;
+  --sans: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { background: #2a2520; }
+
+body {
+  font-family: var(--sans);
+  background: #2a2520;
+  padding: 32px 0 64px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SLIDE CONTAINER ── */
+.slide {
+  width: min(100vw - 32px, 960px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin: 0 auto 20px;
+  position: relative;
+  background: var(--paper);
+}
+
+/* ── SHARED CHROME ── */
+.header-strip {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent);
+}
+.header-strip.warm { background: var(--accent-warm); }
+
+.page-label {
+  position: absolute;
+  top: 18px; right: 28px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+}
+
+.footer-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 36px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 12px;
+}
+.footer-bar .brand {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+.footer-bar .dot {
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  opacity: 0.4;
+}
+.footer-bar .tagline {
+  font-family: var(--sans);
+  font-size: 9px;
+  color: var(--ink-faint);
+}
+
+/* ── SLIDE 1: COVER ── */
+.s1 { background: var(--ink); }
+.s1 .header-strip { background: #c0a060; height: 3px; }
+
+.s1-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 47px, rgba(192,160,96,0.04) 47px, rgba(192,160,96,0.04) 48px),
+    repeating-linear-gradient(90deg, transparent, transparent 47px, rgba(192,160,96,0.04) 47px, rgba(192,160,96,0.04) 48px);
+}
+
+.s1-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 56px 64px;
+}
+
+.s1-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: #c0a060;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.s1-title {
+  font-family: var(--serif);
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 1;
+  color: #f5f0e4;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.s1-title .slash {
+  color: #c0a060;
+}
+
+.s1-subtitle {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(245,240,228,0.6);
+  letter-spacing: 0.04em;
+  margin-bottom: 48px;
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.s1-pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.s1-pill {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  border: 1px solid rgba(192,160,96,0.3);
+  color: #c0a060;
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+.s1-right {
+  position: absolute;
+  right: 64px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.s1-stat {
+  text-align: right;
+}
+.s1-stat-num {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 700;
+  color: #c0a060;
+  line-height: 1;
+}
+.s1-stat-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  color: rgba(245,240,228,0.4);
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* ── SLIDE 2: CONCEPT ── */
+.s2-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.s2-left {
+  padding: 48px 40px 48px 48px;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.s2-right {
+  padding: 48px 48px 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--paper-light);
+}
+
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.section-eyebrow.warm { color: var(--accent-warm); }
+
+.section-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+
+.section-body {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+
+.pull-quote {
+  margin: 20px 0 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.pull-quote.warm { border-left-color: var(--accent-warm); }
+
+.principle-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.principle-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.principle-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  min-width: 20px;
+  padding-top: 2px;
+  letter-spacing: 0.06em;
+}
+
+.principle-num.warm { color: var(--accent-warm); }
+
+.principle-text {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.principle-text strong {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── SLIDE 3: BIG QUOTE ── */
+.s3 { background: var(--accent); }
+
+.s3-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 80px;
+  text-align: center;
+}
+
+.s3-mark {
+  font-family: var(--serif);
+  font-size: 96px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.12);
+  line-height: 0.8;
+  margin-bottom: 16px;
+  align-self: flex-start;
+  margin-left: -8px;
+}
+
+.s3-quote {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.95);
+  line-height: 1.6;
+  max-width: 720px;
+}
+
+.s3-source {
+  margin-top: 32px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ── SLIDE 4: MODE 1 ── */
+.s4-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+
+.s4-left {
+  background: var(--ink);
+  padding: 48px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mode-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  background: rgba(192,160,96,0.15);
+  color: #c0a060;
+  padding: 4px 8px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.mode-num {
+  font-family: var(--serif);
+  font-size: 80px;
+  font-weight: 900;
+  color: rgba(192,160,96,0.15);
+  line-height: 1;
+  margin-bottom: -8px;
+}
+
+.mode-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #f5f0e4;
+  line-height: 1.3;
+}
+
+.mode-en {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(245,240,228,0.3);
+  margin-top: 6px;
+}
+
+.s4-right {
+  padding: 40px 40px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.feature-card {
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  padding: 16px;
+  border-radius: 2px;
+}
+
+.feature-card-title {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.feature-card-body {
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.feature-highlight {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--accent);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+
+/* ── SLIDE 5: A4 MODE ── */
+.s5-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+}
+
+.s5-left {
+  padding: 40px 40px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.s5-right {
+  background: var(--ink);
+  padding: 48px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* A4 page visual mockup */
+.a4-mockup {
+  width: 120px;
+  height: 170px;
+  background: #fff;
+  border: 1px solid rgba(26,23,20,0.15);
+  box-shadow: 2px 2px 0 rgba(26,23,20,0.08);
+  margin-bottom: 16px;
+  padding: 12px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.a4-line {
+  height: 6px;
+  background: rgba(26,23,20,0.08);
+  border-radius: 1px;
+  margin-bottom: 4px;
+}
+
+.a4-line.title { height: 10px; background: rgba(44,74,140,0.2); width: 80%; margin-bottom: 8px; }
+.a4-line.short { width: 60%; }
+.a4-line.med { width: 75%; }
+
+.a4-page-break {
+  height: 1px;
+  background: rgba(44,74,140,0.25);
+  margin: 8px 0;
+  position: relative;
+}
+
+.a4-page-break::after {
+  content: 'PAGE 2';
+  position: absolute;
+  right: 0;
+  top: -6px;
+  font-family: var(--mono);
+  font-size: 6px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.tech-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.tech-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  background: rgba(44,74,140,0.08);
+  color: var(--accent);
+  border: 1px solid rgba(44,74,140,0.2);
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+/* ── SLIDE 6: SOCIAL CARDS ── */
+.s6-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+
+.s6-left {
+  background: #f5efe4;
+  border-right: 1px solid var(--rule);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.s6-right {
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* Mini card previews */
+.card-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.mini-card {
+  background: #1a1714;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mini-card.r34 { width: 72px; height: 96px; }
+.mini-card.r916 { width: 54px; height: 96px; }
+
+.mini-card-header {
+  height: 40px;
+  background: linear-gradient(135deg, #2c4a8c, #1a2d5a);
+}
+
+.mini-card-body {
+  padding: 6px;
+}
+
+.mini-card-line {
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 1px;
+  margin-bottom: 3px;
+}
+.mini-card-line.short { width: 60%; }
+
+.mini-card-num {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 4px;
+}
+
+/* ── SLIDE 7: HTML CANVAS MODE ── */
+.s7 { background: #0f0e0c; }
+
+.s7-inner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.s7-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(44,74,140,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(44,74,140,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.s7-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.s7-left {
+  padding: 48px 40px 48px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.s7-right {
+  padding: 32px 48px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.s7-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(44,74,140,0.8);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.s7-title {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: #f5f0e4;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+.s7-body {
+  font-size: 11px;
+  color: rgba(245,240,228,0.55);
+  line-height: 1.8;
+}
+
+.code-block {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--code-fg);
+}
+
+.code-block .kw { color: #7ab4f5; }
+.code-block .str { color: #b5c07a; }
+.code-block .cm { color: #666053; }
+
+.capability-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cap-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: rgba(245,240,228,0.7);
+}
+
+.cap-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(44,74,140,0.8);
+  flex-shrink: 0;
+}
+
+/* ── SLIDE 8: TECH STACK ── */
+.s8-inner {
+  position: absolute;
+  inset: 0;
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+}
+
+.s8-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.s8-main-title {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.s8-sub {
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  flex: 1;
+  align-content: start;
+}
+
+.stack-item {
+  padding: 16px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--paper-light);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stack-item-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}
+
+.stack-item-name {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.stack-item-detail {
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--ink-muted);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.stack-item.accent { border-color: rgba(44,74,140,0.25); }
+.stack-item.accent .stack-item-name { color: var(--accent); }
+
+/* ── SLIDE 9: ARCHITECTURE ── */
+.s9-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+}
+
+.s9-left {
+  background: var(--ink);
+  padding: 40px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.s9-right {
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dir-tree {
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1.9;
+  color: rgba(245,240,228,0.5);
+}
+
+.dir-tree .dir-name { color: #c0a060; }
+.dir-tree .hl { color: rgba(245,240,228,0.85); }
+
+.arch-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+/* Architecture flow boxes */
+.arch-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arch-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.arch-box {
+  padding: 10px 14px;
+  border: 1px solid var(--rule);
+  background: var(--paper-light);
+  border-radius: 2px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink);
+  flex: 1;
+  text-align: center;
+}
+
+.arch-box.blue {
+  background: rgba(44,74,140,0.08);
+  border-color: rgba(44,74,140,0.2);
+  color: var(--accent);
+}
+
+.arch-box.sub {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--ink-muted);
+  padding: 6px 12px;
+}
+
+.arch-arrow {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.arch-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  text-align: center;
+  margin: 4px 0;
+}
+
+/* ── SLIDE 10: REFERENCES ── */
+.s10-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.ref-col {
+  padding: 40px 32px;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ref-col:last-child { border-right: none; }
+
+.ref-num {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--rule);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.ref-project {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+
+.ref-desc {
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+
+.ref-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--accent-warm);
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+/* ── SLIDE 11: CLOSE ── */
+.s11 { background: var(--ink); }
+
+.s11-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 56px;
+}
+
+.s11-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: rgba(192,160,96,0.5);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.s11-big {
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 900;
+  color: #f5f0e4;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.s11-sub {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(245,240,228,0.45);
+  letter-spacing: 0.08em;
+  text-align: center;
+  max-width: 480px;
+  line-height: 1.8;
+  margin-bottom: 48px;
+}
+
+.s11-badge-row {
+  display: flex;
+  gap: 12px;
+}
+
+.s11-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  border: 1px solid rgba(192,160,96,0.3);
+  color: rgba(192,160,96,0.7);
+  padding: 6px 14px;
+  border-radius: 2px;
+}
+
+/* ── SLIDE 12: 封底 / 感谢观看 ── */
+.s12 { background: var(--ink); }
+.s12 .header-strip { background: #c0a060; height: 3px; }
+
+.s12-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 47px, rgba(192,160,96,0.04) 47px, rgba(192,160,96,0.04) 48px),
+    repeating-linear-gradient(90deg, transparent, transparent 47px, rgba(192,160,96,0.04) 47px, rgba(192,160,96,0.04) 48px);
+}
+
+.s12-mark {
+  position: absolute;
+  top: 28px; left: 48px;
+  font-family: var(--serif);
+  font-size: 160px;
+  font-weight: 900;
+  color: rgba(192,160,96,0.06);
+  line-height: 0.7;
+  user-select: none;
+}
+
+.s12-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 64px;
+  text-align: center;
+}
+
+.s12-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  color: #c0a060;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.s12-title {
+  font-family: var(--serif);
+  font-size: 64px;
+  font-weight: 900;
+  color: #f5f0e4;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.s12-title .slash { color: #c0a060; }
+
+.s12-divider {
+  width: 48px;
+  height: 2px;
+  background: rgba(192,160,96,0.5);
+  margin: 24px 0;
+}
+
+.s12-thanks {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(245,240,228,0.5);
+  letter-spacing: 0.04em;
+  line-height: 1.9;
+  max-width: 540px;
+  margin-bottom: 36px;
+}
+.s12-thanks strong { color: #c0a060; font-weight: 500; }
+
+.s12-feedback-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(245,240,228,0.35);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.s12-channels {
+  display: flex;
+  gap: 12px;
+}
+
+.s12-channel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(192,160,96,0.25);
+  padding: 12px 24px;
+  border-radius: 2px;
+  min-width: 100px;
+}
+
+.s12-channel-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #c0a060;
+}
+
+.s12-channel-desc {
+  font-family: var(--sans);
+  font-size: 9px;
+  color: rgba(245,240,228,0.4);
+}
+
+/* ── PRINT ── */
+@media print {
+  html { background: white; }
+  body { padding: 0; background: white; }
+  .slide {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin: 0;
+    page-break-after: always;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-
-  /* ============ WebGL 背景 ============ */
-  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
-  canvas#bg-light{opacity:0}
-  canvas#bg-dark{opacity:1}
-  body.light-bg canvas#bg-light{opacity:1}
-  body.light-bg canvas#bg-dark{opacity:0}
-  body.low-power canvas.bg{display:none!important}
-
-  /* ============ Deck 容器 + 翻页 ============ */
-  #deck{position:fixed;inset:0;width:500vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
-  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
-  .slide.light{color:var(--ink);background:var(--paper)}
-  .slide.dark{color:var(--paper);background:var(--ink)}
-
-  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
-  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
-  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
-  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
-  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
-  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
-  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
-  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
-
-  /* ============ chrome & foot ============ */
-  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
-  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
-  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
-  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
-  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
-
-  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
-  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
-
-  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
-  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:5.8vw;line-height:1.15;letter-spacing:-.005em}
-  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:7.5vw;line-height:.96;letter-spacing:-.02em}
-  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:4.8vw;line-height:1.08;letter-spacing:-.01em}
-  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.4vw;line-height:1.25;letter-spacing:0;opacity:.7}
-  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2vw;line-height:1.3}
-  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
-  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.6vw;line-height:1.5;opacity:.86}
-  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
-
-  /* ============ Grid 布局 ============ */
-  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
-  .grid-2-7-5{display:grid;grid-template-columns:7.2fr 4.8fr;gap:3vw 4vh;align-items:start}
-  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
-
-  /* ============ Stat ============ */
-  .stat-card{display:flex;flex-direction:column;gap:.8vh;align-items:flex-start;padding-top:1.6vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.3)}
-  .stat-card .stat-label{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.24em;text-transform:uppercase;opacity:.55}
-  .stat-card .stat-nb{font-family:var(--serif-en);font-weight:800;font-size:4.8vw;line-height:.9;letter-spacing:-.03em;font-feature-settings:"tnum";margin-top:.4vh}
-  .stat-card .stat-nb .stat-unit{font-family:var(--serif-zh);font-weight:500;font-size:.38em;letter-spacing:0;opacity:.72;margin-left:.14em}
-  .stat-card .stat-note{font-family:var(--sans-zh);font-weight:400;font-size:max(13px,1.05vw);line-height:1.5;opacity:.72;margin-top:.6vh}
-
-  /* ============ Callout ============ */
-  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(14px,1.15vw);line-height:1.55;opacity:.92}
-  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
-  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
-  .callout-src{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
-
-  /* ============ 图片 Frame ============ */
-  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
-  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
-  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
-  .frame-img.r-16x10{aspect-ratio:16/10;max-height:56vh}
-  .img-cap{display:block;margin-top:.8vh;font-family:var(--mono);font-size:max(10px,.8vw);letter-spacing:.22em;text-transform:uppercase;opacity:.6}
-
-  /* ============ 导航 ============ */
-  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
-  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
-  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
-  body.light-bg #nav{background:rgba(255,255,255,0.25)}
-  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
-  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
-  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
-  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
-  body.light-bg.low-power #hint{color:var(--ink)}
-
-  [data-anim]{opacity:1}
-  body.motion-ready [data-anim]{opacity:0}
-  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
-  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
-  body.low-power #deck{transition:none!important}
-  body.low-power.motion-ready [data-anim],
-  body.low-power [data-anim]{opacity:1!important;transform:none!important}
-
-  @media (max-width:900px){
-    .display-zh{font-size:10vw}
-    .h-hero{font-size:12vw}
-    .h-xl{font-size:8vw}
-    .grid-2-7-5{grid-template-columns:1fr}
-  }
+}
 </style>
 </head>
 <body>
-<script>
-  (function(){
-    const KEY = 'm2v-low-power';
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const stored = localStorage.getItem(KEY);
-    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
-    function updateHint(){
-      const hint = document.getElementById('hint');
-      if(hint) hint.textContent = \`← → 翻页 · B \${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引\`;
-    }
-    window.__setLowPowerMode = function(on, opts={}){
-      window.__lowPowerMode = !!on;
-      document.body.classList.toggle('low-power', window.__lowPowerMode);
-      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
-      if(window.__lowPowerMode && document.getAnimations){
-        document.getAnimations().forEach(a=>a.cancel());
-      }
-      updateHint();
-      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
-      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
-    };
-    document.body.classList.toggle('low-power', window.__lowPowerMode);
-    addEventListener('DOMContentLoaded', updateHint, {once:true});
-  })();
-</script>
 
-<canvas id="bg-dark" class="bg"></canvas>
-<canvas id="bg-light" class="bg"></canvas>
-<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
-
-<div id="deck">
-
-  <!-- SLIDE 1: COVER -->
-  <section class="slide hero dark">
-    <div class="chrome">
-      <div>markdown2view</div>
-      <div>Vol.01</div>
+<!-- ── SLIDE 1: COVER ── -->
+<section class="slide s1">
+  <div class="header-strip" style="background:#c0a060;height:3px;"></div>
+  <div class="s1-bg"></div>
+  <div class="s1-content">
+    <div class="s1-eyebrow">开源项目 · 技术产品</div>
+    <div class="s1-title">markdown<span class="slash">/</span>view</div>
+    <div class="s1-subtitle">纯前端、零后端的多场景排版与导出工作台<br>把同一份内容渲染为面向不同受众的成品形态</div>
+    <div class="s1-pill-row">
+      <span class="s1-pill">React 18</span>
+      <span class="s1-pill">TypeScript</span>
+      <span class="s1-pill">Vite</span>
+      <span class="s1-pill">CodeMirror 6</span>
+      <span class="s1-pill">MIT License</span>
     </div>
-    <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
-      <div class="kicker" data-anim>PRODUCT SLIDESHOW</div>
-      <h1 class="h-hero" data-anim>markdown2view</h1>
-      <h2 class="h-sub" data-anim>纯前端多场景排版与导出工作台</h2>
-      <p class="lead" style="max-width:60vw" data-anim>
-        把同一份内容渲染为面向不同受众的成品形态，利用浏览器原生的排版与截图机制，免去复杂的服务器环境。
-      </p>
-      <div class="meta-row" data-anim>
-        <span>零后端部署</span><span>·</span><span>100% 隐私安全</span><span>·</span><span>一键复制导出</span>
+  </div>
+  <div class="s1-right">
+    <div class="s1-stat">
+      <div class="s1-stat-num">4</div>
+      <div class="s1-stat-label">排版模式</div>
+    </div>
+    <div class="s1-stat">
+      <div class="s1-stat-num">0</div>
+      <div class="s1-stat-label">后端依赖</div>
+    </div>
+    <div class="s1-stat">
+      <div class="s1-stat-num">∞</div>
+      <div class="s1-stat-label">导出自由度</div>
+    </div>
+  </div>
+  <div class="footer-bar" style="border-top-color:rgba(192,160,96,0.15)">
+    <span class="brand" style="color:rgba(192,160,96,0.4);">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline" style="color:rgba(245,240,228,0.25);">零网络传输 · 隐私安全 · 浏览器原生能力</span>
+  </div>
+  <div class="page-label" style="color:rgba(192,160,96,0.3);">01 / 12</div>
+</section>
+
+<!-- ── SLIDE 2: 设计初衷 ── -->
+<section class="slide">
+  <div class="header-strip"></div>
+  <div class="s2-inner">
+    <div class="s2-left">
+      <div class="section-eyebrow">设计初衷</div>
+      <div class="section-title">内容一次创作<br>多端无损分发</div>
+      <div class="section-body">
+        免去繁琐的后端依赖与服务部署，利用浏览器原生的渲染能力、排版实测技术和沙箱机制，实现极致的内容分发与设计自由。
+      </div>
+      <div class="pull-quote">
+        同一份 Markdown，公众号长图、A4 文档、小红书卡片、网页 PPT，一键切换，随写随导。
       </div>
     </div>
-    <div class="foot">
-      <div>多场景排版工作流</div>
-      <div>— 2026 —</div>
+    <div class="s2-right">
+      <div class="section-eyebrow">三项核心原则</div>
+      <ul class="principle-list">
+        <li class="principle-item">
+          <span class="principle-num">01</span>
+          <span class="principle-text"><strong>零服务器</strong> — 所有处理在浏览器本地完成，数据不离开设备，无隐私风险</span>
+        </li>
+        <li class="principle-item">
+          <span class="principle-num">02</span>
+          <span class="principle-text"><strong>内容优先</strong> — 写一次，适配多种成品形态；平台差异由渲染引擎透明处理</span>
+        </li>
+        <li class="principle-item">
+          <span class="principle-num">03</span>
+          <span class="principle-text"><strong>开放扩展</strong> — 基于 MIT 协议开源，自定义组件与主题可直接接入排版引擎</span>
+        </li>
+      </ul>
     </div>
-  </section>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">核心理念</span>
+  </div>
+  <div class="page-label">02 / 12</div>
+</section>
 
-  <!-- SLIDE 2: ACT DIVIDER -->
-  <section class="slide hero light">
-    <div class="chrome">
-      <div>第 一 幕 · 设计哲学</div>
-      <div>ACT I · 02 / 05</div>
-    </div>
-    <div class="frame" style="display:grid; gap:6vh; align-content:center; min-height:80vh">
-      <div class="kicker" data-anim>ACT I</div>
-      <h1 class="display-zh" data-anim>信息的叙事与排版</h1>
-      <p class="lead" style="max-width:55vw" data-anim>
-        排版不是无意义的装饰，而是帮助读者以最佳的路径去理解信息。
-      </p>
-    </div>
-    <div class="foot">
-      <div>第一幕：排版与分发</div>
-      <div>— · —</div>
-    </div>
-  </section>
+<!-- ── SLIDE 3: BIG QUOTE ── -->
+<section class="slide s3">
+  <div class="s3-content">
+    <div class="s3-mark">&ldquo;</div>
+    <div class="s3-quote">彻底抛弃粗暴的延时 sleep，改用基于 MutationObserver 探测 DOM 稳定性的 waitForStability 高清截图导出方案</div>
+    <div class="s3-source">markdown2view · HTML 可视化自由画布 · 高清导出技术</div>
+  </div>
+  <div class="page-label" style="color:rgba(255,255,255,0.25);">03 / 12</div>
+</section>
 
-  <!-- SLIDE 3: GRID 2 COL (TEXT + IMAGE) -->
-  <section class="slide light">
-    <div class="chrome">
-      <div>核心范式 · The Paradigm</div>
-      <div>03 / 05</div>
+<!-- ── SLIDE 4: 长图文模式 ── -->
+<section class="slide">
+  <div class="header-strip warm"></div>
+  <div class="s4-inner">
+    <div class="s4-left">
+      <div class="mode-badge">📝 MODE 01</div>
+      <div class="mode-num">01</div>
+      <div class="mode-title">长图文<br>排版模式</div>
+      <div class="mode-en">WeChat Longform</div>
     </div>
-    <div class="frame grid-2-7-5" style="padding-top:6vh">
-      <div style="display:flex; flex-direction:column; justify-content:space-between; gap:3vh">
+    <div class="s4-right">
+      <div class="section-eyebrow warm" style="margin-bottom:20px;">核心能力</div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-card-title">公众号无损渲染</div>
+          <div class="feature-card-body">支持自定义组件 steps、timeline、compare、slider，直接复用公众号排版引擎</div>
+          <div class="feature-highlight">自定义 Markdown 语法扩展</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">一键复制富文本</div>
+          <div class="feature-card-body">完美兼容微信公众平台、知乎、头条等图文编辑器，保留格式无偏差</div>
+          <div class="feature-highlight">clipboard API · 富文本保真</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">万字流畅编辑</div>
+          <div class="feature-card-body">输入防抖 Debounce 与状态解耦保证万字长文编辑时不卡顿</div>
+          <div class="feature-highlight">CodeMirror 6 · Zustand 状态管理</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">本地持久化</div>
+          <div class="feature-card-body">Zustand persist 中间件自动将草稿写入 localStorage，关窗不丢内容</div>
+          <div class="feature-highlight">零后端 · 离线可用</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">长图文排版 · 公众号生态</span>
+  </div>
+  <div class="page-label">04 / 12</div>
+</section>
+
+<!-- ── SLIDE 5: A4 文档模式 ── -->
+<section class="slide">
+  <div class="header-strip"></div>
+  <div class="s5-inner">
+    <div class="s5-left">
+      <div class="section-eyebrow" style="margin-bottom:20px;">🖨 MODE 02 — A4 规范文档模式</div>
+      <div class="section-title" style="font-size:24px;margin-bottom:16px;">纯前端智能分页<br>完美还原印刷质感</div>
+      <div class="section-body" style="margin-bottom:16px;">
+        内置高度实测机制，结合 ResizeObserver 及图片 load 监听，实时精确计算 A4 页面物理高度并进行平滑跨页分页，彻底解决图片被截断的痛点。
+      </div>
+      <div style="display:flex;gap:20px;align-items:flex-start;margin-top:8px;">
+        <div class="a4-mockup">
+          <div class="a4-line title"></div>
+          <div class="a4-line"></div>
+          <div class="a4-line med"></div>
+          <div class="a4-line short"></div>
+          <div class="a4-line"></div>
+          <div class="a4-line med"></div>
+          <div class="a4-page-break"></div>
+          <div class="a4-line"></div>
+          <div class="a4-line short"></div>
+          <div class="a4-line med"></div>
+          <div class="a4-line"></div>
+        </div>
         <div>
-          <div class="kicker" data-anim>THE TWIST</div>
-          <h2 class="h-xl" data-anim>把设计交给原生引擎</h2>
-          <p class="lead" style="margin-top:3vh" data-anim>
-            无论是公众号排版、A4 规范文档报告、小红书多图卡片，还是 Web 网页演示稿，均在本地浏览器一秒渲染。
-          </p>
-        </div>
-        <div class="callout" data-anim>
-          "这是一种极其自由的工作方式。内容依然是 Markdown，输出形式则是根据需要任意变形的成品。"
-          <div class="callout-src">— 产品设计团队</div>
-        </div>
-      </div>
-      <figure class="frame-img r-16x10" data-anim>
-        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=375&fit=crop&q=80" alt="极简工作流">
-        <figcaption class="img-cap">纯前端排版 · 极简工作空间</figcaption>
-      </figure>
-    </div>
-    <div class="foot">
-      <div>Page 03 · 极致的分发效率</div>
-      <div>— · —</div>
-    </div>
-  </section>
-
-  <!-- SLIDE 4: BIG NUMBERS -->
-  <section class="slide light">
-    <div class="chrome">
-      <div>核心特性 · Features</div>
-      <div>04 / 05</div>
-    </div>
-    <div class="frame" style="padding-top:6vh">
-      <div class="kicker" data-anim>CORE CAPABILITIES</div>
-      <h2 class="h-xl" data-anim>强大的功能矩阵</h2>
-      <p class="lead" style="margin-bottom:5vh" data-anim>我们用最轻量的设计，实现多平台的格式打通。</p>
-
-      <div class="grid-6" style="margin-top:4vh">
-        <div class="stat-card" data-anim>
-          <div class="stat-label">MODES</div>
-          <div class="stat-nb">4 <span class="stat-unit">大模式</span></div>
-          <div class="stat-note">长图文/A4/小红书/画布</div>
-        </div>
-        <div class="stat-card" data-anim>
-          <div class="stat-label">PRIVACY</div>
-          <div class="stat-nb">100%</div>
-          <div class="stat-note">完全本地计算，零网络传输</div>
-        </div>
-        <div class="stat-card" data-anim>
-          <div class="stat-label">DEPLOYMENT</div>
-          <div class="stat-nb">0 <span class="stat-unit">后端</span></div>
-          <div class="stat-note">开箱即用，静态托管</div>
-        </div>
-        <div class="stat-card" data-anim>
-          <div class="stat-label">DEBOUNCE</div>
-          <div class="stat-nb">500 <span class="stat-unit">ms</span></div>
-          <div class="stat-note">轻量级防抖，编辑实时响应</div>
-        </div>
-        <div class="stat-card" data-anim>
-          <div class="stat-label">STABILITY</div>
-          <div class="stat-nb">150 <span class="stat-unit">ms</span></div>
-          <div class="stat-note">DOM 稳定性自适应导出</div>
-        </div>
-        <div class="stat-card" data-anim>
-          <div class="stat-label">LICENSE</div>
-          <div class="stat-nb">MIT</div>
-          <div class="stat-note">完全开源自由授权</div>
+          <ul class="principle-list" style="gap:12px;">
+            <li class="principle-item">
+              <span class="principle-num">①</span>
+              <span class="principle-text" style="font-size:11px;"><strong>自定义页眉页脚</strong> — 页码、标题、首行缩进、字体倍率全部可调</span>
+            </li>
+            <li class="principle-item">
+              <span class="principle-num">②</span>
+              <span class="principle-text" style="font-size:11px;"><strong>浏览器打印 / PDF 导出</strong> — 调用原生打印机制，背景色保留，不依赖服务器</span>
+            </li>
+            <li class="principle-item">
+              <span class="principle-num">③</span>
+              <span class="principle-text" style="font-size:11px;"><strong>实时预览</strong> — 编辑即时渲染，所见即所得，分页结果实时展示</span>
+            </li>
+          </ul>
         </div>
       </div>
+      <div class="tech-tag-row">
+        <span class="tech-tag">ResizeObserver</span>
+        <span class="tech-tag">img.load 监听</span>
+        <span class="tech-tag">@media print</span>
+        <span class="tech-tag">高度实测分页算法</span>
+      </div>
     </div>
-    <div class="foot">
-      <div>Page 04 · 特性矩阵</div>
-      <div>— · —</div>
+    <div class="s5-right">
+      <div class="mode-badge">🖨 MODE 02</div>
+      <div class="mode-num">02</div>
+      <div class="mode-title">A4 规范<br>文档模式</div>
+      <div class="mode-en">A4 Document</div>
     </div>
-  </section>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">A4 文档 · 无损打印 · 前端分页</span>
+  </div>
+  <div class="page-label">05 / 12</div>
+</section>
 
-  <!-- SLIDE 5: CLOSING -->
-  <section class="slide hero dark">
-    <div class="chrome">
-      <div>收束 · Conclusion</div>
-      <div>05 / 05</div>
+<!-- ── SLIDE 6: 小红书卡片 ── -->
+<section class="slide">
+  <div class="header-strip" style="background:#d4547e;"></div>
+  <div class="s6-inner">
+    <div class="s6-left">
+      <div class="mode-badge" style="background:rgba(212,84,126,0.12);color:#d4547e;border:1px solid rgba(212,84,126,0.25);">📷 MODE 03</div>
+      <div class="mode-num" style="color:rgba(212,84,126,0.12);">03</div>
+      <div class="mode-title">小红书<br>多页卡片</div>
+      <div class="mode-en" style="color:rgba(26,23,20,0.35);">Social Cards</div>
     </div>
-    <div class="frame" style="display:grid; gap:8vh; align-content:center; min-height:80vh">
-      <div class="kicker" data-anim>THE TAKEAWAY</div>
-      <h1 class="h-hero" style="font-size:6.4vw; line-height:1.2">
-        <span data-anim style="display:block">今天，就开始</span>
-        <span data-anim style="display:block">用新一代工作流，</span>
-        <span data-anim style="display:block">倍增你的内容分发效率。</span>
-      </h1>
-      <p class="lead" style="max-width:50vw" data-anim>
-        立即在左侧编辑器中尝试。切换不同的主题、组件，组合出只属于你的排版。
-      </p>
+    <div class="s6-right">
+      <div class="section-eyebrow" style="color:#d4547e;margin-bottom:16px;">生成与导出</div>
+      <div class="card-row">
+        <div class="mini-card r34">
+          <div class="mini-card-header"></div>
+          <div class="mini-card-body">
+            <div class="mini-card-line"></div>
+            <div class="mini-card-line short"></div>
+            <div class="mini-card-line"></div>
+            <div class="mini-card-num">3:4</div>
+          </div>
+        </div>
+        <div class="mini-card r916">
+          <div class="mini-card-header"></div>
+          <div class="mini-card-body">
+            <div class="mini-card-line"></div>
+            <div class="mini-card-line short"></div>
+            <div class="mini-card-num">9:16</div>
+          </div>
+        </div>
+        <div style="flex:1;padding-left:12px;">
+          <ul class="principle-list" style="gap:10px;">
+            <li class="principle-item">
+              <span class="principle-num" style="color:#d4547e;">①</span>
+              <span class="principle-text" style="font-size:11px;"><strong>自动序号角标</strong>与作者 Logo 注入</span>
+            </li>
+            <li class="principle-item">
+              <span class="principle-num" style="color:#d4547e;">②</span>
+              <span class="principle-text" style="font-size:11px;">Frontmatter 智能生成<strong>社交文案</strong></span>
+            </li>
+            <li class="principle-item">
+              <span class="principle-num" style="color:#d4547e;">③</span>
+              <span class="principle-text" style="font-size:11px;"><strong>批量 ZIP 导出</strong>或逐张高清 PNG 下载</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:14px 16px;background:rgba(212,84,126,0.05);border:1px solid rgba(212,84,126,0.12);border-radius:2px;">
+        <div style="font-family:var(--mono);font-size:9px;color:#d4547e;letter-spacing:0.1em;margin-bottom:6px;">EXPORT OPTIONS</div>
+        <div style="font-size:11px;color:var(--ink-muted);line-height:1.7;">html2canvas 高清截图 → PNG · 批量 ZIP 打包 · 逐张下载<br>完全运行在浏览器端，零网络传输，隐私安全</div>
+      </div>
     </div>
-    <div class="foot">
-      <div>Page 05 · 感谢阅读</div>
-      <div>— · —</div>
-    </div>
-  </section>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">小红书卡片 · 3:4 / 9:16 · 批量导出</span>
+  </div>
+  <div class="page-label">06 / 12</div>
+</section>
 
-</div>
-
-<div id="nav"></div>
-
-<script>
-/* =============== WebGL 背景渲染逻辑 =============== */
-const VS = \`attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}\`;
-
-const FS_DARK = \`precision highp float;
-uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
-vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
-void main(){
-  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
-  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
-  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
-  float md=length(p-m);
-  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
-  vec2 p0=p;
-  for(float i=1.0;i<4.0;i++){
-    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
-    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
-  }
-  float r=length(p);float ang=atan(p.y,p.x);
-  vec3 a=vec3(0.12,0.12,0.13);
-  vec3 b=vec3(0.03,0.04,0.05);
-  vec3 c=vec3(1.0,1.0,1.0);
-  vec3 d=vec3(0.1,0.2,0.4);
-  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
-  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
-  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
-  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
-  col+=hi*0.08;
-  vec3 base=vec3(0.05,0.05,0.06);
-  col=mix(base,col,0.85);
-  gl_FragColor=vec4(col,1.0);
-}\`;
-
-const FS_LIGHT = \`precision highp float;
-uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
-float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float noise(vec2 p){
-  vec2 i=floor(p),f=fract(p);
-  float a=hash(i),b=hash(i+vec2(1,0));
-  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
-  vec2 u=f*f*(3.0-2.0*f);
-  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
-}
-float fbm(vec2 p){
-  float v=0.0,a=0.5;
-  mat2 m=mat2(0.80,0.60,-0.60,0.80);
-  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
-  return v;
-}
-void main(){
-  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
-  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
-  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
-  vec2 md=p-m;float dl=length(md);
-  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
-  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
-  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
-              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
-  float f=fbm(p*2.2+r*1.5);
-  vec3 silverDark=vec3(0.86,0.85,0.84);
-  vec3 paper=vec3(0.955,0.945,0.925);
-  vec3 col=mix(silverDark,paper,f);
-  float ph=r.x*2.2+u_time*0.35;
-  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
-  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
-  float hl=smoothstep(0.48,0.92,f);
-  col+=hl*0.06;
-  gl_FragColor=vec4(col,1.0);
-}\`;
-
-const mouse={x:0.5,y:0.5};
-addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
-
-function bootGL(canvasId, fsSrc){
-  const canvas=document.getElementById(canvasId);
-  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
-  if(!gl) return ()=>false;
-  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
-  const prog=gl.createProgram();
-  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
-  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
-  gl.linkProgram(prog);gl.useProgram(prog);
-  const buf=gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
-  const pos=gl.getAttribLocation(prog,'position');
-  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
-  const lRes=gl.getUniformLocation(prog,'u_resolution');
-  const lT=gl.getUniformLocation(prog,'u_time');
-  const lM=gl.getUniformLocation(prog,'u_mouse');
-  const resize=()=>{
-    const d=Math.min(window.devicePixelRatio||1,2);
-    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
-    gl.viewport(0,0,canvas.width,canvas.height);
-  };
-  addEventListener('resize',resize);resize();
-  return (tSec)=>{
-    gl.uniform2f(lRes,canvas.width,canvas.height);
-    gl.uniform1f(lT,tSec);
-    gl.uniform2f(lM,mouse.x,1-mouse.y);
-    gl.drawArrays(gl.TRIANGLES,0,6);
-    return true;
-  };
-}
-let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
-function startGL(){
-  if(window.__lowPowerMode || glRAF) return;
-  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
-  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
-  glT0=Date.now();
-  function loop(){
-    if(window.__lowPowerMode){glRAF=0;return;}
-    const t=(Date.now()-glT0)/1000;
-    drawDark(t);drawLight(t);
-    glRAF=requestAnimationFrame(loop);
-  }
-  glRAF=requestAnimationFrame(loop);
-}
-function stopGL(){
-  if(glRAF) cancelAnimationFrame(glRAF);
-  glRAF=0;
-}
-startGL();
-addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
-
-// =============== 翻页与指示器逻辑 ===============
-const deck=document.getElementById('deck');
-const slides=deck.querySelectorAll('.slide');
-const nav=document.getElementById('nav');
-let idx=0,total=slides.length,lock=false;
-
-deck.style.width=(total*100)+'vw';
-
-slides.forEach((s,i)=>{
-  const b=document.createElement('button');
-  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
-  b.onclick=()=>go(i);
-  nav.appendChild(b);
-});
-
-function go(n){
-  if(lock)return;
-  idx=Math.max(0,Math.min(total-1,n));
-  window.__currentSlideIndex = idx;
-  deck.style.transform=\`translateX(\${-idx*100}vw)\`;
-  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
-  const el=slides[idx];
-  const th=el.dataset.theme || (el.classList.contains('light')?'light':'dark');
-  document.body.classList.toggle('light-bg',th==='light');
-  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
-  lock=true;setTimeout(()=>lock=false,700);
-}
-
-// 键盘与滚轮导航支持
-addEventListener('keydown',e=>{
-  if(e.key==='Escape'){e.preventDefault();return;}
-  if(e.key && e.key.toLowerCase()==='b'){
-    e.preventDefault();
-    window.__setLowPowerMode(!window.__lowPowerMode);
-    return;
-  }
-  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' ') go(idx+1);
-  if(e.key==='ArrowLeft'||e.key==='PageUp') go(idx-1);
-  if(e.key==='Home') go(0);
-  if(e.key==='End') go(total-1);
-});
-
-let wheelTO=null,wheelAcc=0;
-addEventListener('wheel',e=>{
-  wheelAcc+=e.deltaY+e.deltaX;
-  if(Math.abs(wheelAcc)>50){
-    go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
-  }
-  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
-},{passive:true});
-
-go(0);
-</script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
-
-<script type="module">
-let motion;
-try {
-  motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
-} catch(e) {
-  console.warn('[motion] Failed to load animation library.', e);
-  document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
-}
-
-if(motion){
-  const { animate, stagger } = motion;
-  document.body.classList.add('motion-ready');
-  const EASE = [.22, 1, .36, 1];
-  const slides = [...document.querySelectorAll('.slide')];
-
-  function revealStatic(slide){
-    document.getAnimations?.().forEach(a=>a.cancel());
-    slide.querySelectorAll('[data-anim]').forEach(el=>{
-      el.style.opacity='1';
-      el.style.transform='none';
-    });
-  }
-
-  function playSlide(i){
-    const slide = slides[i];
-    if(!slide) return;
-
-    if(window.__lowPowerMode){
-      revealStatic(slide);
-      return;
-    }
-
-    const els = [...slide.querySelectorAll('[data-anim]')];
-    if(els.length === 0) return;
-
-    // 重置状态
-    els.forEach(el=>{
-      el.style.opacity='0';
-      if(el.dataset.anim === 'left') el.style.transform='translateX(-24px)';
-      else if(el.dataset.anim === 'right') el.style.transform='translateX(24px)';
-      else el.style.transform='translateY(16px)';
-    });
-
-    // 运行动画
-    animate(els, 
-      i === 0 || slide.classList.contains('hero') 
-        ? { opacity: [0, 1], y: [16, 0], x: (el)=>el.dataset.anim === 'left' ? [-24, 0] : el.dataset.anim === 'right' ? [24, 0] : [0, 0] }
-        : { opacity: [0, 1], y: [12, 0], x: (el)=>el.dataset.anim === 'left' ? [-16, 0] : el.dataset.anim === 'right' ? [16, 0] : [0, 0] },
-      { delay: stagger(0.12), duration: 0.85, easing: EASE }
+<!-- ── SLIDE 7: HTML 自由画布 ── -->
+<section class="slide s7">
+  <div class="s7-inner">
+    <div class="s7-grid"></div>
+    <div class="s7-content">
+      <div class="s7-left">
+        <div class="s7-eyebrow">🎨 MODE 04 — HTML 可视化自由画布</div>
+        <div class="s7-title" style="color:#f5f0e4;">沙箱隔离渲染<br>网页 PPT 专属呈现</div>
+        <div class="s7-body">
+          内置基于 iframe 容器的隔离机制，防止样式污染，支持导入 Tailwind Play CDN 等外部样式。生成带有极致字号对比的「电子杂志风格」横向翻页网页 PPT。
+        </div>
+        <div class="capability-list" style="margin-top:20px;">
+          <div class="cap-item"><span class="cap-dot"></span>键盘 / 手势切换幻灯片</div>
+          <div class="cap-item"><span class="cap-dot"></span>WebGL 背景支持</div>
+          <div class="cap-item"><span class="cap-dot" style="background:rgba(192,160,96,0.7)"></span>waitForStability 高清截图导出</div>
+          <div class="cap-item"><span class="cap-dot" style="background:rgba(192,160,96,0.7)"></span>MutationObserver DOM 稳定性探测</div>
+        </div>
+      </div>
+      <div class="s7-right">
+        <div class="code-block">
+<span class="cm">// 探测 DOM 稳定后截图</span>
+<span class="kw">async function</span> waitForStability() {
+  <span class="kw">return new</span> Promise(resolve => {
+    <span class="kw">const</span> obs = <span class="kw">new</span> MutationObserver(
+      debounce(() => {
+        obs.disconnect();
+        resolve();
+      }, <span class="str">200</span>)
     );
-  }
-
-  window.__playSlide = playSlide;
-  playSlide(0);
+    obs.observe(document.body, {
+      subtree: <span class="str">true</span>,
+      childList: <span class="str">true</span>
+    });
+  });
 }
-</script>
+        </div>
+        <div style="padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:4px;font-family:var(--mono);font-size:9px;color:rgba(245,240,228,0.35);line-height:1.8;">
+          电子杂志风格 · 瑞士国际主义风格<br>
+          源自 guizang-ppt-skill 设计精髓
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-label" style="color:rgba(245,240,228,0.2);"><span style="color:#d4c89a;">07 / 12</span></div>
+</section>
+
+<!-- ── SLIDE 8: 技术栈 ── -->
+<section class="slide">
+  <div class="header-strip"></div>
+  <div class="s8-inner">
+    <div class="s8-title-row">
+      <div class="s8-main-title">技术栈全览</div>
+      <div class="s8-sub">Node.js ≥ 20 · pnpm ≥ 10 · 完全运行于浏览器端</div>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-item accent">
+        <div class="stack-item-label">前端框架</div>
+        <div class="stack-item-name">React 18</div>
+        <div class="stack-item-detail">TypeScript + Vite 构建，热更新开发体验</div>
+      </div>
+      <div class="stack-item accent">
+        <div class="stack-item-label">编辑器内核</div>
+        <div class="stack-item-name">CodeMirror 6</div>
+        <div class="stack-item-detail">Markdown 语法高亮，万字流畅输入</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">状态管理</div>
+        <div class="stack-item-name">Zustand</div>
+        <div class="stack-item-detail">persist 中间件自动本地持久化草稿</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">样式系统</div>
+        <div class="stack-item-name">Tailwind v4</div>
+        <div class="stack-item-detail">+ Vanilla CSS，响应式自适应布局</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">导出技术</div>
+        <div class="stack-item-name">html2canvas</div>
+        <div class="stack-item-detail">+ jsPDF，纯浏览器端 PNG / PDF 导出</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">Markdown 解析</div>
+        <div class="stack-item-name">自研引擎</div>
+        <div class="stack-item-detail">支持 steps、timeline、slider 等自定义语法</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">分页算法</div>
+        <div class="stack-item-name">ResizeObserver</div>
+        <div class="stack-item-detail">实时高度实测，平滑跨页无截断</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">截图优化</div>
+        <div class="stack-item-name">MutationObserver</div>
+        <div class="stack-item-detail">waitForStability 替代 sleep，稳定截帧</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">沙箱隔离</div>
+        <div class="stack-item-name">iframe 沙箱</div>
+        <div class="stack-item-detail">防止样式污染，支持外部 CDN 资源</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-item-label">开源协议</div>
+        <div class="stack-item-name">MIT License</div>
+        <div class="stack-item-detail">自由使用、修改与商业应用</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">技术栈 · 零后端依赖 · 浏览器原生能力</span>
+  </div>
+  <div class="page-label">08 / 12</div>
+</section>
+
+<!-- ── SLIDE 9: 目录结构 ── -->
+<section class="slide">
+  <div class="header-strip"></div>
+  <div class="s9-inner">
+    <div class="s9-left">
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.16em;color:#c0a060;margin-bottom:12px;">SRC/ STRUCTURE</div>
+        <div class="dir-tree">
+<span class="dir-name">src/</span><br>
+├ <span class="dir-name">engine/</span><br>
+│ ├ <span class="hl">utils/</span>  markdownParser<br>
+│ ├ <span class="hl">editor-components/</span><br>
+│ └ composables/<br>
+├ <span class="dir-name">components/</span><br>
+│ ├ editor/  CodeMirror<br>
+│ └ ui/  Toast / Button<br>
+├ <span class="dir-name">modes/</span><br>
+│ ├ <span class="hl">article/</span><br>
+│ ├ <span class="hl">document/</span><br>
+│ ├ <span class="hl">card/</span><br>
+│ └ <span class="hl">html/</span><br>
+├ lib/  store / exportImage<br>
+├ data/  demo + prompts<br>
+├ <span class="hl">App.tsx</span>  模式切换入口<br>
+└ main.tsx
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:8px;color:rgba(192,160,96,0.3);letter-spacing:0.1em;margin-top:16px;">框架无关渲染引擎</div>
+    </div>
+    <div class="s9-right">
+      <div class="arch-title">架构分层</div>
+      <div class="arch-flow">
+        <div class="arch-label">输入层</div>
+        <div class="arch-row">
+          <div class="arch-box blue">Markdown 编辑器<br><span style="font-size:9px;font-weight:400;">CodeMirror 6</span></div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box blue">HTML 画布<br><span style="font-size:9px;font-weight:400;">自由输入</span></div>
+        </div>
+        <div class="arch-label">引擎层</div>
+        <div class="arch-row">
+          <div class="arch-box" style="flex:1;">自定义 Markdown 解析器</div>
+          <div class="arch-arrow" style="opacity:0;"></div>
+          <div class="arch-box" style="flex:1;">iframe 沙箱渲染器</div>
+        </div>
+        <div class="arch-label">渲染层 — 四种模式</div>
+        <div class="arch-row" style="flex-wrap:wrap;gap:6px;">
+          <div class="arch-box sub">📝 长图文</div>
+          <div class="arch-box sub">🖨 A4 文档</div>
+          <div class="arch-box sub">📷 社交卡片</div>
+          <div class="arch-box sub">🎨 自由画布</div>
+        </div>
+        <div class="arch-label">导出层</div>
+        <div class="arch-row">
+          <div class="arch-box sub">复制富文本</div>
+          <div class="arch-box sub">PNG 截图</div>
+          <div class="arch-box sub">PDF 打印</div>
+          <div class="arch-box sub">ZIP 批量</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">项目架构 · 模块分层</span>
+  </div>
+  <div class="page-label">09 / 12</div>
+</section>
+
+<!-- ── SLIDE 10: 开源致敬 ── -->
+<section class="slide">
+  <div class="header-strip"></div>
+  <div style="position:absolute;top:0;left:0;right:0;padding:32px 48px 0;display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--rule);padding-bottom:20px;">
+    <div class="section-eyebrow" style="margin:0;">开源参考与设计致敬</div>
+  </div>
+  <div class="s10-inner" style="top:72px;position:absolute;bottom:36px;left:0;right:0;">
+    <div class="ref-col">
+      <div class="ref-num">01</div>
+      <div class="ref-project">r-markdown</div>
+      <div class="ref-desc">
+        移植了微信公众号渲染引擎的核心解析逻辑、多款排版组件以及主题配色方案。长图文模式的技术基础来源于此。
+      </div>
+      <div class="ref-tag">RobocopMao · 渲染引擎</div>
+    </div>
+    <div class="ref-col">
+      <div class="ref-num">02</div>
+      <div class="ref-project">html-anything</div>
+      <div class="ref-desc">
+        启发了 HTML 可视化画布中基于 iframe 容器的安全隔离设计与导图规范，奠定沙箱架构基础。
+      </div>
+      <div class="ref-tag">nexu-io · 沙箱隔离设计</div>
+    </div>
+    <div class="ref-col">
+      <div class="ref-num">03</div>
+      <div class="ref-project">guizang-ppt-skill</div>
+      <div class="ref-desc">
+        自由画布中「电子杂志」「瑞士国际主义」的风格参考，以及网页 PPT 主题节奏、标准图片比例、版式校验等经验启发。
+      </div>
+      <div class="ref-tag" style="color:var(--ink-faint);">op7418 · AGPL-3.0 · 仅设计经验转译</div>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">致敬开源社区 · 站在巨人肩膀上</span>
+  </div>
+  <div class="page-label">10 / 12</div>
+</section>
+
+<!-- ── SLIDE 11: CLOSE ── -->
+<section class="slide s11">
+  <div class="header-strip" style="background:#c0a060;height:3px;"></div>
+  <div class="s11-inner">
+    <div class="s11-label">快速开始</div>
+    <div class="s11-big">pnpm install<br>&amp;&amp; pnpm dev</div>
+    <div class="s11-sub">
+      Node.js ≥ 20 · pnpm ≥ 10<br>
+      默认启动于 http://localhost:5173 · 热更新开发环境
+    </div>
+    <div class="s11-badge-row">
+      <span class="s11-badge">MIT License</span>
+      <span class="s11-badge">零后端</span>
+      <span class="s11-badge">4 种排版模式</span>
+      <span class="s11-badge">浏览器原生导出</span>
+    </div>
+  </div>
+  <div class="footer-bar" style="border-top-color:rgba(192,160,96,0.15)">
+    <span class="brand" style="color:rgba(192,160,96,0.4);">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline" style="color:rgba(245,240,228,0.25);">开源 · 纯前端 · 极致排版自由度</span>
+  </div>
+  <div class="page-label" style="color:rgba(192,160,96,0.3);">11 / 12</div>
+</section>
+
+<!-- ── SLIDE 12: 感谢观看 + 欢迎反馈 ── -->
+<section class="slide s12">
+  <div class="header-strip" style="background:#c0a060;height:3px;"></div>
+  <div class="s12-bg"></div>
+  <div class="s12-mark">&rdquo;</div>
+  <div class="s12-inner">
+    <div class="s12-eyebrow">Thank You for Watching</div>
+    <div class="s12-title">感谢观看<span class="slash">.</span></div>
+    <div class="s12-divider"></div>
+    <div class="s12-thanks">
+      本项目站在众多开源项目的肩膀上 —— 致敬 <strong>r-markdown</strong>、<strong>html-anything</strong>、<strong>guizang-ppt-skill</strong> 以及每一位开源贡献者。<br>markdown2view 基于 MIT 协议开源，期待与你一同打磨。
+    </div>
+    <div class="s12-feedback-label">欢迎反馈与共建</div>
+    <div class="s12-channels">
+      <div class="s12-channel">
+        <div class="s12-channel-name">Issue</div>
+        <div class="s12-channel-desc">提交问题与建议</div>
+      </div>
+      <div class="s12-channel">
+        <div class="s12-channel-name">Pull Request</div>
+        <div class="s12-channel-desc">贡献代码与组件</div>
+      </div>
+      <div class="s12-channel">
+        <div class="s12-channel-name">Star</div>
+        <div class="s12-channel-desc">支持项目持续迭代</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar" style="border-top-color:rgba(192,160,96,0.15)">
+    <span class="brand" style="color:rgba(192,160,96,0.4);">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline" style="color:rgba(245,240,228,0.25);">感谢观看 · 欢迎 Issue / PR / Star 共建</span>
+  </div>
+  <div class="page-label" style="color:rgba(192,160,96,0.3);">12 / 12</div>
+</section>
+
 </body>
-</html>`;
+</html>
+`;

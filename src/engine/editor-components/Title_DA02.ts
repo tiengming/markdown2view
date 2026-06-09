@@ -74,7 +74,8 @@ export const Title_DA02 = {
   ],
   example: `<title type="DA02" badge="UPDATE" subtitle="新增了段落标题、步骤流程、时间线等组件，优化了深色模式适配。" chips="新组件|深色模式|性能优化">v2.0 版本更新说明</title>`,
 
-  render(attrs: Record<string, string>, body: string, t: ThemeColors, raw: string = ''): string {
+  render(attrs: Record<string, string>, body: string, t: ThemeColors, ...rest: unknown[]): string {
+    const raw = (rest[0] as string) || ''
     const { chars, minutes } = countChars(raw)
     const color = attrs.color || t.accent
 

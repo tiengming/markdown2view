@@ -73,6 +73,34 @@ describe('documentModel', () => {
     expect(blocks[2].markdown).toBe('　　第二段正文保留两个全角空格。')
   })
 
+  it('keeps a table caption with the table below even when separated by a blank line', () => {
+    const blocks = splitMarkdownBlocks([
+      '**表 1：A4 文档能力总览**',
+      '',
+      '| 能力 | 说明 |',
+      '| --- | --- |',
+      '| 题注 | 表题在表格上方 |',
+    ].join('\n'))
+
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].kind).toBe('table')
+    expect(blocks[0].markdown).toContain('**表 1：A4 文档能力总览**')
+    expect(blocks[0].markdown).toContain('| 能力 | 说明 |')
+  })
+
+  it('keeps an image caption with the image above even when separated by a blank line', () => {
+    const blocks = splitMarkdownBlocks([
+      '![工作流示意图](https://example.com/workflow.png)',
+      '',
+      '**图 1：从草稿到成品的工作流示意**',
+    ].join('\n'))
+
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].kind).toBe('image')
+    expect(blocks[0].markdown).toContain('![工作流示意图]')
+    expect(blocks[0].markdown).toContain('**图 1：从草稿到成品的工作流示意**')
+  })
+
   it('paginates blocks without exceeding page content height when possible', () => {
     const blocks = [
       { id: 'a', kind: 'paragraph' as const, markdown: 'a', estimatedHeight: 300, avoidBreak: true },
@@ -86,6 +114,40 @@ describe('documentModel', () => {
     expect(pages[0].blocks.map((b) => b.id)).toEqual(['a', 'b'])
     expect(pages[1].blocks.map((b) => b.id)).toEqual(['c'])
     expect(pages.every((p) => p.usedHeight <= 900)).toBe(true)
+  })
+
+  it('reserves bottom safety space so content does not collide with the footer', () => {
+    const blocks = [
+      { id: 'body', kind: 'paragraph' as const, markdown: 'body', estimatedHeight: 850, avoidBreak: false },
+      { id: 'tail', kind: 'paragraph' as const, markdown: 'tail', estimatedHeight: 30, avoidBreak: false },
+    ]
+
+    const pages = paginateDocumentBlocks(blocks, {
+      ...DEFAULT_DOCUMENT_SETTINGS,
+      pageHeight: 900,
+      marginTop: 0,
+      marginBottom: 0,
+      fontScale: 'normal',
+    })
+
+    expect(pages.map((p) => p.blocks.map((b) => b.id))).toEqual([['body'], ['tail']])
+  })
+
+  it('moves a heading to the next page when it would start too close to the bottom', () => {
+    const blocks = [
+      { id: 'body', kind: 'paragraph' as const, markdown: 'body', estimatedHeight: 720, avoidBreak: false },
+      { id: 'heading', kind: 'heading' as const, markdown: '## 下一章', estimatedHeight: 80, avoidBreak: true },
+    ]
+
+    const pages = paginateDocumentBlocks(blocks, {
+      ...DEFAULT_DOCUMENT_SETTINGS,
+      pageHeight: 900,
+      marginTop: 0,
+      marginBottom: 0,
+      fontScale: 'normal',
+    })
+
+    expect(pages.map((p) => p.blocks.map((b) => b.id))).toEqual([['body'], ['heading']])
   })
 
   it('places an oversized image on its own page', () => {

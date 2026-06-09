@@ -52,8 +52,9 @@ export const Compare_DA02 = {
     attrs: Record<string, string>,
     body: string,
     t: ThemeColors,
-    inlineRenderer?: (md: string) => string,
+    ...rest: unknown[]
   ): string {
+    const inlineRenderer = rest[0] as ((md: string) => string) | undefined
     const hex = resolveColor(attrs.color || t.accent)
     const { left, right } = this.parseSides(body)
 

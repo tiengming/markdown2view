@@ -79,6 +79,34 @@ function hasTableBelow(lines: string[], index: number): boolean {
   return false
 }
 
+export function extractBlock(lines: string[], start: number, openTagRegex: RegExp, closeTagRegex: RegExp): { attrs: Record<string, string>; body: string; next: number } | null {
+  const line = lines[start]
+  const openMatch = line.match(openTagRegex)
+  if (!openMatch) return null
+
+  const attrs = openMatch[1] ? parseAttrs(openMatch[1]) : {}
+  
+  if (openMatch[2] !== undefined && closeTagRegex.test(openMatch[2])) {
+    const text = openMatch[2].replace(closeTagRegex, '').trim()
+    return { attrs, body: text, next: start + 1 }
+  }
+
+  let body = openMatch[2] !== undefined ? openMatch[2] + '\n' : ''
+  let i = start + 1
+  while (i < lines.length && !closeTagRegex.test(lines[i])) {
+    body += lines[i] + '\n'
+    i++
+  }
+  if (i < lines.length) {
+    const match = lines[i].match(closeTagRegex)
+    if (match) {
+      body += lines[i].substring(0, match.index)
+    }
+    i++
+  }
+  return { attrs, body: body.trim(), next: i }
+}
+
 export function parseMarkdown(md: string, t: ThemeColors): string {
   // 先抽取数学公式（$$...$$ / $...$）为占位符，避免被后续 Markdown 规则破坏
   const { text: mathText, store: mathStore } = extractMath(md)
@@ -153,66 +181,31 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
 
     // <steps>
     if (/^<steps\b/.test(line)) {
-      const openMatch = line.match(/^<steps\b([^>]*)>/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      i++
-      let body = ''
-      while (i < lines.length && !/^<\/steps>/.test(lines[i])) {
-        body += lines[i] + '\n'
-        i++
+      const block = extractBlock(lines, i, /^<steps\b([^>]*)>(.*)$/, /<\/steps>/) || extractBlock(lines, i, /^<steps\b([^>]*)>/, /<\/steps>/)
+      if (block) {
+        const stepsRenderer = block.attrs.type === 'DA02' ? Steps_DA02 : Steps_DA01
+        html += stepsRenderer.render(block.attrs, block.body, t)
+        i = block.next
+        continue
       }
-      i++ // skip </steps>
-      const stepsRenderer = attrs.type === 'DA02' ? Steps_DA02 : Steps_DA01
-      html += stepsRenderer.render(attrs, body.trim(), t)
-      continue
     }
     // <statement> ... </statement>
     if (/^<statement\b/.test(line)) {
-      const openMatch = line.match(/^<statement\b([^>]*)>(.*)$/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      // 单行模式
-      if (openMatch && openMatch[2] && /<\/statement>\s*$/.test(openMatch[2])) {
-        const text = openMatch[2].replace(/<\/statement>\s*$/, '').trim()
-        html += Statement_DA01.render(attrs, text, t)
-        i++
+      const block = extractBlock(lines, i, /^<statement\b([^>]*)>(.*)$/, /<\/statement>/)
+      if (block) {
+        html += Statement_DA01.render(block.attrs, block.body, t)
+        i = block.next
         continue
       }
-      // 多行模式：累积到出现 </statement> 为止（闭合标签可在任意位置，含行尾）
-      let text = openMatch && openMatch[2] ? openMatch[2] + '\n' : ''
-      i++
-      while (i < lines.length && !/<\/statement>/.test(lines[i])) {
-        text += lines[i] + '\n'
-        i++
-      }
-      if (i < lines.length) {
-        // 取闭合标签之前的内容，并跳过该行
-        text += lines[i].replace(/<\/statement>[\s\S]*$/, '')
-        i++
-      }
-      html += Statement_DA01.render(attrs, text.trim(), t)
-      continue
     }
     // <badges> ... </badges> (支持单行和多行)
     if (/^<badges\b/.test(line)) {
-      const openMatch = line.match(/^<badges\b([^>]*)>(.*)$/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      // 单行模式：<badges ...>content</badges>
-      if (openMatch && openMatch[2] && /<\/badges>\s*$/.test(openMatch[2])) {
-        const body = openMatch[2].replace(/<\/badges>\s*$/, '').trim()
-        html += Badges_DA01.render(attrs, body, t)
-        i++
+      const block = extractBlock(lines, i, /^<badges\b([^>]*)>(.*)$/, /<\/badges>/)
+      if (block) {
+        html += Badges_DA01.render(block.attrs, block.body, t)
+        i = block.next
         continue
       }
-      // 多行模式：内容在后续行
-      let body = openMatch && openMatch[2] ? openMatch[2] + '\n' : ''
-      i++
-      while (i < lines.length && !/^<\/badges>/.test(lines[i])) {
-        body += lines[i] + '\n'
-        i++
-      }
-      i++ // skip </badges>
-      html += Badges_DA01.render(attrs, body.trim(), t)
-      continue
     }
     // ::: cta
     if (/^:::\s*cta\b/.test(line)) {
@@ -223,57 +216,30 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
     }
     // ::: lead
     if (/^:::\s*lead\b/.test(line)) {
-      const leadAttrsMatch = line.match(/^:::\s*lead\b([^>]*)/)
-      const attrs = leadAttrsMatch && leadAttrsMatch[1] ? parseAttrs(leadAttrsMatch[1]) : {}
-      i++
-      let text = ''
-      while (i < lines.length && !/^:::\s*$/.test(lines[i])) {
-        text += lines[i] + '\n'
-        i++
+      const block = extractBlock(lines, i, /^:::\s*lead\b(.*)$/, /^:::\s*$/)
+      if (block) {
+        html += Lead_DA01.render(block.attrs, block.body, t)
+        i = block.next
+        continue
       }
-      i++
-      html += Lead_DA01.render(attrs, text.trim(), t)
-      continue
     }
     // <lead> ... </lead>
     if (/^<lead\b/.test(line)) {
-      const openMatch = line.match(/^<lead\b([^>]*)>(.*)$/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      // 单行模式
-      if (openMatch && openMatch[2] && /<\/lead>\s*$/.test(openMatch[2])) {
-        const text = openMatch[2].replace(/<\/lead>\s*$/, '').trim()
-        html += Lead_DA01.render(attrs, text, t)
-        i++
+      const block = extractBlock(lines, i, /^<lead\b([^>]*)>(.*)$/, /<\/lead>/)
+      if (block) {
+        html += Lead_DA01.render(block.attrs, block.body, t)
+        i = block.next
         continue
       }
-      // 多行模式：累积到出现 </lead> 为止（闭合标签可在任意位置，含行尾）
-      let text = openMatch && openMatch[2] ? openMatch[2] + '\n' : ''
-      i++
-      while (i < lines.length && !/<\/lead>/.test(lines[i])) {
-        text += lines[i] + '\n'
-        i++
-      }
-      if (i < lines.length) {
-        // 取闭合标签之前的内容，并跳过该行
-        text += lines[i].replace(/<\/lead>[\s\S]*$/, '')
-        i++
-      }
-      html += Lead_DA01.render(attrs, text.trim(), t)
-      continue
     }
     // <breaking>
     if (/^<breaking\b/.test(line)) {
-      const openMatch = line.match(/^<breaking\b([^>]*)>/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      i++
-      let body = ''
-      while (i < lines.length && !/^<\/breaking>/.test(lines[i])) {
-        body += lines[i] + '\n'
-        i++
+      const block = extractBlock(lines, i, /^<breaking\b([^>]*)>(.*)$/, /<\/breaking>/) || extractBlock(lines, i, /^<breaking\b([^>]*)>/, /<\/breaking>/)
+      if (block) {
+        html += Breaking_DA01.render(block.attrs, block.body, t)
+        i = block.next
+        continue
       }
-      i++ // skip </breaking>
-      html += Breaking_DA01.render(attrs, body.trim(), t)
-      continue
     }
     // <cta>
     if (/^<cta\b/.test(line)) {
@@ -407,17 +373,12 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
     }
     // <case-flow> 标签
     if (/^<case-flow\b/.test(line)) {
-      const openMatch = line.match(/^<case-flow\b([^>]*)>/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      i++
-      let body = ''
-      while (i < lines.length && !/^<\/case-flow>/.test(lines[i])) {
-        body += lines[i] + '\n'
-        i++
+      const block = extractBlock(lines, i, /^<case-flow\b([^>]*)>(.*)$/, /<\/case-flow>/) || extractBlock(lines, i, /^<case-flow\b([^>]*)>/, /<\/case-flow>/)
+      if (block) {
+        html += CaseFlow_DA01.render(block.attrs, block.body, t)
+        i = block.next
+        continue
       }
-      i++ // skip </case-flow>
-      html += CaseFlow_DA01.render(attrs, body.trim(), t)
-      continue
     }
     // 案例流（行内语法，无标签包裹时）
     if (/^-\s*\[案例\s*\d+\]/.test(line)) {
@@ -431,39 +392,21 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
     }
     // <timeline> 标签
     if (/^<timeline\b/.test(line)) {
-      const openMatch = line.match(/^<timeline\b([^>]*)>/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      i++
-      let body = ''
-      while (i < lines.length && !/^<\/timeline>/.test(lines[i])) {
-        body += lines[i] + '\n'
-        i++
+      const block = extractBlock(lines, i, /^<timeline\b([^>]*)>(.*)$/, /<\/timeline>/) || extractBlock(lines, i, /^<timeline\b([^>]*)>/, /<\/timeline>/)
+      if (block) {
+        html += Timeline_DA01.render(block.attrs, block.body, t)
+        i = block.next
+        continue
       }
-      i++ // skip </timeline>
-      html += Timeline_DA01.render(attrs, body.trim(), t)
-      continue
     }
     // <slider> 标签
     if (/^<slider\b/.test(line)) {
-      const openMatch = line.match(/^<slider\b([^>]*)>(.*)$/)
-      const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
-      // 单行模式：<slider ...>content</slider>
-      if (openMatch && openMatch[2] && /<\/slider>\s*$/.test(openMatch[2])) {
-        const body = openMatch[2].replace(/<\/slider>\s*$/, '').trim()
-        html += Slider_DA01.render(attrs, body, t)
-        i++
+      const block = extractBlock(lines, i, /^<slider\b([^>]*)>(.*)$/, /<\/slider>/)
+      if (block) {
+        html += Slider_DA01.render(block.attrs, block.body, t)
+        i = block.next
         continue
       }
-      // 多行模式：内容在后续行
-      let body = openMatch && openMatch[2] ? openMatch[2] + '\n' : ''
-      i++
-      while (i < lines.length && !/^<\/slider>/.test(lines[i])) {
-        body += lines[i] + '\n'
-        i++
-      }
-      i++ // skip </slider>
-      html += Slider_DA01.render(attrs, body.trim(), t)
-      continue
     }
     // : engage 或 <engage>
     if (/^:\s*engage\b/.test(line) || /^<engage\b/.test(line)) {

@@ -30,8 +30,7 @@ export interface ComponentDef {
     default?: string
     options?: string[]
   }>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render: (attrs: any, body: any, t: ThemeColors, ...rest: any[]) => string
+  render: (attrs: Record<string, string>, body: string, t: ThemeColors, ...rest: unknown[]) => string
 }
 
 import { Title_DA01 } from './Title_DA01'

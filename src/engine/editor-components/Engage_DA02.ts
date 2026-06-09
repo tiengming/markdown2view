@@ -37,8 +37,7 @@ export const Engage_DA02 = {
       ],
     },
   ],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render(attrs: any = {}, _body: any = '', _t: any = ''): string {
+  render(attrs: Record<string, string> = {}, _body: string = '', _t: unknown = ''): string {
     const title = attrs.title || '感谢你的阅读与支持！'
     const subtitle = attrs.subtitle || '喜欢就互动一下吧～ 💚'
     const colors = parseColors(attrs.color)

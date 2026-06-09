@@ -67,8 +67,9 @@ export const Compare_DA01 = {
     attrs: Record<string, string>,
     body: string,
     t: ThemeColors,
-    inlineRenderer?: (md: string) => string,
+    ...rest: unknown[]
   ): string {
+    const inlineRenderer = rest[0] as ((md: string) => string) | undefined
     const hex = resolveColor(attrs.color || t.accent)
     const direction = attrs.direction || 'horizontal'
     const isVertical = direction === 'vertical'

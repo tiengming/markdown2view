@@ -59,6 +59,34 @@ describe('parseMarkdown - Caption parsing', () => {
     expect(html).toContain('图 1: 这是加粗题注')
   })
 
+  it('should support bold table captions above tables', () => {
+    const md = '**表 1: 这是加粗表格题注**\n| col1 | col2 |\n| --- | --- |\n| a | b |'
+    const html = parseMarkdown(md, colors)
+
+    expect(html).toContain('class="document-caption document-caption-table"')
+    expect(html).toContain('data-caption-kind="table"')
+    expect(html).toContain('text-align:center')
+    expect(html).toContain('表 1: 这是加粗表格题注')
+  })
+
+  it('allows figure and table captions to use independent numbering', () => {
+    const md = [
+      '![img](url)',
+      '图 1: 这是图片题注',
+      '',
+      '表 1: 这是表格题注',
+      '| col1 | col2 |',
+      '| --- | --- |',
+      '| a | b |',
+    ].join('\n')
+    const html = parseMarkdown(md, colors)
+
+    expect(html).toContain('class="document-caption document-caption-image"')
+    expect(html).toContain('class="document-caption document-caption-table"')
+    expect(html).toContain('图 1: 这是图片题注')
+    expect(html).toContain('表 1: 这是表格题注')
+  })
+
   it('should not parse text describing figures/tables as captions', () => {
     // 即使上面有图，如果只是空格分隔符且包含“展现”等词，也不应误判为题注
     const md1 = '![img](url)\n图 1 展现了核心架构。'

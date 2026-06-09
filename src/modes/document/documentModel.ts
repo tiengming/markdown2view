@@ -66,6 +66,8 @@ export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
 }
 
 const INVALID_FILENAME_CHARS = /[\\/:*?"<>|]/g
+const PAGE_BOTTOM_SAFETY_GAP = 36
+const HEADING_NEAR_BOTTOM_RATIO = 0.78
 
 function compactPlainText(text: string): string {
   return text
@@ -108,6 +110,49 @@ function classifyBlock(markdown: string): DocumentBlockKind {
   if (text.includes('|') && /\n\|?[\s:-]+\|/.test(text)) return 'table'
   if (/^<\w[\s\S]*<\/\w/.test(text)) return 'component'
   return 'paragraph'
+}
+
+function stripCaptionMarkup(text: string): string {
+  return text
+    .trim()
+    .replace(/^(\*\*|__|\*|_)+/, '')
+    .replace(/(\*\*|__|\*|_)+$/, '')
+    .trim()
+}
+
+function isTableCaptionBlock(markdown: string): boolean {
+  const line = stripCaptionMarkup(markdown)
+  return /^(表|Table)\.?\s*(\d+|[一二三四五六七八九十百]+)([:：.\-\—\s]+)/i.test(line)
+}
+
+function isImageCaptionBlock(markdown: string): boolean {
+  const line = stripCaptionMarkup(markdown)
+  return /^(图|Fig|Figure)\.?\s*(\d+|[一二三四五六七八九十百]+)([:：.\-\—\s]+)/i.test(line)
+}
+
+function mergeCaptionBlocks(blocks: string[]): string[] {
+  const merged: string[] = []
+
+  for (let i = 0; i < blocks.length; i++) {
+    const current = blocks[i]
+    const next = blocks[i + 1]
+
+    if (next && isTableCaptionBlock(current) && classifyBlock(next) === 'table') {
+      merged.push(`${current}\n\n${next}`)
+      i++
+      continue
+    }
+
+    if (next && classifyBlock(current) === 'image' && isImageCaptionBlock(next)) {
+      merged.push(`${current}\n\n${next}`)
+      i++
+      continue
+    }
+
+    merged.push(current)
+  }
+
+  return merged
 }
 
 function estimateBlockHeight(markdown: string, kind: DocumentBlockKind): number {
@@ -197,7 +242,7 @@ export function splitMarkdownBlocks(markdown: string): DocumentBlock[] {
     }
   }
 
-  return rawBlocks.map((block, index) => {
+  return mergeCaptionBlocks(rawBlocks).map((block, index) => {
     const kind = classifyBlock(block)
     return {
       id: `block-${index + 1}`,
@@ -224,7 +269,7 @@ export function paginateDocumentBlocks(
 ): DocumentPage[] {
   const scale = fontScaleFactor(settings.fontScale ?? 'normal')
   const contentHeight = settings.pageHeight - settings.marginTop - settings.marginBottom
-  const effectiveHeight = contentHeight / scale
+  const effectiveHeight = Math.max(0, (contentHeight - PAGE_BOTTOM_SAFETY_GAP) / scale)
   const pages: DocumentPage[] = []
   let current: DocumentBlock[] = []
   let usedHeight = 0
@@ -249,6 +294,8 @@ export function paginateDocumentBlocks(
 
     const height = actualHeights?.[block.id] ?? block.estimatedHeight
     const oversized = height > effectiveHeight
+    const headingNearBottom =
+      block.kind === 'heading' && current.length > 0 && usedHeight > effectiveHeight * HEADING_NEAR_BOTTOM_RATIO
     if (oversized) {
       pushPage()
       current = [block]
@@ -257,7 +304,7 @@ export function paginateDocumentBlocks(
       continue
     }
 
-    if (current.length && usedHeight + height > effectiveHeight) {
+    if (current.length && (usedHeight + height > effectiveHeight || headingNearBottom)) {
       pushPage()
     }
 

@@ -52,7 +52,13 @@ markdown2view 的长图文模式把重点放在“文章表达”上：你仍然
 </right>
 </compare>
 
-<p-title num="05" title="常用 Markdown 能力" subtitle="MARKDOWN BASICS" level="1"></p-title>
+<p-title num="05" title="图文混排与基础样式" subtitle="RICH MEDIA & BASICS" level="1"></p-title>
+
+![优质代码环境](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80)
+图 1：展示高质量插图在长文中的视觉焦点作用
+
+< ![ ![沉浸式开发](https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&auto=format&fit=crop&q=80) ![极简工作流](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&auto=format&fit=crop&q=80) ]
+图 2：排版精美的图片组合可以增强技术文档的阅读体验
 
 ### 文本强调
 
@@ -104,6 +110,12 @@ $$
 - 需要打印交付：切到 A4 文档
 </right>
 </compare>
+
+<p-title num="08" title="高级图片版式：轮播图" subtitle="CAROUSEL / SLIDER" level="1"></p-title>
+
+如果你有更多的图片想要展示，还可以使用轮播组件。这在展示多个产品细节、多步骤操作演示时非常有用。由于它利用 SVG 原生动画，因此复制到公众号或各大知识平台时均可完美展示，无需任何额外插件。
+
+<slider images="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=300&fit=crop&q=80,https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=300&fit=crop&q=80,https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=300&fit=crop&q=80" interval="3" width="600" height="300" type="1"></slider>
 
 <cta label="NEXT STEP" title="把这篇示例改成你的发布稿" button="复制长图文 AI 指令"></cta>
 

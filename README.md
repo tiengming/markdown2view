@@ -76,11 +76,12 @@ src/
 
 ## 开源参考与归属
 
-| 项目 | 借鉴内容 |
-|---|---|
-| [r-markdown](https://github.com/RobocopMao/r-markdown) | 公众号渲染引擎、自定义语法组件、主题系统、富文本/图片复制 |
-| [html-anything（nexu-io）](https://github.com/nexu-io/open-design) | HTML iframe 沙箱容器、`iframeToBlob` 高清导图、Skill 设计哲学 |
-| [awesome-design-md（VoltAgent）](https://github.com/VoltAgent/awesome-design-md) | DESIGN.md 设计风格指令来源 |
+| 项目                                                                              | 借鉴内容                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [r-markdown](https://github.com/RobocopMao/r-markdown)                            | 公众号渲染引擎、自定义语法组件、主题系统、富文本/图片复制                                                                                                                                                |
+| [html-anything（nexu-io）](https://github.com/nexu-io/open-design)                | HTML iframe 沙箱容器、`iframeToBlob` 高清导图、Skill 设计哲学                                                                                                                                            |
+| [awesome-design-md（VoltAgent）](https://github.com/VoltAgent/awesome-design-md)  | DESIGN.md 设计风格指令来源                                                                                                                                                                               |
+| [guizang-ppt-skill（op7418 / 歸藏）](https://github.com/op7418/guizang-ppt-skill) | 自由画布中「电子杂志」「瑞士国际主义」的风格参考，以及网页 PPT 主题节奏、标准图片比例、版式校验、低性能兜底等经验启发。原项目采用 AGPL-3.0，本项目仅做设计经验与提示词层面的转译吸收，未并入其模板源码。 |
 
 ## License
 

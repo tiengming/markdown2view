@@ -84,6 +84,8 @@ describe('Design Prompt Library', () => {
       'annual-story-review',
       'proposal-lab',
       'workshop-canvas',
+      'editorial-ink-deck',
+      'swiss-presentation-system',
       'ai-console',
       'blueprint-tech',
       'swiss-grid',
@@ -116,6 +118,8 @@ describe('Design Prompt Library', () => {
       'annual-story-review',
       'proposal-lab',
       'workshop-canvas',
+      'editorial-ink-deck',
+      'swiss-presentation-system',
     ]))
   })
 
@@ -126,5 +130,19 @@ describe('Design Prompt Library', () => {
     expect(prompt).toContain('严格执行所选风格')
     expect(prompt).toContain('强制分页')
     expect(prompt).toContain('不要以 ```html 包装代码块')
+  })
+
+  it('includes guizang-inspired presentation styles and production lessons', () => {
+    const byId = Object.fromEntries(DESIGN_STYLES.map((style) => [style.id, style]))
+
+    expect(byId['editorial-ink-deck'].style).toContain('电子杂志')
+    expect(byId['editorial-ink-deck'].style).toContain('主题节奏')
+    expect(byId['swiss-presentation-system'].style).toContain('瑞士国际主义')
+    expect(byId['swiss-presentation-system'].style).toContain('单一锚点色')
+
+    const prompt = buildDesignPrompt(byId['swiss-presentation-system'])
+    expect(prompt).toContain('先列出版式节奏')
+    expect(prompt).toContain('标准比例')
+    expect(prompt).toContain('低性能')
   })
 })

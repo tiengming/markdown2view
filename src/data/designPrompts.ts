@@ -4,109 +4,118 @@
 // 风格灵感来自 awesome-design-md 与 html-anything 架构。
 
 export interface DesignStyle {
-  id: string
-  name: string
-  category: string
-  accent: string
-  description: string
-  outputType: OutputType
-  visualTone: VisualTone
-  family: string
-  displayLevel: DisplayLevel
-  style: string
+  id: string;
+  name: string;
+  category: string;
+  accent: string;
+  description: string;
+  outputType: OutputType;
+  visualTone: VisualTone;
+  family: string;
+  displayLevel: DisplayLevel;
+  style: string;
 }
 
 export const OUTPUT_TYPES = [
-  '幻灯片',
-  '长页',
-  '卡片',
-  '报告',
-  '仪表盘',
-  '文档',
-] as const
+  "幻灯片",
+  "长页",
+  "卡片",
+  "报告",
+  "仪表盘",
+  "文档",
+] as const;
 
 export const VISUAL_TONES = [
-  '极简',
-  '编辑',
-  '科技',
-  '数据',
-  '温暖',
-  '代码',
-] as const
+  "极简",
+  "编辑",
+  "科技",
+  "数据",
+  "温暖",
+  "代码",
+] as const;
 
-export type OutputType = (typeof OUTPUT_TYPES)[number]
-export type VisualTone = (typeof VISUAL_TONES)[number]
-export type DisplayLevel = 'primary' | 'basic'
+export type OutputType = (typeof OUTPUT_TYPES)[number];
+export type VisualTone = (typeof VISUAL_TONES)[number];
+export type DisplayLevel = "primary" | "basic";
 
-type DesignStyleMetadata = Pick<DesignStyle, 'outputType' | 'visualTone' | 'family' | 'displayLevel'>
-type RawDesignStyle = Omit<DesignStyle, keyof DesignStyleMetadata>
+type DesignStyleMetadata = Pick<
+  DesignStyle,
+  "outputType" | "visualTone" | "family" | "displayLevel"
+>;
+type RawDesignStyle = Omit<DesignStyle, keyof DesignStyleMetadata>;
 
 const meta = (
   outputType: OutputType,
   visualTone: VisualTone,
   family: string,
-  displayLevel: DisplayLevel = 'primary',
-): DesignStyleMetadata => ({ outputType, visualTone, family, displayLevel })
+  displayLevel: DisplayLevel = "primary",
+): DesignStyleMetadata => ({ outputType, visualTone, family, displayLevel });
 
 const STYLE_METADATA: Record<string, DesignStyleMetadata> = {
-  vercel: meta('长页', '极简', 'minimal-product'),
-  stripe: meta('长页', '科技', 'fintech-product'),
-  linear: meta('长页', '科技', 'product-tool'),
-  apple: meta('长页', '极简', 'brand-story'),
-  spotify: meta('长页', '编辑', 'media-entertainment'),
-  editorial: meta('长页', '编辑', 'editorial-magazine'),
-  terminal: meta('长页', '代码', 'developer-code'),
-  xiaohongshu: meta('卡片', '温暖', 'social-card-custom'),
-  notion: meta('文档', '温暖', 'knowledge-doc'),
-  'xhs-multipage': meta('卡片', '温暖', 'social-card-multipage'),
-  'ppt-slide': meta('幻灯片', '极简', 'presentation-basic', 'basic'),
-  dashboard: meta('仪表盘', '数据', 'business-dashboard'),
-  resume: meta('文档', '极简', 'resume-profile'),
-  claude: meta('长页', '温暖', 'ai-assistant'),
-  figma: meta('长页', '科技', 'design-tool'),
-  airbnb: meta('长页', '温暖', 'consumer-brand'),
-  supabase: meta('长页', '代码', 'developer-code'),
-  raycast: meta('长页', '科技', 'system-tool'),
-  mongodb: meta('长页', '科技', 'enterprise-data'),
-  framer: meta('长页', '科技', 'site-builder'),
-  github: meta('长页', '代码', 'developer-code'),
-  openai: meta('长页', '极简', 'frontier-ai'),
-  arc: meta('长页', '温暖', 'system-experience'),
-  discord: meta('长页', '科技', 'community-chat'),
-  tailwind: meta('长页', '极简', 'web-components'),
-  report: meta('报告', '编辑', 'annual-report'),
-  poster: meta('卡片', '编辑', 'poster-design'),
-  'ai-console': meta('仪表盘', '科技', 'ai-console'),
-  'blueprint-tech': meta('长页', '科技', 'blueprint-tech'),
-  'keynote-cinematic': meta('幻灯片', '编辑', 'keynote-cinematic'),
-  'consulting-deck': meta('幻灯片', '数据', 'consulting-deck'),
-  'startup-pitch': meta('幻灯片', '温暖', 'startup-pitch'),
-  'neon-tech-launch': meta('幻灯片', '科技', 'launch-event'),
-  'growth-review': meta('幻灯片', '数据', 'growth-review'),
-  'developer-conf': meta('幻灯片', '代码', 'developer-code'),
-  'project-kickoff-rally': meta('幻灯片', '温暖', 'project-kickoff'),
-  'roadmap-planning': meta('幻灯片', '数据', 'roadmap-planning'),
-  'project-retro': meta('幻灯片', '数据', 'project-retro'),
-  'annual-story-review': meta('幻灯片', '温暖', 'annual-story'),
-  'proposal-lab': meta('幻灯片', '科技', 'proposal-lab'),
-  'workshop-canvas': meta('幻灯片', '温暖', 'workshop-canvas'),
-  'swiss-grid': meta('卡片', '编辑', 'swiss-grid'),
-  'bauhaus-composition': meta('卡片', '编辑', 'bauhaus-composition'),
-  'newsroom-feature': meta('长页', '编辑', 'newsroom-feature'),
-  'documentary-scroll': meta('长页', '编辑', 'documentary-scroll'),
-  'data-command-center': meta('仪表盘', '数据', 'data-screen'),
-  'data-journalism': meta('报告', '数据', 'data-journalism'),
-  'academic-paper': meta('文档', '编辑', 'academic-paper'),
-  'product-spec': meta('文档', '数据', 'product-spec'),
-}
+  vercel: meta("长页", "极简", "minimal-product"),
+  stripe: meta("长页", "科技", "fintech-product"),
+  linear: meta("长页", "科技", "product-tool"),
+  apple: meta("长页", "极简", "brand-story"),
+  spotify: meta("长页", "编辑", "media-entertainment"),
+  editorial: meta("长页", "编辑", "editorial-magazine"),
+  terminal: meta("长页", "代码", "developer-code"),
+  xiaohongshu: meta("卡片", "温暖", "social-card-custom"),
+  notion: meta("文档", "温暖", "knowledge-doc"),
+  "xhs-multipage": meta("卡片", "温暖", "social-card-multipage"),
+  "ppt-slide": meta("幻灯片", "极简", "presentation-basic", "basic"),
+  dashboard: meta("仪表盘", "数据", "business-dashboard"),
+  resume: meta("文档", "极简", "resume-profile"),
+  claude: meta("长页", "温暖", "ai-assistant"),
+  figma: meta("长页", "科技", "design-tool"),
+  airbnb: meta("长页", "温暖", "consumer-brand"),
+  supabase: meta("长页", "代码", "developer-code"),
+  raycast: meta("长页", "科技", "system-tool"),
+  mongodb: meta("长页", "科技", "enterprise-data"),
+  framer: meta("长页", "科技", "site-builder"),
+  github: meta("长页", "代码", "developer-code"),
+  openai: meta("长页", "极简", "frontier-ai"),
+  arc: meta("长页", "温暖", "system-experience"),
+  discord: meta("长页", "科技", "community-chat"),
+  tailwind: meta("长页", "极简", "web-components"),
+  report: meta("报告", "编辑", "annual-report"),
+  poster: meta("卡片", "编辑", "poster-design"),
+  "ai-console": meta("仪表盘", "科技", "ai-console"),
+  "blueprint-tech": meta("长页", "科技", "blueprint-tech"),
+  "keynote-cinematic": meta("幻灯片", "编辑", "keynote-cinematic"),
+  "consulting-deck": meta("幻灯片", "数据", "consulting-deck"),
+  "startup-pitch": meta("幻灯片", "温暖", "startup-pitch"),
+  "neon-tech-launch": meta("幻灯片", "科技", "launch-event"),
+  "growth-review": meta("幻灯片", "数据", "growth-review"),
+  "developer-conf": meta("幻灯片", "代码", "developer-code"),
+  "project-kickoff-rally": meta("幻灯片", "温暖", "project-kickoff"),
+  "roadmap-planning": meta("幻灯片", "数据", "roadmap-planning"),
+  "project-retro": meta("幻灯片", "数据", "project-retro"),
+  "annual-story-review": meta("幻灯片", "温暖", "annual-story"),
+  "proposal-lab": meta("幻灯片", "科技", "proposal-lab"),
+  "workshop-canvas": meta("幻灯片", "温暖", "workshop-canvas"),
+  "editorial-ink-deck": meta("幻灯片", "编辑", "editorial-ink-deck"),
+  "swiss-presentation-system": meta(
+    "幻灯片",
+    "极简",
+    "swiss-presentation-system",
+  ),
+  "swiss-grid": meta("卡片", "编辑", "swiss-grid"),
+  "bauhaus-composition": meta("卡片", "编辑", "bauhaus-composition"),
+  "newsroom-feature": meta("长页", "编辑", "newsroom-feature"),
+  "documentary-scroll": meta("长页", "编辑", "documentary-scroll"),
+  "data-command-center": meta("仪表盘", "数据", "data-screen"),
+  "data-journalism": meta("报告", "数据", "data-journalism"),
+  "academic-paper": meta("文档", "编辑", "academic-paper"),
+  "product-spec": meta("文档", "数据", "product-spec"),
+};
 
 const RAW_DESIGN_STYLES: RawDesignStyle[] = [
   {
-    id: 'vercel',
-    name: '极简黑白 · Vercel',
-    category: '科技产品/极简工程',
-    accent: '#000000',
-    description: '黑白精确主义，大留白，Geist 风格无衬线，锐利分割线',
+    id: "vercel",
+    name: "极简黑白 · Vercel",
+    category: "科技产品/极简工程",
+    accent: "#000000",
+    description: "黑白精确主义，大留白，Geist 风格无衬线，锐利分割线",
     style: `【视觉主题】黑白精确主义，极简工程师审美（参考 Vercel）
 【色彩系统】
  - 基础底色：纯白 #ffffff
@@ -119,14 +128,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片：纯白背景，6px 极小圆角，1px #eaeaea 边框，**严格禁止使用阴影**。
  - 按钮：纯黑背景，纯白文字，6px 圆角。
-【布局原则】大量留白，元素间距严格对齐，视觉呈现绝对的冷静与精确。`
+【布局原则】大量留白，元素间距严格对齐，视觉呈现绝对的冷静与精确。`,
   },
   {
-    id: 'stripe',
-    name: '紫色渐变 · Stripe',
-    category: '科技产品/金融科技',
-    accent: '#635bff',
-    description: '标志性紫色渐变，weight-300 轻盈优雅，斜切色块',
+    id: "stripe",
+    name: "紫色渐变 · Stripe",
+    category: "科技产品/金融科技",
+    accent: "#635bff",
+    description: "标志性紫色渐变，weight-300 轻盈优雅，斜切色块",
     style: `【视觉主题】科技与优雅融合，顶级金融科技质感（参考 Stripe）
 【色彩系统】
  - 基础底色：纯白 #ffffff 或极浅灰
@@ -138,14 +147,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片：白底，柔和大圆角（12-16px），伴有轻微且柔和的彩色投影（如 rgba(99, 91, 255, 0.1)）。
  - 按钮：紫色渐变或纯色填充，大圆角或完全胶囊形。
-【布局原则】常伴随斜切的背景色块或柔和的渐变光晕，具备极强的信任感与高级感。`
+【布局原则】常伴随斜切的背景色块或柔和的渐变光晕，具备极强的信任感与高级感。`,
   },
   {
-    id: 'linear',
-    name: '精密深色 · Linear',
-    category: '科技产品/精密工具',
-    accent: '#5e6ad2',
-    description: '超极简深色，精密网格，淡紫强调，克制动效',
+    id: "linear",
+    name: "精密深色 · Linear",
+    category: "科技产品/精密工具",
+    accent: "#5e6ad2",
+    description: "超极简深色，精密网格，淡紫强调，克制动效",
     style: `【视觉主题】精密深色界面，冷峻的工程师审美（参考 Linear）
 【色彩系统】
  - 基础底色：深色底（#08090a ~ #1c1c1f 渐变）
@@ -158,14 +167,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片：半透明深色面板，1px 微亮边框，细腻低调的暗投影。
  - 按钮：极简深灰底色或淡紫底色。
-【布局原则】精密网格，所有元素边缘对齐极致严谨，极度克制。`
+【布局原则】精密网格，所有元素边缘对齐极致严谨，极度克制。`,
   },
   {
-    id: 'apple',
-    name: '高级留白 · Apple',
-    category: '设计创意/品牌叙事',
-    accent: '#0071e3',
-    description: 'SF Pro 风格，超大留白，居中叙事，电影感大标题',
+    id: "apple",
+    name: "高级留白 · Apple",
+    category: "设计创意/品牌叙事",
+    accent: "#0071e3",
+    description: "SF Pro 风格，超大留白，居中叙事，电影感大标题",
     style: `【视觉主题】极简、高级、电影感叙事（参考 Apple 官网）
 【色彩系统】
  - 基础底色：纯净白底或极浅灰 #f5f5f7
@@ -177,14 +186,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片：圆润边角（18px+），白色背景，近乎无边界或柔和微投影。
  - 按钮：经典蓝色胶囊形（全圆角）。
-【布局原则】超大垂直留白（120px+），居中对齐为主，产品图极其突出。`
+【布局原则】超大垂直留白（120px+），居中对齐为主，产品图极其突出。`,
   },
   {
-    id: 'spotify',
-    name: '暗色霓虹 · Spotify',
-    category: '媒体内容/音乐娱乐',
-    accent: '#1db954',
-    description: '深黑底霓虹绿，超粗大标题，专辑封面式视觉',
+    id: "spotify",
+    name: "暗色霓虹 · Spotify",
+    category: "媒体内容/音乐娱乐",
+    accent: "#1db954",
+    description: "深黑底霓虹绿，超粗大标题，专辑封面式视觉",
     style: `【视觉主题】暗色活力、音乐与情绪驱动（参考 Spotify）
 【色彩系统】
  - 基础底色：近黑 #121212 与深灰渐变
@@ -196,14 +205,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片：深灰圆角面板，悬浮上浮互动，常配大图。
  - 按钮：鲜艳的绿色圆角或胶囊。
-【布局原则】卡片与图库排布紧凑，大面积暗色映衬彩色封面图，强调沉浸感。`
+【布局原则】卡片与图库排布紧凑，大面积暗色映衬彩色封面图，强调沉浸感。`,
   },
   {
-    id: 'editorial',
-    name: '杂志编辑 · WIRED',
-    category: '媒体内容/杂志编辑',
-    accent: '#1a1aff',
-    description: '报刊密度排版，自定义衬线大标题，墨蓝链接',
+    id: "editorial",
+    name: "杂志编辑 · WIRED",
+    category: "媒体内容/杂志编辑",
+    accent: "#1a1aff",
+    description: "报刊密度排版，自定义衬线大标题，墨蓝链接",
     style: `【视觉主题】科技杂志编辑风，印刷质感（参考 WIRED）
 【色彩系统】
  - 基础底色：纸白底 #fafafa
@@ -215,14 +224,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 装饰：利用粗细对比的实体横线（border-top/bottom）分隔小节。
  - 引用块：左侧竖线或极大引号标注。
-【布局原则】多栏排版，信息密度高，具备传统报刊的权威感。`
+【布局原则】多栏排版，信息密度高，具备传统报刊的权威感。`,
   },
   {
-    id: 'terminal',
-    name: '开发者代码 · Terminal',
-    category: '科技产品/开发极客',
-    accent: '#00ff9c',
-    description: '等宽字体、命令片段、API 示例和调试信息清晰排布',
+    id: "terminal",
+    name: "开发者代码 · Terminal",
+    category: "科技产品/开发极客",
+    accent: "#00ff9c",
+    description: "等宽字体、命令片段、API 示例和调试信息清晰排布",
     style: `【视觉主题】开发者代码工作台，清晰、克制、可信
 【色彩系统】
  - 基础底色：深灰 #0f1115 或冷白 #f8fafc，按内容密度选择。
@@ -234,14 +243,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 代码块：带标题、语言标签、行号或输出区，边框清晰，不使用发光装饰。
  - 信息块：API 请求、响应、环境变量、错误提示分别用稳定区块表达。
-【布局原则】适合 CLI 教程、SDK 说明、调试记录、技术方案附录；重点是可读和可复制。`
+【布局原则】适合 CLI 教程、SDK 说明、调试记录、技术方案附录；重点是可读和可复制。`,
   },
   {
-    id: 'xiaohongshu',
-    name: '社媒卡片 · 小红书',
-    category: '媒体内容/社交卡片',
-    accent: '#ff2e4d',
-    description: '竖屏卡片，柔和渐变，大圆角，亲切手账感',
+    id: "xiaohongshu",
+    name: "社媒卡片 · 小红书",
+    category: "媒体内容/社交卡片",
+    accent: "#ff2e4d",
+    description: "竖屏卡片，柔和渐变，大圆角，亲切手账感",
     style: `【视觉主题】亲切、可爱、手账感的种草卡片（参考 小红书）
 【色彩系统】
  - 基础底色：柔和的粉彩或奶油渐变（如浅黄到浅粉）
@@ -253,14 +262,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片：大圆角面板（20-24px），柔和宽泛的背景投影。
  - 标签：彩色背景小圆角 Tag，用于圈出重点。
-【布局原则】非常适合竖向浏览，分点排版，重点极其突出。`
+【布局原则】非常适合竖向浏览，分点排版，重点极其突出。`,
   },
   {
-    id: 'notion',
-    name: '暖色极简 · Notion',
-    category: '文档知识/知识文档',
-    accent: '#0f0f0f',
-    description: '暖白底，衬线标题，柔和表面，文档阅读优化',
+    id: "notion",
+    name: "暖色极简 · Notion",
+    category: "文档知识/知识文档",
+    accent: "#0f0f0f",
+    description: "暖白底，衬线标题，柔和表面，文档阅读优化",
     style: `【视觉主题】专注阅读与书写的暖色极简文档（参考 Notion）
 【色彩系统】
  - 基础底色：暖白 #ffffff 或 #f7f6f3
@@ -272,14 +281,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - Callout 卡片：带有一侧边框或浅底色，前缀常带一个大 Emoji。
  - 引用块：左侧细竖线。
-【布局原则】左对齐或居中定宽，无冗余装饰。`
+【布局原则】左对齐或居中定宽，无冗余装饰。`,
   },
   {
-    id: 'xhs-multipage',
-    name: '小红书多页图文',
-    category: '媒体内容/多页图文',
-    accent: '#ff2e4d',
-    description: '3:4 多页卡片：封面页 + N 张内容页',
+    id: "xhs-multipage",
+    name: "小红书多页图文",
+    category: "媒体内容/多页图文",
+    accent: "#ff2e4d",
+    description: "3:4 多页卡片：封面页 + N 张内容页",
     style: `【视觉主题】小红书划动图文，多页独立卡片
 【色彩系统】
  - 封面底色：强视觉渐变或大图叠加
@@ -292,14 +301,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 页面尺寸：宽高固定比例 3:4（例如内部强制 height:100vh 或者 1440x1080 设定，需保证撑满一屏）。
 【布局原则】
  - 封面大标题居中 + 底部标签；
- - 内容页顶部小标题，中间内容，底部页码指示器。`
+ - 内容页顶部小标题，中间内容，底部页码指示器。`,
   },
   {
-    id: 'ppt-slide',
-    name: '基础幻灯片',
-    category: '演示汇报/基础幻灯',
-    accent: '#2563eb',
-    description: '通用 16:9 横版幻灯片，适合作为空白起点',
+    id: "ppt-slide",
+    name: "基础幻灯片",
+    category: "演示汇报/基础幻灯",
+    accent: "#2563eb",
+    description: "通用 16:9 横版幻灯片，适合作为空白起点",
     style: `【视觉主题】专业商务幻灯片，演示大屏展示
 【色彩系统】
  - 基础底色：深蓝商务底色或纯白底
@@ -310,14 +319,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹。
  - 页面尺寸：固定比例 16:9 横板。
-【布局原则】单页信息极少，大面积留白。封面居中，内容页分左右栏或上下结构。`
+【布局原则】单页信息极少，大面积留白。封面居中，内容页分左右栏或上下结构。`,
   },
   {
-    id: 'dashboard',
-    name: '现代仪表盘',
-    category: '数据分析/仪表盘',
-    accent: '#3b82f6',
-    description: 'B端现代数据面板，Bento网格布局，清晰的信息层级与微交互',
+    id: "dashboard",
+    name: "现代仪表盘",
+    category: "数据分析/仪表盘",
+    accent: "#3b82f6",
+    description: "B端现代数据面板，Bento网格布局，清晰的信息层级与微交互",
     style: `【视觉主题】现代B端商业数据仪表盘（Data Dashboard）
 【色彩系统】
  - 基础底色：浅灰全局背景（如 #f8fafc）配以纯白数据卡片，营造呼吸感。
@@ -329,14 +338,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 卡片容器：利用 CSS Grid 或 Bento 网格系统，将图表与数据切割在带圆角（12px）和细腻阴影（shadow-sm/border）的白色卡片中。
  - 微型图表：用纯 CSS 或 HTML 元素绘制进度条、状态指示灯或极简的趋势柱状块，拒绝复杂的空白图表占位。
-【布局原则】"少即是多"（Less is more）。顶部展示核心数据卡片，下方展示详细图表或表格区域，整体高度对齐，减少用户的认知负荷。`
+【布局原则】"少即是多"（Less is more）。顶部展示核心数据卡片，下方展示详细图表或表格区域，整体高度对齐，减少用户的认知负荷。`,
   },
   {
-    id: 'resume',
-    name: '简历 / 个人主页',
-    category: '文档知识/个人简历',
-    accent: '#0891b2',
-    description: '单页简历，左右分栏，清晰层级，A4 打印友好',
+    id: "resume",
+    name: "简历 / 个人主页",
+    category: "文档知识/个人简历",
+    accent: "#0891b2",
+    description: "单页简历，左右分栏，清晰层级，A4 打印友好",
     style: `【视觉主题】专业清晰的 A4 打印级简历
 【色彩系统】
  - 基础底色：纯白 #ffffff
@@ -348,14 +357,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 容器：如果有多页请使用 \`<section class="page">\` 包裹，整体定宽 A4 比例。
  - 模块：时间轴节点（小圆点与左侧虚线）。
-【布局原则】典型的左右双栏结构，左窄右宽，高度紧凑，留白克制但绝不拥挤。`
+【布局原则】典型的左右双栏结构，左窄右宽，高度紧凑，留白克制但绝不拥挤。`,
   },
   {
-    id: 'claude',
-    name: '克制温和 · Claude',
-    category: '科技产品/AI 助手',
-    accent: '#d97757',
-    description: '暖白底，衬线体标题搭配无衬线正文，阅读体验极佳的温和科技感',
+    id: "claude",
+    name: "克制温和 · Claude",
+    category: "科技产品/AI 助手",
+    accent: "#d97757",
+    description: "暖白底，衬线体标题搭配无衬线正文，阅读体验极佳的温和科技感",
     style: `【视觉主题】克制、温和、富有书卷气的 AI 对话窗（参考 Claude）
 【色彩系统】
  - 基础底色：暖白 #fdfdfc 或 #faf9f8
@@ -365,14 +374,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 字体：标题优雅衬线体（Tiempos/宋体），正文无衬线。
 【组件特征】
  - 卡片：圆角适中（8-12px），淡淡的灰边框或阴影。
-【布局原则】无多余装饰，对话体阅读体验极佳。`
+【布局原则】无多余装饰，对话体阅读体验极佳。`,
   },
   {
-    id: 'figma',
-    name: '创意工具 · Figma',
-    category: '设计创意/设计工具',
-    accent: '#0d99ff',
-    description: '纯白底，纯黑字，鲜艳纯色点缀，粗边框与工具感面板',
+    id: "figma",
+    name: "创意工具 · Figma",
+    category: "设计创意/设计工具",
+    accent: "#0d99ff",
+    description: "纯白底，纯黑字，鲜艳纯色点缀，粗边框与工具感面板",
     style: `【视觉主题】设计工具面板，极其紧凑且充满创造力（参考 Figma）
 【色彩系统】
  - 基础底色：纯白 #ffffff 与工具面板灰 #f5f5f5
@@ -382,14 +391,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 字体：系统极简字体 Inter。字号整体偏小。
 【组件特征】
  - 面板：极细分割线，偶尔出现深色带有小尾巴的气泡提示（Tooltip）。
-【布局原则】UI 元素极度靠近，紧凑型网格。`
+【布局原则】UI 元素极度靠近，紧凑型网格。`,
   },
   {
-    id: 'airbnb',
-    name: '亲和旅行 · Airbnb',
-    category: '设计创意/消费品牌',
-    accent: '#ff385c',
-    description: '圆润大字重，柔和投影，标志性粉红，以图为主',
+    id: "airbnb",
+    name: "亲和旅行 · Airbnb",
+    category: "设计创意/消费品牌",
+    accent: "#ff385c",
+    description: "圆润大字重，柔和投影，标志性粉红，以图为主",
     style: `【视觉主题】温暖、友善的高质量消费界面（参考 Airbnb）
 【色彩系统】
  - 基础底色：纯净白
@@ -400,14 +409,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 标题使用极粗的字重（800），充满安全感和亲和力。
 【组件特征】
  - 卡片：无硬边框，极其宽泛弥散的柔和投影。
-【布局原则】注重超大图片的展示力。`
+【布局原则】注重超大图片的展示力。`,
   },
   {
-    id: 'supabase',
-    name: '开源极客 · Supabase',
-    category: '科技产品/开源数据',
-    accent: '#3ecf8e',
-    description: '深灰背景，亮绿强调，等宽字体点缀，暗黑开源风',
+    id: "supabase",
+    name: "开源极客 · Supabase",
+    category: "科技产品/开源数据",
+    accent: "#3ecf8e",
+    description: "深灰背景，亮绿强调，等宽字体点缀，暗黑开源风",
     style: `【视觉主题】暗色极客，现代开源数据库（参考 Supabase）
 【色彩系统】
  - 基础底色：极深灰/近黑 #1c1c1c
@@ -417,14 +426,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 字体：代码和数据大量穿插等宽字体。
 【组件特征】
  - 面板：1px 反光内描边，常带有微弱的绿色泛光。
-【布局原则】严谨的开发者文档式排版。`
+【布局原则】严谨的开发者文档式排版。`,
   },
   {
-    id: 'raycast',
-    name: '毛玻璃 · Raycast',
-    category: '科技产品/系统工具',
-    accent: '#ff6363',
-    description: 'macOS 原生感，深色毛玻璃，悬浮搜索框，极致动效',
+    id: "raycast",
+    name: "毛玻璃 · Raycast",
+    category: "科技产品/系统工具",
+    accent: "#ff6363",
+    description: "macOS 原生感，深色毛玻璃，悬浮搜索框，极致动效",
     style: `【视觉主题】极致丝滑的 macOS 悬浮窗口（参考 Raycast）
 【色彩系统】
  - 基础底色：深色毛玻璃（rgba(0,0,0,0.5) 配合 blur(20px)）
@@ -434,14 +443,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 带有内反光（rgba(255,255,255,0.1)）的精美卡片。
  - 深色小标签高亮快捷键。
-【布局原则】列表排布密集且克制。`
+【布局原则】列表排布密集且克制。`,
   },
   {
-    id: 'mongodb',
-    name: '企业数据 · MongoDB',
-    category: '科技产品/企业数据',
-    accent: '#00ed64',
-    description: '深蓝色/乳白底，几何粗体，标志性亮绿，企业信任感',
+    id: "mongodb",
+    name: "企业数据 · MongoDB",
+    category: "科技产品/企业数据",
+    accent: "#00ed64",
+    description: "深蓝色/乳白底，几何粗体，标志性亮绿，企业信任感",
     style: `【视觉主题】稳重、强大的企业数据平台（参考 MongoDB）
 【色彩系统】
  - 基础底色：午夜深蓝 #001e2b 或 乳白底
@@ -450,14 +459,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 字体：几何感极强的粗壮无衬线体。
 【组件特征】
  - 大块深色和浅色的截然对比，力量感强。
-【布局原则】大版面，块状分明。`
+【布局原则】大版面，块状分明。`,
   },
   {
-    id: 'framer',
-    name: '丝滑动效 · Framer',
-    category: '设计创意/建站动效',
-    accent: '#0055ff',
-    description: '高对比度，柔和发光，精美卡片悬浮，顶级建站审美',
+    id: "framer",
+    name: "丝滑动效 · Framer",
+    category: "设计创意/建站动效",
+    accent: "#0055ff",
+    description: "高对比度，柔和发光，精美卡片悬浮，顶级建站审美",
     style: `【视觉主题】顶级现代建站的视觉冲击力（参考 Framer 官网）
 【色彩系统】
  - 基础底色：纯净深黑或纯白。
@@ -466,14 +475,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 字体：极具设计感的大字号无衬线。
 【组件特征】
  - 大圆角（24px+），卡片叠加或交织。
-【布局原则】自由但极度考究的留白比例。`
+【布局原则】自由但极度考究的留白比例。`,
   },
   {
-    id: 'github',
-    name: '开源协作 · GitHub',
-    category: '科技产品/开源协作',
-    accent: '#2f81f7',
-    description: '经典浅色/深灰，冷色边框，蓝色链接，代码原生感',
+    id: "github",
+    name: "开源协作 · GitHub",
+    category: "科技产品/开源协作",
+    accent: "#2f81f7",
+    description: "经典浅色/深灰，冷色边框，蓝色链接，代码原生感",
     style: `【视觉主题】冷色、逻辑性、代码原生的开源环境（参考 GitHub）
 【色彩系统】
  - 基础底色：纯白配浅灰区块，或深黑 #0d1117。
@@ -483,14 +492,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 系统级无衬线体，代码段落紧密镶嵌。
 【组件特征】
  - 大量浅色精细边框切分区域。按钮多为冷灰白底。
-【布局原则】极其规整的盒子模型。`
+【布局原则】极其规整的盒子模型。`,
   },
   {
-    id: 'openai',
-    name: '未来黑白 · OpenAI',
-    category: '科技产品/前沿 AI',
-    accent: '#10a37f',
-    description: '纯黑白对比，优雅细体或宋体，微弱绿色点缀，未来极简',
+    id: "openai",
+    name: "未来黑白 · OpenAI",
+    category: "科技产品/前沿 AI",
+    accent: "#10a37f",
+    description: "纯黑白对比，优雅细体或宋体，微弱绿色点缀，未来极简",
     style: `【视觉主题】前沿科技、充满哲学与神秘感的极致极简（参考 OpenAI 官网）
 【色彩系统】
  - 基础底色：极致纯黑 #000000 或 纯白。
@@ -499,14 +508,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 优雅的中文字体（黑体或具有书籍感的衬线）。
 【组件特征】
  - 没有任何多余边框或阴影。
-【布局原则】大面积空旷带来的未来压迫感与高级感。`
+【布局原则】大面积空旷带来的未来压迫感与高级感。`,
   },
   {
-    id: 'arc',
-    name: '多彩卡片 · Arc Browser',
-    category: '设计创意/系统体验',
-    accent: '#ff8a8a',
-    description: '侧边栏布局，柔和多彩粉彩，极大圆角，拟物玻璃',
+    id: "arc",
+    name: "多彩卡片 · Arc Browser",
+    category: "设计创意/系统体验",
+    accent: "#ff8a8a",
+    description: "侧边栏布局，柔和多彩粉彩，极大圆角，拟物玻璃",
     style: `【视觉主题】多彩、透明、灵动现代的新型操作系统（参考 Arc 浏览器）
 【色彩系统】
  - 基础底色：低饱和度粉彩（淡紫、淡蓝、淡黄）与半透明。
@@ -514,14 +523,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 字体较小且精致。
 【组件特征】
  - 极其夸张的大圆角或完全胶囊状。带有玻璃质感与反光。
-【布局原则】卡片拼接排列（侧边与中央区块）。`
+【布局原则】卡片拼接排列（侧边与中央区块）。`,
   },
   {
-    id: 'discord',
-    name: '游戏连麦 · Discord',
-    category: '媒体内容/社区聊天',
-    accent: '#5865F2',
-    description: '深灰紫底色，标志性 Blurple，聊天对话流，年轻游戏感',
+    id: "discord",
+    name: "游戏连麦 · Discord",
+    category: "媒体内容/社区聊天",
+    accent: "#5865F2",
+    description: "深灰紫底色，标志性 Blurple，聊天对话流，年轻游戏感",
     style: `【视觉主题】年轻化、社群驱动的深色游戏平台（参考 Discord）
 【色彩系统】
  - 基础底色：深灰偏紫 #36393f / #2f3136
@@ -530,14 +539,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 紧凑的对话流排版模式。
 【组件特征】
  - 圆形头像搭配状态小圆点，悬浮带有暗沉背景高亮。
-【布局原则】信息高密度但不杂乱。`
+【布局原则】信息高密度但不杂乱。`,
   },
   {
-    id: 'tailwind',
-    name: '现代实用 · Tailwind CSS',
-    category: '科技产品/开发框架',
-    accent: '#38bdf8',
-    description: '系统化字体，柔和阴影，蓝青主色，标准实用主义',
+    id: "tailwind",
+    name: "现代实用 · Tailwind CSS",
+    category: "科技产品/开发框架",
+    accent: "#38bdf8",
+    description: "系统化字体，柔和阴影，蓝青主色，标准实用主义",
     style: `【视觉主题】完美的实用主义现代网页标杆（参考 Tailwind UI）
 【色彩系统】
  - 基础底色：白 #ffffff 配 浅灰 #f9fafb。
@@ -547,14 +556,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
  - 规整平衡的字体缩放。
 【组件特征】
  - 标志性的精美弥散阴影层级（shadow-md/xl）。
-【布局原则】标准、通用、无可挑剔的商业组件范式。`
+【布局原则】标准、通用、无可挑剔的商业组件范式。`,
   },
   {
-    id: 'report',
-    name: '年度报告',
-    category: '文档知识/年度报告',
-    accent: '#2f4f4f',
-    description: '现代数字报告，适合数据叙事，暖白底自然色调，混搭字体',
+    id: "report",
+    name: "年度报告",
+    category: "文档知识/年度报告",
+    accent: "#2f4f4f",
+    description: "现代数字报告，适合数据叙事，暖白底自然色调，混搭字体",
     style: `【视觉主题】故事驱动的现代数字年度报告（Annual Report）
 【色彩系统】
  - 基础底色：暖调灰白/纸张色（如 #faf9f6 或 #f5f5f0），避免刺眼的纯白。
@@ -566,14 +575,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 核心数据：用醒目的大字号与强调色展示核心数字，取代密集的传统表格。
  - **强制分页容器**：如果是一份多页报告，每一页必须使用 \`<section class="page">\` 独立包裹，尺寸定宽（如 A4 或横屏幻灯片比例）。
-【布局原则】单页突出一个核心洞察，排版类似高端商业杂志，内容结构化且叙事清晰。`
+【布局原则】单页突出一个核心洞察，排版类似高端商业杂志，内容结构化且叙事清晰。`,
   },
   {
-    id: 'poster',
-    name: '平面海报',
-    category: '设计创意/平面海报',
-    accent: '#ff3366',
-    description: '硬核平面海报美学，Bento网格，超大标题展示，视觉冲击力极强',
+    id: "poster",
+    name: "平面海报",
+    category: "设计创意/平面海报",
+    accent: "#ff3366",
+    description: "硬核平面海报美学，Bento网格，超大标题展示，视觉冲击力极强",
     style: `【视觉主题】极具表现力、打破常规的网页海报（Modern Poster）
 【色彩系统】
  - 基础底色：极高对比度的背景（纯黑底色，或极鲜艳纯色背景）。
@@ -584,14 +593,15 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 容器尺寸：如果是多张海报，每一张必须使用 \`<section class="page">\` 包装，并推荐赋予其明确的版面比例（如 \`.page{width:100%; aspect-ratio:3/4; overflow:hidden;}\`）。
  - 装饰元素：常用几何色块拼贴，以及利用粗细不一的纯色线条（border）切割版面空间。
-【布局原则】完全不同于普通网页，将屏幕视作一张实体画布，排版张力优先于常规阅读流。`
+【布局原则】完全不同于普通网页，将屏幕视作一张实体画布，排版张力优先于常规阅读流。`,
   },
   {
-    id: 'ai-console',
-    name: '智能控制台',
-    category: '科技产品/智能控制台',
-    accent: '#7c3aed',
-    description: 'AI 产品控制台，深浅混合界面，模型状态、任务流和提示词面板清晰分区',
+    id: "ai-console",
+    name: "智能控制台",
+    category: "科技产品/智能控制台",
+    accent: "#7c3aed",
+    description:
+      "AI 产品控制台，深浅混合界面，模型状态、任务流和提示词面板清晰分区",
     style: `【视觉主题】面向 AI 产品的专业控制台，兼具实验室感与可操作性
 【色彩系统】
  - 基础底色：冷白 #f8fafc 或深灰 #0f172a；不要做单纯黑底。
@@ -603,14 +613,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 面板：左侧导航 / 中央工作流 / 右侧参数检查器三栏结构，边框细、圆角 10-12px。
  - 状态：使用小型状态点、进度条、token 计数、运行日志块，不要空白图表。
-【布局原则】适合 AI 工作台、模型评测、自动化流程页面；强调“可控、可审计、可复用”。`
+【布局原则】适合 AI 工作台、模型评测、自动化流程页面；强调“可控、可审计、可复用”。`,
   },
   {
-    id: 'blueprint-tech',
-    name: '蓝图科技',
-    category: '科技产品/蓝图架构',
-    accent: '#2563eb',
-    description: '工程蓝图风，细网格、结构线、系统架构和模块说明特别清晰',
+    id: "blueprint-tech",
+    name: "蓝图科技",
+    category: "科技产品/蓝图架构",
+    accent: "#2563eb",
+    description: "工程蓝图风，细网格、结构线、系统架构和模块说明特别清晰",
     style: `【视觉主题】工程蓝图与系统架构说明，理性、清晰、技术可信
 【色彩系统】
  - 基础底色：深海军蓝 #08111f 或冷白 #f8fbff。
@@ -622,14 +632,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 模块：架构卡、连接线、编号节点、接口表、流程箭头都用 CSS 边框和网格实现。
  - 图示：可用纯 HTML/CSS 绘制流程图和系统拓扑，禁止依赖图片占位。
-【布局原则】适合技术方案、产品架构、API 能力介绍；视觉像一张可交付的工程说明图。`
+【布局原则】适合技术方案、产品架构、API 能力介绍；视觉像一张可交付的工程说明图。`,
   },
   {
-    id: 'keynote-cinematic',
-    name: '电影发布会',
-    category: '演示汇报/发布会',
-    accent: '#f59e0b',
-    description: 'Keynote 式大屏演示，深色舞台、超大标题、强节奏单页信息',
+    id: "keynote-cinematic",
+    name: "电影发布会",
+    category: "演示汇报/发布会",
+    accent: "#f59e0b",
+    description: "Keynote 式大屏演示，深色舞台、超大标题、强节奏单页信息",
     style: `【视觉主题】电影级产品发布会幻灯片，适合大屏演讲与发布稿
 【色彩系统】
  - 基础底色：深黑蓝 #05070c 或暗灰渐变。
@@ -641,14 +651,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 视觉：允许大幅背景图、产品剪影、光束式渐变，但文字必须始终清晰。
-【布局原则】封面强冲击，内容页大留白，结尾页突出一句总结或行动口号。`
+【布局原则】封面强冲击，内容页大留白，结尾页突出一句总结或行动口号。`,
   },
   {
-    id: 'consulting-deck',
-    name: '咨询汇报',
-    category: '演示汇报/咨询顾问',
-    accent: '#1d4ed8',
-    description: '咨询公司式汇报页，结论先行、矩阵图、分栏和数据证据清楚',
+    id: "consulting-deck",
+    name: "咨询汇报",
+    category: "演示汇报/咨询顾问",
+    accent: "#1d4ed8",
+    description: "咨询公司式汇报页，结论先行、矩阵图、分栏和数据证据清楚",
     style: `【视觉主题】咨询公司董事会汇报，结论先行、结构严谨、证据可追踪
 【色彩系统】
  - 基础底色：纯白 #ffffff，辅助背景 #f8fafc。
@@ -660,14 +670,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 图表：2x2 矩阵、瀑布图、关键数字、路线图用 HTML/CSS 绘制，表格要有清晰表头。
-【布局原则】适合战略汇报、经营复盘、项目方案；不要做花哨动画，重点是专业可信。`
+【布局原则】适合战略汇报、经营复盘、项目方案；不要做花哨动画，重点是专业可信。`,
   },
   {
-    id: 'startup-pitch',
-    name: '创业路演',
-    category: '演示汇报/年轻路演',
-    accent: '#ff4d8d',
-    description: '年轻清爽的 Pitch Deck，故事线、市场机会和产品证据突出',
+    id: "startup-pitch",
+    name: "创业路演",
+    category: "演示汇报/年轻路演",
+    accent: "#ff4d8d",
+    description: "年轻清爽的 Pitch Deck，故事线、市场机会和产品证据突出",
     style: `【视觉主题】年轻创业团队路演，清爽、有冲劲、但仍然可信
 【色彩系统】
  - 基础底色：亮白 #ffffff 或深紫灰 #171329。
@@ -679,14 +689,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 可使用大号数字、机会卡片、增长曲线、产品 mockup 框、投资亮点标签。
-【布局原则】适合融资 BP、Demo Day、创新项目汇报；视觉年轻，但信息结构必须稳。`
+【布局原则】适合融资 BP、Demo Day、创新项目汇报；视觉年轻，但信息结构必须稳。`,
   },
   {
-    id: 'neon-tech-launch',
-    name: '科技产品发布',
-    category: '演示汇报/科技发布',
-    accent: '#00e5ff',
-    description: '高科技发布会风，深色舞台、产品能力、规格参数和路线图清晰',
+    id: "neon-tech-launch",
+    name: "科技产品发布",
+    category: "演示汇报/科技发布",
+    accent: "#00e5ff",
+    description: "高科技发布会风，深色舞台、产品能力、规格参数和路线图清晰",
     style: `【视觉主题】高科技产品发布会，未来感来自结构、节奏和产品中心
 【色彩系统】
  - 基础底色：深黑蓝 #050816 或 #08111f。
@@ -698,14 +708,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：能力芯片、规格矩阵、产品框线、版本路线图可用 HTML/CSS 绘制。
-【布局原则】适合 AI、新硬件、SaaS 新功能发布；发布感来自清楚的节奏，不靠随机装饰。`
+【布局原则】适合 AI、新硬件、SaaS 新功能发布；发布感来自清楚的节奏，不靠随机装饰。`,
   },
   {
-    id: 'growth-review',
-    name: '增长战报',
-    category: '演示汇报/增长复盘',
-    accent: '#22c55e',
-    description: '活跃的数据复盘演示，增长指标、实验结果、行动清单一页讲透',
+    id: "growth-review",
+    name: "增长战报",
+    category: "演示汇报/增长复盘",
+    accent: "#22c55e",
+    description: "活跃的数据复盘演示，增长指标、实验结果、行动清单一页讲透",
     style: `【视觉主题】增长团队复盘战报，积极、清爽、行动导向
 【色彩系统】
  - 基础底色：浅色 #f8fafc 或纯白 #ffffff。
@@ -717,14 +727,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：KPI 卡、实验 A/B 对照、漏斗、行动看板、下周计划列表用 CSS 实现。
-【布局原则】适合增长复盘、运营周报、营销战报；年轻活跃但必须数据清楚、结论明确。`
+【布局原则】适合增长复盘、运营周报、营销战报；年轻活跃但必须数据清楚、结论明确。`,
   },
   {
-    id: 'developer-conf',
-    name: '开发者大会',
-    category: '演示汇报/技术大会',
-    accent: '#38bdf8',
-    description: '开发者大会技术分享，深色代码感、架构图、API 示例和路线图并重',
+    id: "developer-conf",
+    name: "开发者大会",
+    category: "演示汇报/技术大会",
+    accent: "#38bdf8",
+    description: "开发者大会技术分享，深色代码感、架构图、API 示例和路线图并重",
     style: `【视觉主题】开发者大会技术分享，专业、清晰、带舞台科技感
 【色彩系统】
  - 基础底色：深色 IDE 背景 #0b1020，辅助面板 #111827。
@@ -736,14 +746,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：终端窗口、代码片段、架构节点、发布路线图、API 请求/响应卡片。
-【布局原则】适合技术大会、SDK 发布、工程方案分享；不要把代码塞满整页，观众要能在远处看懂。`
+【布局原则】适合技术大会、SDK 发布、工程方案分享；不要把代码塞满整页，观众要能在远处看懂。`,
   },
   {
-    id: 'project-kickoff-rally',
-    name: '项目启动动员',
-    category: '演示汇报/项目动员',
-    accent: '#f97316',
-    description: '启动会动员风，目标、角色、节奏、里程碑和团队士气都要有画面感',
+    id: "project-kickoff-rally",
+    name: "项目启动动员",
+    category: "演示汇报/项目动员",
+    accent: "#f97316",
+    description: "启动会动员风，目标、角色、节奏、里程碑和团队士气都要有画面感",
     style: `【视觉主题】项目启动会与团队动员，热烈、有方向感、带行动召集感
 【色彩系统】
  - 基础底色：暖白 #fff7ed 或深色 #1c1917，避免传统公文蓝。
@@ -755,14 +765,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：目标旗帜、角色卡、里程碑跑道、启动清单、风险护栏、团队承诺墙。
-【布局原则】适合 Kickoff、专项行动、攻坚项目启动；氛围要鼓舞人，但不要变成鸡血海报。`
+【布局原则】适合 Kickoff、专项行动、攻坚项目启动；氛围要鼓舞人，但不要变成鸡血海报。`,
   },
   {
-    id: 'roadmap-planning',
-    name: '项目路线图',
-    category: '演示汇报/项目规划',
-    accent: '#6366f1',
-    description: '规划路线图风，阶段目标、依赖关系、优先级和资源安排清晰',
+    id: "roadmap-planning",
+    name: "项目路线图",
+    category: "演示汇报/项目规划",
+    accent: "#6366f1",
+    description: "规划路线图风，阶段目标、依赖关系、优先级和资源安排清晰",
     style: `【视觉主题】项目规划与路线图，清楚、有节奏、能让团队对齐预期
 【色彩系统】
  - 基础底色：冷白 #f8fafc 或淡靛蓝 #eef2ff。
@@ -774,14 +784,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：时间轴、泳道图、优先级矩阵、资源看板、依赖箭头、关键决策点。
-【布局原则】适合项目计划、产品路线图、OKR 拆解；风格轻快但必须可执行。`
+【布局原则】适合项目计划、产品路线图、OKR 拆解；风格轻快但必须可执行。`,
   },
   {
-    id: 'project-retro',
-    name: '项目总结复盘',
-    category: '演示汇报/项目总结',
-    accent: '#14b8a6',
-    description: '项目复盘风，结果、经验、问题、改进动作一屏说清，避免流水账',
+    id: "project-retro",
+    name: "项目总结复盘",
+    category: "演示汇报/项目总结",
+    accent: "#14b8a6",
+    description: "项目复盘风，结果、经验、问题、改进动作一屏说清，避免流水账",
     style: `【视觉主题】项目总结与复盘，坦诚、清晰、重视经验沉淀
 【色彩系统】
  - 基础底色：白 #ffffff 或浅青灰 #f0fdfa。
@@ -793,14 +803,15 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：结果仪表、Before/After 对比、经验卡、问题清单、改进行动表。
-【布局原则】适合项目收口、阶段验收、复盘分享；要有真实感，不要只报喜。`
+【布局原则】适合项目收口、阶段验收、复盘分享；要有真实感，不要只报喜。`,
   },
   {
-    id: 'annual-story-review',
-    name: '年终故事总结',
-    category: '演示汇报/年终总结',
-    accent: '#a855f7',
-    description: '年终总结叙事风，年度主题、关键战役、数据成果和团队瞬间更有温度',
+    id: "annual-story-review",
+    name: "年终故事总结",
+    category: "演示汇报/年终总结",
+    accent: "#a855f7",
+    description:
+      "年终总结叙事风，年度主题、关键战役、数据成果和团队瞬间更有温度",
     style: `【视觉主题】年终总结与年度回顾，既有成绩单，也有故事和温度
 【色彩系统】
  - 基础底色：深紫黑 #171024、暖白 #fffaf5 或柔和渐变。
@@ -812,14 +823,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：年度时间胶片、荣誉墙、关键数字、团队语录、里程碑地图、展望卡片。
-【布局原则】适合部门年终、项目年度总结、团队述职；不要像财务报表一样僵硬，要有叙事节奏。`
+【布局原则】适合部门年终、项目年度总结、团队述职；不要像财务报表一样僵硬，要有叙事节奏。`,
   },
   {
-    id: 'proposal-lab',
-    name: '方案提案',
-    category: '演示汇报/方案提案',
-    accent: '#0ea5e9',
-    description: '提案实验室风，问题洞察、方案架构、价值证明和落地路径有说服力',
+    id: "proposal-lab",
+    name: "方案提案",
+    category: "演示汇报/方案提案",
+    accent: "#0ea5e9",
+    description: "提案实验室风，问题洞察、方案架构、价值证明和落地路径有说服力",
     style: `【视觉主题】方案提案与创意提案，像一间清爽的策略实验室
 【色彩系统】
  - 基础底色：白 #ffffff、浅蓝灰 #f1f5f9，允许局部淡色渐变。
@@ -831,14 +842,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：洞察卡、方案架构图、价值阶梯、投入产出表、实施路线图、决策页。
-【布局原则】适合客户提案、内部方案评审、创新方案推荐；要有设计感，但逻辑必须能说服决策者。`
+【布局原则】适合客户提案、内部方案评审、创新方案推荐；要有设计感，但逻辑必须能说服决策者。`,
   },
   {
-    id: 'workshop-canvas',
-    name: '共创工作坊',
-    category: '演示汇报/共创工作坊',
-    accent: '#eab308',
-    description: '工作坊引导风，议程、分组任务、讨论模板和产出看板轻松但有秩序',
+    id: "workshop-canvas",
+    name: "共创工作坊",
+    category: "演示汇报/共创工作坊",
+    accent: "#eab308",
+    description: "工作坊引导风，议程、分组任务、讨论模板和产出看板轻松但有秩序",
     style: `【视觉主题】团队共创工作坊，轻松、开放、适合讨论和协作
 【色彩系统】
  - 基础底色：柔和米白 #fffbeb 或浅灰 #f8fafc。
@@ -850,14 +861,59 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 组件：分组任务卡、计时器、讨论看板、投票点、问题引导卡、成果模板。
-【布局原则】适合工作坊、头脑风暴、需求共创、复盘会；轻松但必须整齐可执行。`
+【布局原则】适合工作坊、头脑风暴、需求共创、复盘会；轻松但必须整齐可执行。`,
   },
   {
-    id: 'swiss-grid',
-    name: '瑞士网格',
-    category: '设计创意/网格排版',
-    accent: '#e11d48',
-    description: 'Swiss Style，非对称网格、强字号对比、红黑白秩序感',
+    id: "editorial-ink-deck",
+    name: "电子杂志",
+    category: "演示汇报/杂志演讲",
+    accent: "#0a1f3d",
+    description:
+      "电子杂志式网页 PPT，衬线大标题、纸感底色、叙事节奏和图片证据并重",
+    style: `【视觉主题】电子杂志 × 电子墨水，像一份可演示的深度杂志专题
+【色彩系统】
+ - 基础底色：暖纸白 #f1efea、瓷白 #f1f3f5 或沙色 #f0e6d2，整份作品只选一套。
+ - 文本颜色：墨黑、深靛蓝或炭灰，避免纯彩色正文。
+ - 强调色：只用于页眉、编号、关键词和数据标记，不做大面积装饰。
+【排版规则】
+ - 字体：大标题使用高质感衬线体，正文使用清晰无衬线体，元数据和编号使用等宽字体。
+ - 主题节奏：先规划每页的 hero / light / dark 节奏，每 3-4 页插入封面、章节幕封、大引用或问题页。
+ - 单页限制：每页只承载一个叙事动作，长内容拆成“钩子 -> 背景 -> 证据 -> 转折 -> 收束”。
+【组件特征】
+ - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
+ - 页面组件：杂志页眉、衬线大标题、导语、数据大字报、图文分栏、图片网格、引用页和收束页。
+ - 图片：图片是第一公民，使用 16:10、4:3、3:2、1:1 或 16:9 等标准比例；优先只裁底部，保留顶部和左右关键信息。
+【布局原则】适合观点分享、行业观察、人文叙事、产品故事和私享会演讲；克制优于炫技，结构优于装饰。`,
+  },
+  {
+    id: "swiss-presentation-system",
+    name: "瑞士国际主义",
+    category: "演示汇报/瑞士国际主义",
+    accent: "#002FA7",
+    description:
+      "瑞士国际主义网页 PPT，12 栏网格、单一锚点色、直角纯色和超强字号对比",
+    style: `【视觉主题】瑞士国际主义系统，信息驱动、冷静、强秩序
+【色彩系统】
+ - 基础底色：极浅暖白 #fafaf8，辅助灰阶 #f0f0ee / #d4d4d2 / #737373。
+ - 文本颜色：近黑 #0a0a0a，高对比优先。
+ - 单一锚点色：整份作品只选一个 accent，如克莱因蓝 #002FA7、柠檬黄 #FFD500、柠檬绿 #C5E803 或安全橙 #FF6B35；禁止混用多个高亮色。
+【排版规则】
+ - 字体：全程无衬线，优先 Inter / Helvetica / Noto Sans SC；代码和标签可用等宽字体。
+ - 字号阶梯：越大的字越轻，主标题和 KPI 使用 200-300 字重，小标签和图表标注使用 500-600 字重。
+ - 中文标题必须降档处理，避免 2-3 行大标题挤掉图表和正文。
+【组件特征】
+ - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
+ - 版式：优先使用登记过的 12 栏结构，如封面、statement、KPI tower、横向时间线、duo compare、矩阵、系统图、规格表和 image hero。
+ - 几何：直角、纯色块、1px 发丝线、点阵或网格背景；禁止渐变、阴影、圆角、玻璃拟态和随意图标堆叠。
+ - 图片：主图优先 21:9，多图统一 21:9 或 16:10；同组图片比例、高度、边距和标题样式必须一致。
+【布局原则】适合数据汇报、产品方法论、工程分享、年度总结和技术发布；视觉冲击来自网格、留白、字号对比和单一锚点色，而不是装饰。`,
+  },
+  {
+    id: "swiss-grid",
+    name: "瑞士网格",
+    category: "设计创意/网格排版",
+    accent: "#e11d48",
+    description: "Swiss Style，非对称网格、强字号对比、红黑白秩序感",
     style: `【视觉主题】瑞士国际主义平面设计，冷静、秩序、强网格
 【色彩系统】
  - 基础底色：纯白 #ffffff 或极浅灰 #f5f5f5。
@@ -869,14 +925,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 装饰：粗细对比的线条、编号、坐标、栏目标签；禁止柔和阴影和卡通插画。
  - 图片：如使用图片，必须矩形裁切并与网格线对齐。
-【布局原则】适合海报、展览介绍、品牌规范、课程封面；信息像海报一样有视觉张力。`
+【布局原则】适合海报、展览介绍、品牌规范、课程封面；信息像海报一样有视觉张力。`,
   },
   {
-    id: 'bauhaus-composition',
-    name: '包豪斯构成',
-    category: '设计创意/几何构成',
-    accent: '#facc15',
-    description: '包豪斯几何构成，红黄蓝黑基础形，适合创意海报和展览页',
+    id: "bauhaus-composition",
+    name: "包豪斯构成",
+    category: "设计创意/几何构成",
+    accent: "#facc15",
+    description: "包豪斯几何构成，红黄蓝黑基础形，适合创意海报和展览页",
     style: `【视觉主题】包豪斯平面构成，几何、理性、色块鲜明
 【色彩系统】
  - 基础底色：米白 #f5f1e8 或纯白。
@@ -888,14 +944,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 装饰：圆形、半圆、矩形、粗线条和网格块必须服务布局，不要随机漂浮。
  - 容器：海报或多页卡片必须使用 \`<section class="page">\` 包裹并固定比例。
-【布局原则】适合艺术展、设计课程、品牌海报；视觉张力优先，但正文仍要可读。`
+【布局原则】适合艺术展、设计课程、品牌海报；视觉张力优先，但正文仍要可读。`,
   },
   {
-    id: 'newsroom-feature',
-    name: '新闻专题',
-    category: '媒体内容/新闻专题',
-    accent: '#b91c1c',
-    description: '严肃新闻专题页，强标题、导语、事实框、时间线和引用证据',
+    id: "newsroom-feature",
+    name: "新闻专题",
+    category: "媒体内容/新闻专题",
+    accent: "#b91c1c",
+    description: "严肃新闻专题页，强标题、导语、事实框、时间线和引用证据",
     style: `【视觉主题】严肃新闻与深度专题报道，克制、可信、有现场感
 【色彩系统】
  - 基础底色：新闻纸白 #fbfaf7 或纯白。
@@ -907,14 +963,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 信息块：事实框、关键数字、时间线、人物引用、资料来源列表。
  - 图片：新闻图必须带图注，图注字号小且靠近图片。
-【布局原则】适合深度文章、事件复盘、行业报道；不要营销化，不要过度装饰。`
+【布局原则】适合深度文章、事件复盘、行业报道；不要营销化，不要过度装饰。`,
   },
   {
-    id: 'documentary-scroll',
-    name: '纪录片叙事',
-    category: '媒体内容/影像叙事',
-    accent: '#f97316',
-    description: '纪录片式滚动叙事，暗色剧照感、大段留白、章节镜头语言',
+    id: "documentary-scroll",
+    name: "纪录片叙事",
+    category: "媒体内容/影像叙事",
+    accent: "#f97316",
+    description: "纪录片式滚动叙事，暗色剧照感、大段留白、章节镜头语言",
     style: `【视觉主题】纪录片式长页叙事，沉浸、克制、带镜头感
 【色彩系统】
  - 基础底色：炭黑 #0f0f0f 或暗棕黑 #18130f。
@@ -926,14 +982,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 媒体：大图或渐变背景可以 full-bleed，但必须保留文字安全区。
  - 卡片：少用普通卡片，多用字幕条、章节编号、片段引用、时间戳。
-【布局原则】适合品牌故事、人物专题、影像项目介绍；强调情绪和叙事推进。`
+【布局原则】适合品牌故事、人物专题、影像项目介绍；强调情绪和叙事推进。`,
   },
   {
-    id: 'data-command-center',
-    name: '数据指挥舱',
-    category: '数据分析/实时监控',
-    accent: '#06b6d4',
-    description: '深色实时数据大屏，指标、地图感网格、告警和趋势模块清晰',
+    id: "data-command-center",
+    name: "数据指挥舱",
+    category: "数据分析/实时监控",
+    accent: "#06b6d4",
+    description: "深色实时数据大屏，指标、地图感网格、告警和趋势模块清晰",
     style: `【视觉主题】实时数据指挥舱，冷静、精密、态势感强
 【色彩系统】
  - 基础底色：深蓝黑 #06111f，面板 #0f1b2d。
@@ -945,14 +1001,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 图表：用 CSS 绘制柱状条、折线近似、环形进度、状态灯和告警列表。
  - 面板：细描边、弱发光、网格背景；禁止复杂空白图表占位。
-【布局原则】适合运营监控、设备状态、业务大屏；所有数据模块必须有标题、单位和状态含义。`
+【布局原则】适合运营监控、设备状态、业务大屏；所有数据模块必须有标题、单位和状态含义。`,
   },
   {
-    id: 'data-journalism',
-    name: '数据新闻',
-    category: '数据分析/数据叙事',
-    accent: '#0f766e',
-    description: '数据新闻风，图表与解释并重，适合研究结论和公众传播',
+    id: "data-journalism",
+    name: "数据新闻",
+    category: "数据分析/数据叙事",
+    accent: "#0f766e",
+    description: "数据新闻风，图表与解释并重，适合研究结论和公众传播",
     style: `【视觉主题】数据新闻与解释型可视化，理性但亲近读者
 【色彩系统】
  - 基础底色：柔和白 #fbfbf8，图表底色 #f3f4f0。
@@ -964,14 +1020,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 图表：条形图、排名表、对比卡、注释标线用 HTML/CSS 实现。
  - 来源：每个关键数据区域必须预留“数据来源/口径说明”。
-【布局原则】适合调研报告、行业数据解读、年度盘点；用故事解释数据，而不是堆仪表盘。`
+【布局原则】适合调研报告、行业数据解读、年度盘点；用故事解释数据，而不是堆仪表盘。`,
   },
   {
-    id: 'academic-paper',
-    name: '学术论文',
-    category: '文档知识/学术论文',
-    accent: '#374151',
-    description: '论文式阅读排版，摘要、章节、脚注、图表题注和参考文献清晰',
+    id: "academic-paper",
+    name: "学术论文",
+    category: "文档知识/学术论文",
+    accent: "#374151",
+    description: "论文式阅读排版，摘要、章节、脚注、图表题注和参考文献清晰",
     style: `【视觉主题】学术论文与研究手稿，严谨、安静、长文友好
 【色彩系统】
  - 基础底色：纯白 #ffffff。
@@ -983,14 +1039,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 图表：题注必须靠近图表；表格使用细线和清晰表头。
  - 注释：脚注、引用编号、参考文献列表要整齐，不要做装饰卡片。
-【布局原则】适合研究摘要、论文预印本、学术报告；优先阅读和打印，不追求强视觉冲击。`
+【布局原则】适合研究摘要、论文预印本、学术报告；优先阅读和打印，不追求强视觉冲击。`,
   },
   {
-    id: 'product-spec',
-    name: '产品规格书',
-    category: '文档知识/产品文档',
-    accent: '#2563eb',
-    description: 'PRD/规格书风格，目录、需求表、状态标签、流程和验收标准完整',
+    id: "product-spec",
+    name: "产品规格书",
+    category: "文档知识/产品文档",
+    accent: "#2563eb",
+    description: "PRD/规格书风格，目录、需求表、状态标签、流程和验收标准完整",
     style: `【视觉主题】产品规格书与 PRD，结构化、可评审、可执行
 【色彩系统】
  - 基础底色：白 #ffffff，辅助区块 #f8fafc。
@@ -1002,19 +1058,21 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
 【组件特征】
  - 模块：需求表、优先级标签、流程步骤、状态徽标、风险提示和开放问题列表。
  - 文档容器：长文用定宽阅读区；多页输出可使用 \`<section class="page">\`。
-【布局原则】适合产品方案、技术规格、项目需求；重点是让团队一眼看懂范围、状态和下一步。`
-  }
-]
+【布局原则】适合产品方案、技术规格、项目需求；重点是让团队一眼看懂范围、状态和下一步。`,
+  },
+];
 
 export const DESIGN_STYLES: DesignStyle[] = RAW_DESIGN_STYLES.map((style) => {
-  const metadata = STYLE_METADATA[style.id]
+  const metadata = STYLE_METADATA[style.id];
   if (!metadata) {
-    throw new Error(`Missing design style metadata: ${style.id}`)
+    throw new Error(`Missing design style metadata: ${style.id}`);
   }
-  return { ...style, ...metadata }
-})
+  return { ...style, ...metadata };
+});
 
-const TEMPLATE = (style: string) => `你是一名资深网页设计师、信息架构师与前端工程师。请基于我提供的内容，输出一个**完整、自包含、可直接在浏览器打开**的 HTML 文档。
+const TEMPLATE = (
+  style: string,
+) => `你是一名资深网页设计师、信息架构师与前端工程师。请基于我提供的内容，输出一个**完整、自包含、可直接在浏览器打开**的 HTML 文档。
 
 【设计系统令牌 (Micro Design System)】
 ${style}
@@ -1034,6 +1092,13 @@ ${style}
 5. **视觉去 slop 化**：拒绝滥用无意义的大投影、彩虹渐变、漂浮光球、玻璃拟态堆叠和随机装饰。除非风格明确要求，不要使用极端纯黑大面积背景或过饱和荧光色。
 6. **内容真实感**：如果需要补全文案，必须具体、可信、贴近业务场景；严禁出现 "Lorem ipsum"、"您的标题在这里"、"示例文本" 等占位符。
 7. **可读性优先**：正文不可被装饰、图片、渐变或固定层遮挡；按钮、标签、卡片内文字不能溢出容器。
+
+【自由画布生产经验】
+1. **先列出版式节奏**：生成多页卡片或幻灯片前，先在心里规划每页承担的角色（封面 / 数据 / 证据 / 对比 / 结构 / 收束），避免所有页面长得一样。
+2. **单一视觉系统**：一份作品只使用一套主题色、一套字体分工和一组组件规则；不要把多个风格拼贴到同一份 HTML 里。
+3. **标准比例**：图片、截图、信息图和卡片槽位使用 21:9、16:10、16:9、4:3、3:2、1:1、3:4 或 9:16 等标准比例，不要复制原图的奇怪宽高比。
+4. **图文安全区**：底部页码、导航、说明文字和图片 caption 不得贴近画布边缘；核心内容应明显避开导出裁切区。
+5. **演示与低性能兜底**：少量动画可以增强节奏，但所有内容必须在静态状态完整可读；如果写交互脚本，请提供低性能或无脚本时的可阅读状态。
 
 【技术与容器规范（兼容 html-anything 引擎）】
 1. 只输出完整 \`<!DOCTYPE html>\` 文档，必须包含 \`<html>\`、\`<head>\`、\`<meta charset="utf-8">\`、\`<meta name="viewport" content="width=device-width, initial-scale=1">\` 与 \`<body>\`。
@@ -1058,9 +1123,9 @@ ${style}
 直接返回唯一的代码，不要任何前后解释性说明废话，不要以 \`\`\`html 包装代码块。
 
 【我的输入内容与业务诉求】
-（在此粘贴你的文章、大纲、数据或描述）`
+（在此粘贴你的文章、大纲、数据或描述）`;
 
 // 生成某风格完整可复制的指令
 export function buildDesignPrompt(s: DesignStyle): string {
-  return TEMPLATE(s.style)
+  return TEMPLATE(s.style);
 }

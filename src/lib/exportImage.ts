@@ -20,10 +20,43 @@ export type ImageOpts = {
   maxHeight?: number
 }
 
-const NEXT_FRAME = () =>
-  new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
+const NEXT_FRAME = (win: Window = window) =>
+  new Promise<void>((r) => win.requestAnimationFrame(() => win.requestAnimationFrame(() => r())))
 
-const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+// 基于 MutationObserver 的 DOM 稳定性探测机制
+async function waitForStability(element: HTMLElement | Document, win: Window = window, maxWaitMs = 1500): Promise<void> {
+  await new Promise<void>((resolve) => {
+    let timeout: ReturnType<typeof setTimeout>
+    let stableTimer: ReturnType<typeof setTimeout>
+    
+    const target = 'body' in element ? element.body : element
+    if (!target) {
+      resolve()
+      return
+    }
+
+    const finish = () => {
+      observer.disconnect()
+      clearTimeout(timeout)
+      clearTimeout(stableTimer)
+      resolve()
+    }
+
+    const observer = new MutationObserver(() => {
+      clearTimeout(stableTimer)
+      stableTimer = setTimeout(finish, 150) // 150ms 无变化视为稳定
+    })
+
+    observer.observe(target, { childList: true, subtree: true, attributes: true, characterData: true })
+    
+    stableTimer = setTimeout(finish, 150)
+    timeout = setTimeout(finish, maxWaitMs)
+  })
+
+  for (let i = 0; i < 3; i++) {
+    await new Promise<void>((r) => win.requestAnimationFrame(() => r()))
+  }
+}
 
 async function waitForDocumentReady(doc: Document, win: Window): Promise<void> {
   if (doc.readyState !== 'complete') {
@@ -79,10 +112,8 @@ async function waitForDocumentReady(doc: Document, win: Window): Promise<void> {
     /* noop */
   }
 
-  // Tailwind Play CDN 异步注入样式，留两帧 + 小段空闲时间
-  await NEXT_FRAME()
-  await sleep(120)
-  await NEXT_FRAME()
+  // Tailwind Play CDN 异步注入样式，等待 DOM 变动停止和帧渲染
+  await waitForStability(doc, win, 2000)
 }
 
 export function resolveBackground(doc: Document, win: Window, override?: string): string {
@@ -135,9 +166,7 @@ export async function iframeToBlob(iframe: HTMLIFrameElement, opts: ImageOpts = 
   doc.documentElement.style.overflow = 'visible'
   doc.body.style.overflow = 'visible'
 
-  await NEXT_FRAME()
-  await sleep(60)
-  await NEXT_FRAME()
+  await waitForStability(doc, win, 1000)
 
   try {
     const layoutWidth =
@@ -168,9 +197,7 @@ export async function iframeToBlob(iframe: HTMLIFrameElement, opts: ImageOpts = 
 }
 
 export async function elementToBlob(element: HTMLElement, opts: ImageOpts = {}): Promise<Blob> {
-  await NEXT_FRAME()
-  await sleep(60)
-  await NEXT_FRAME()
+  await waitForStability(element, element.ownerDocument.defaultView || window, 1000)
 
   const rect = element.getBoundingClientRect()
   const width = Math.ceil(rect.width || element.offsetWidth)
@@ -311,10 +338,8 @@ export async function captureElementInIframeToBlob(
     setTempStyle(element, 'width', `${w}px`)
     setTempStyle(element, 'height', `${h}px`)
 
-    // 等待两帧让新布局完全渲染
-    await NEXT_FRAME()
-    await sleep(60)
-    await NEXT_FRAME()
+    // 等待让新布局完全渲染且 DOM 稳定
+    await waitForStability(doc, win, 1000)
 
     const scale = opts.scale ?? 2
     const backgroundColor = resolveBackground(doc, win, opts.backgroundColor)

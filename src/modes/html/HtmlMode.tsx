@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { HtmlSandbox } from '@/components/preview/HtmlSandbox'
-import { downloadIframeAsImage, iframeToBlob, elementToBlob, downloadBlob, resolveBackground, captureElementInIframeToBlob } from '@/lib/exportImage'
+import { downloadBlob, resolveBackground, captureElementInIframeToBlob } from '@/lib/exportImage'
 import { downloadAsZip, type ZipEntry } from '@/lib/export/zipDownload'
 import { copyText } from '@/lib/clipboard'
 import { buildDesignPrompt, type DesignStyle } from '@/data/designPrompts'
 import { PromptLibrary } from './PromptLibrary'
-import { detectPages, scrollToPage, type PageInfo } from '@/lib/multipage'
+import { detectPages, type PageInfo } from '@/lib/multipage'
 import { Button } from '@/components/ui/Button'
 
 interface HtmlModeProps {
@@ -15,17 +15,92 @@ interface HtmlModeProps {
   onToast: (message: string) => void
 }
 
+function firstContentElement(doc: Document): HTMLElement {
+  return (
+    doc.querySelector<HTMLElement>('body > div')
+    || doc.querySelector<HTMLElement>('body > main')
+    || doc.querySelector<HTMLElement>('body > section')
+    || doc.body
+  )
+}
+
+async function nextFrame(): Promise<void> {
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+async function withScaleReset<T>(doc: Document, task: () => Promise<T>): Promise<T> {
+  const oldZoom = doc.body.style.zoom
+  const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
+
+  doc.body.style.zoom = '1'
+  doc.documentElement.style.setProperty('--auto-scale', '1')
+
+  try {
+    return await task()
+  } finally {
+    doc.body.style.zoom = oldZoom
+    if (oldScale) {
+      doc.documentElement.style.setProperty('--auto-scale', oldScale)
+    } else {
+      doc.documentElement.style.removeProperty('--auto-scale')
+    }
+  }
+}
+
+async function withVisiblePage<T>(
+  pageNodes: HTMLElement[],
+  visibleIndex: number,
+  task: () => Promise<T>,
+): Promise<T> {
+  const originalStyles = pageNodes.map((node) => node.style.display)
+  pageNodes.forEach((node, index) => {
+    node.style.display = index === visibleIndex ? '' : 'none'
+  })
+  await nextFrame()
+
+  try {
+    return await task()
+  } finally {
+    pageNodes.forEach((node, index) => {
+      node.style.display = originalStyles[index]
+    })
+  }
+}
+
+async function captureIframeElement(
+  iframe: HTMLIFrameElement,
+  element: HTMLElement,
+): Promise<Blob> {
+  const doc = iframe.contentDocument
+  const win = iframe.contentWindow
+  if (!doc || !win) throw new Error('预览尚未就绪')
+
+  const bgColor = resolveBackground(doc, win)
+  return captureElementInIframeToBlob(iframe, element, {
+    scale: 2,
+    backgroundColor: bgColor,
+  })
+}
+
 // HTML 可视化模式：左侧编辑 HTML，右侧 iframe 沙箱实时渲染，支持 Prompt 指令库与导出 PNG。
 export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const editorScrollerRef = useRef<HTMLElement | null>(null)
+  const previewPaneRef = useRef<HTMLElement | null>(null)
+  const lastWheelFlipAtRef = useRef(0)
+  const currentPageRef = useRef(0)
   const [refreshKey, setRefreshKey] = useState(0)
   const [promptOpen, setPromptOpen] = useState(false)
   const [editorReady, setEditorReady] = useState(0)
   const [exporting, setExporting] = useState(false)
+  const [allowScripts, setAllowScripts] = useState(false)
 
   const [pages, setPages] = useState<PageInfo[]>([])
   const [currentPage, setCurrentPage] = useState(0)
+
+  useEffect(() => {
+    currentPageRef.current = currentPage
+  }, [currentPage])
 
   // One-way scroll sync: editor → iframe
   useEffect(() => {
@@ -123,6 +198,43 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
   }, [pages])
 
+  // 多页模式：鼠标滚轮在右侧渲染区内上下翻页。
+  useEffect(() => {
+    if (pages.length <= 1) return
+
+    const flipByWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) < 24) return
+
+      const now = Date.now()
+      if (now - lastWheelFlipAtRef.current < 360) {
+        event.preventDefault()
+        return
+      }
+
+      const prev = currentPageRef.current
+      const next = event.deltaY > 0
+        ? Math.min(prev + 1, pages.length - 1)
+        : Math.max(prev - 1, 0)
+
+      if (next !== prev) {
+        currentPageRef.current = next
+        setCurrentPage(next)
+        lastWheelFlipAtRef.current = now
+      }
+      event.preventDefault()
+    }
+
+    const pane = previewPaneRef.current
+    const iframeDoc = iframeRef.current?.contentDocument
+    pane?.addEventListener('wheel', flipByWheel, { passive: false })
+    iframeDoc?.addEventListener('wheel', flipByWheel, { passive: false })
+
+    return () => {
+      pane?.removeEventListener('wheel', flipByWheel)
+      iframeDoc?.removeEventListener('wheel', flipByWheel)
+    }
+  }, [pages])
+
   // 自动等比例缩放适应窗口大小
   useEffect(() => {
     const iframe = iframeRef.current
@@ -192,26 +304,15 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       setExporting(false)
       return
     }
-    const oldZoom = doc.body.style.zoom
-    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-    doc.body.style.zoom = '1'
-    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
-      const wrapper = doc.querySelector('body > div') || doc.querySelector('body > main') || doc.querySelector('body > section') || doc.body
-      const bgColor = resolveBackground(doc, iframeRef.current.contentWindow!)
-      const blob = await captureElementInIframeToBlob(iframeRef.current, wrapper as HTMLElement, {
-        scale: 2,
-        backgroundColor: bgColor
+      await withScaleReset(doc, async () => {
+        const blob = await captureIframeElement(iframeRef.current!, firstContentElement(doc))
+        downloadBlob(blob, `html-${Date.now()}.png`)
       })
-      downloadBlob(blob, `html-${Date.now()}.png`)
       onToast('已导出 PNG')
     } catch (e) {
       onToast(`导出失败：${e instanceof Error ? e.message : '未知错误'}`)
     } finally {
-      if (doc) {
-        doc.body.style.zoom = oldZoom || ''
-        if (oldScale) doc.documentElement.style.setProperty('--auto-scale', oldScale)
-      }
       setExporting(false)
     }
   }
@@ -225,79 +326,17 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     
     setExporting(true)
     const allNodes = pages.map(p => p.node)
-    const originalStyles = allNodes.map(n => n.style.display)
-    const oldZoom = doc.body.style.zoom
-    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-    doc.body.style.zoom = '1'
-    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
-      // Hide all other pages
-      allNodes.forEach((n, i) => {
-        if (i !== currentPage) n.style.display = 'none'
+      await withScaleReset(doc, async () => {
+        await withVisiblePage(allNodes, currentPage, async () => {
+          const blob = await captureIframeElement(iframe, page.node)
+          downloadBlob(blob, `html-page-${currentPage + 1}.png`)
+        })
       })
-      
-      const bgColor = resolveBackground(doc, iframe.contentWindow!)
-      const blob = await captureElementInIframeToBlob(iframe, page.node, { 
-        scale: 2,
-        backgroundColor: bgColor
-      })
-      downloadBlob(blob, `html-page-${currentPage + 1}.png`)
       onToast(`已导出 ${page.label}`)
     } catch (e) {
       onToast(`导出失败：${e instanceof Error ? e.message : '未知错误'}`)
     } finally {
-      allNodes.forEach((n, i) => {
-        n.style.display = originalStyles[i]
-      })
-      if (doc) {
-        doc.body.style.zoom = oldZoom || ''
-        if (oldScale) doc.documentElement.style.setProperty('--auto-scale', oldScale)
-      }
-      setExporting(false)
-    }
-  }
-
-  const handleExportAllPages = async () => {
-    const iframe = iframeRef.current
-    const doc = iframe?.contentDocument
-    if (!doc || !pages.length) return
-    
-    setExporting(true)
-    const allNodes = pages.map(p => p.node)
-    const originalStyles = allNodes.map(n => n.style.display)
-    const oldZoom = doc.body.style.zoom
-    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-    doc.body.style.zoom = '1'
-    doc.documentElement.style.setProperty('--auto-scale', '1')
-    try {
-      for (let i = 0; i < pages.length; i++) {
-        // Hide all except current
-        allNodes.forEach((n, j) => {
-          n.style.display = j === i ? '' : 'none'
-        })
-        
-        // Wait a frame for layout
-        await new Promise(r => requestAnimationFrame(r))
-        
-        const bgColor = resolveBackground(doc, iframe.contentWindow!)
-        const blob = await captureElementInIframeToBlob(iframe, pages[i].node, {
-          scale: 2,
-          backgroundColor: bgColor
-        })
-        downloadBlob(blob, `html-page-${i + 1}.png`)
-      }
-
-      onToast(`已导出 ${pages.length} 页`)
-    } catch (e) {
-      onToast(`导出失败：${e instanceof Error ? e.message : '未知错误'}`)
-    } finally {
-      allNodes.forEach((n, i) => {
-        n.style.display = originalStyles[i]
-      })
-      if (doc) {
-        doc.body.style.zoom = oldZoom || ''
-        if (oldScale) doc.documentElement.style.setProperty('--auto-scale', oldScale)
-      }
       setExporting(false)
     }
   }
@@ -309,43 +348,23 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     
     setExporting(true)
     const allNodes = pages.map(p => p.node)
-    const originalStyles = allNodes.map(n => n.style.display)
-    const oldZoom = doc.body.style.zoom
-    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-    doc.body.style.zoom = '1'
-    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
       const entries: ZipEntry[] = []
-      
-      for (let i = 0; i < pages.length; i++) {
-        allNodes.forEach((n, j) => {
-          n.style.display = j === i ? '' : 'none'
-        })
-        
-        await new Promise(r => requestAnimationFrame(r))
-        
-        const bgColor = resolveBackground(doc, iframe.contentWindow!)
-        const blob = await captureElementInIframeToBlob(iframe, pages[i].node, { 
-          scale: 2,
-          backgroundColor: bgColor
-        })
-        entries.push({
-          filename: `html-page-${String(i + 1).padStart(2, '0')}.png`,
-          blob,
-        })
-      }
+
+      await withScaleReset(doc, async () => {
+        for (let i = 0; i < pages.length; i++) {
+          const blob = await withVisiblePage(allNodes, i, () => captureIframeElement(iframe, pages[i].node))
+          entries.push({
+            filename: `html-page-${String(i + 1).padStart(2, '0')}.png`,
+            blob,
+          })
+        }
+      })
       await downloadAsZip(entries, `html-pages-${Date.now()}.zip`)
       onToast(`已打包 ${pages.length} 页`)
     } catch (e) {
       onToast(`导出失败：${e instanceof Error ? e.message : '未知错误'}`)
     } finally {
-      allNodes.forEach((n, i) => {
-        n.style.display = originalStyles[i]
-      })
-      if (doc) {
-        doc.body.style.zoom = oldZoom || ''
-        if (oldScale) doc.documentElement.style.setProperty('--auto-scale', oldScale)
-      }
       setExporting(false)
     }
   }
@@ -358,32 +377,26 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
 
     setExporting(true)
-    const oldZoom = doc.body.style.zoom
-    const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-    doc.body.style.zoom = '1'
-    doc.documentElement.style.setProperty('--auto-scale', '1')
     try {
-      if (pages.length > 0) {
-        // 多页模式：在 iframe 内逐页截图，保留完整样式
-        const { exportIframeToPdf } = await import('@/lib/exportPdf')
-        await exportIframeToPdf(
-          iframe,
-          pages.map(p => p.node),
-          `html-${Date.now()}.pdf`
-        )
-      } else {
-        // 单页模式：直接截取 iframe 全部内容
-        const { exportSinglePageToPdf } = await import('@/lib/exportPdf')
-        await exportSinglePageToPdf(iframe, `html-${Date.now()}.pdf`)
-      }
+      await withScaleReset(doc, async () => {
+        if (pages.length > 0) {
+          // 多页模式：在 iframe 内逐页截图，保留完整样式
+          const { exportIframeToPdf } = await import('@/lib/exportPdf')
+          await exportIframeToPdf(
+            iframe,
+            pages.map(p => p.node),
+            `html-${Date.now()}.pdf`
+          )
+        } else {
+          // 单页模式：直接截取 iframe 全部内容
+          const { exportSinglePageToPdf } = await import('@/lib/exportPdf')
+          await exportSinglePageToPdf(iframe, `html-${Date.now()}.pdf`)
+        }
+      })
       onToast('PDF 导出成功')
     } catch (e) {
       onToast(`PDF 导出失败：${e instanceof Error ? e.message : '未知错误'}`)
     } finally {
-      if (doc) {
-        doc.body.style.zoom = oldZoom || ''
-        if (oldScale) doc.documentElement.style.setProperty('--auto-scale', oldScale)
-      }
       setExporting(false)
     }
   }
@@ -429,6 +442,18 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           )}
 
           <div className="w-px h-4 bg-slate-200 mx-1" />
+          <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={allowScripts}
+              onChange={(e) => {
+                setAllowScripts(e.target.checked)
+                setRefreshKey((n) => n + 1)
+              }}
+              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            />
+            互动脚本
+          </label>
           <Button onClick={() => setPromptOpen(true)}>
             📚 指令库
           </Button>
@@ -472,11 +497,12 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
             }}
           />
         </section>
-        <section className="min-h-0 overflow-hidden bg-white">
+        <section ref={previewPaneRef} className="min-h-0 overflow-hidden bg-white">
           <HtmlSandbox 
             ref={iframeRef} 
             html={html} 
             refreshKey={refreshKey}
+            allowScripts={allowScripts}
             onLoad={() => {
               const iframe = iframeRef.current
               if (!iframe?.contentDocument) return

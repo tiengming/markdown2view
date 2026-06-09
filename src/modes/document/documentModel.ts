@@ -141,10 +141,42 @@ export function splitMarkdownBlocks(markdown: string): DocumentBlock[] {
   const normalized = markdown.replace(/\r\n/g, '\n').trim()
   if (!normalized) return []
 
-  const initialBlocks = normalized
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter(Boolean)
+  const initialBlocks: string[] = []
+  const current: string[] = []
+  let inFence = false
+  let openTag: string | null = null
+
+  const flush = () => {
+    const block = current.join('\n').trim()
+    if (block) initialBlocks.push(block)
+    current.length = 0
+  }
+
+  for (const line of normalized.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('```')) {
+      inFence = !inFence
+      current.push(line)
+      continue
+    }
+
+    if (!inFence && !openTag) {
+      const open = trimmed.match(/^<([a-z][\w-]*)\b[^>]*>/i)
+      if (open && !trimmed.includes(`</${open[1]}>`) && !trimmed.endsWith('/>')) {
+        openTag = open[1]
+      }
+    }
+
+    if (!inFence && !openTag && !trimmed) {
+      flush()
+      continue
+    }
+
+    current.push(line)
+    if (openTag && trimmed.includes(`</${openTag}>`)) openTag = null
+  }
+
+  flush()
 
   const rawBlocks: string[] = []
   for (const block of initialBlocks) {

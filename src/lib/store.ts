@@ -1,7 +1,5 @@
 import { create } from 'zustand'
-import { THEMES, makeColors, type ThemeColors } from '@engine'
-import { DEMO_CONTENT } from '@/data/demoContent'
-import { DEMO_HTML } from '@/data/demoHtml'
+import { THEMES, makeColors, type ThemeColors } from '@engine/composables/useTheme'
 import {
   DEFAULT_DOCUMENT_SETTINGS,
   type DocumentSettings,
@@ -21,14 +19,17 @@ const MODE_STORAGE_KEY = 'm2v-mode'
 const ARTICLE_FONT_KEY = 'm2v-article-font'
 const CARD_FONT_KEY = 'm2v-card-font'
 
+const FALLBACK_MARKDOWN = '# markdown2view\n\n正在加载示例内容，或直接在左侧输入 Markdown。'
+const FALLBACK_HTML = '<main style="padding:32px;font-family:sans-serif">正在加载示例 HTML，或直接粘贴 AI 生成的 HTML。</main>'
+
 function loadMarkdown(): string {
-  if (typeof localStorage === 'undefined') return DEMO_CONTENT
-  return localStorage.getItem(MD_STORAGE_KEY) ?? DEMO_CONTENT
+  if (typeof localStorage === 'undefined') return FALLBACK_MARKDOWN
+  return localStorage.getItem(MD_STORAGE_KEY) ?? FALLBACK_MARKDOWN
 }
 
 function loadHtml(): string {
-  if (typeof localStorage === 'undefined') return DEMO_HTML
-  return localStorage.getItem(HTML_STORAGE_KEY) ?? DEMO_HTML
+  if (typeof localStorage === 'undefined') return FALLBACK_HTML
+  return localStorage.getItem(HTML_STORAGE_KEY) ?? FALLBACK_HTML
 }
 
 function loadMode(): RenderMode {
@@ -163,3 +164,8 @@ export const useStore = create<AppState>((set) => ({
     set({ accent, accentDark: dark, colors: makeColors(accent, dark) })
   },
 }))
+
+export function shouldHydrateDemoContent(): boolean {
+  if (typeof localStorage === 'undefined') return false
+  return !localStorage.getItem(MD_STORAGE_KEY) && !localStorage.getItem(HTML_STORAGE_KEY)
+}

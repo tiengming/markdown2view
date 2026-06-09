@@ -1,17 +1,23 @@
-import { useMemo, useRef, useState } from 'react'
-import { useStore } from '@/lib/store'
-import { useScrollSync } from '@/lib/useScrollSync'
-import { renderMarkdown } from '@/lib/render/markdown'
+import { Suspense, lazy, useEffect, useState } from 'react'
+import { shouldHydrateDemoContent, useStore } from '@/lib/store'
 import { Toast, type ToastState } from '@/components/ui/Toast'
 import { ModeTabs } from '@/components/layout/ModeTabs'
-import { CodeEditor } from '@/components/editor/CodeEditor'
-import { ArticlePreview } from '@/modes/article/ArticlePreview'
-import { DocumentMode } from '@/modes/document/DocumentMode'
-import { CardMode } from '@/modes/card/CardMode'
-import { HtmlMode } from '@/modes/html/HtmlMode'
-import { THEMES } from '@engine'
+import { THEMES } from '@engine/composables/useTheme'
 
-// 多场景渲染工作台：长图文 / HTML 可视化 / 其余待实现。
+const ArticleMode = lazy(() => import('@/modes/article/ArticleMode').then((m) => ({ default: m.ArticleMode })))
+const DocumentMode = lazy(() => import('@/modes/document/DocumentMode').then((m) => ({ default: m.DocumentMode })))
+const CardMode = lazy(() => import('@/modes/card/CardMode').then((m) => ({ default: m.CardMode })))
+const HtmlMode = lazy(() => import('@/modes/html/HtmlMode').then((m) => ({ default: m.HtmlMode })))
+
+function ModeLoading() {
+  return (
+    <main className="flex min-h-0 flex-1 items-center justify-center bg-slate-50 text-sm text-slate-400">
+      正在加载工作台...
+    </main>
+  )
+}
+
+// 多场景渲染工作台：长图文 / A4 文档 / 小红书卡片 / HTML 可视化。
 export default function App() {
   const markdown = useStore((s) => s.markdown)
   const setMarkdown = useStore((s) => s.setMarkdown)
@@ -26,17 +32,26 @@ export default function App() {
   const setPlatform = useStore((s) => s.setPlatform)
   const documentSettings = useStore((s) => s.documentSettings)
   const updateDocumentSettings = useStore((s) => s.updateDocumentSettings)
-  const renderedMarkdown = useMemo(() => renderMarkdown(markdown, colors), [markdown, colors])
-
-  // 滚动联动：编辑器滚动容器与预览滚动容器按比例同步
-  const editorScrollerRef = useRef<HTMLElement | null>(null)
-  const previewScrollRef = useRef<HTMLDivElement>(null)
-  const [editorReady, setEditorReady] = useState(0)
-  useScrollSync(editorScrollerRef, previewScrollRef, [editorReady])
 
   // 统一 Toast 反馈
   const [toast, setToast] = useState<ToastState | null>(null)
   const showToast = (message: string) => setToast({ message, key: Date.now() })
+
+  useEffect(() => {
+    if (!shouldHydrateDemoContent()) return
+    let cancelled = false
+    Promise.all([
+      import('@/data/demoContent'),
+      import('@/data/demoHtml'),
+    ]).then(([{ DEMO_CONTENT }, { DEMO_HTML }]) => {
+      if (cancelled || !shouldHydrateDemoContent()) return
+      setMarkdown(DEMO_CONTENT)
+      setHtml(DEMO_HTML)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [setMarkdown, setHtml])
 
   const handleRestoreDemo = () => {
     if (window.confirm('确定要恢复示例文件吗？这将会覆盖你当前所有的输入内容。')) {
@@ -100,50 +115,37 @@ export default function App() {
       </header>
 
       {/* 主体：按模式渲染 */}
-      {mode === 'article' && (
-        <main className="grid min-h-0 flex-1 grid-cols-2 gap-px bg-gray-200">
-          <section className="min-h-0 overflow-hidden bg-white">
-            <CodeEditor
-              value={markdown}
-              onChange={setMarkdown}
-              onScrollerReady={(el) => {
-                editorScrollerRef.current = el
-                setEditorReady((n) => n + 1)
-              }}
-            />
-          </section>
-          <section className="min-h-0 overflow-hidden bg-gray-50">
-            <ArticlePreview
-              rendered={renderedMarkdown}
-              scrollRef={previewScrollRef}
-              markdown={markdown}
-              onToast={showToast}
-            />
-          </section>
-        </main>
-      )}
-      {mode === 'html' && <HtmlMode html={html} setHtml={setHtml} onToast={showToast} />}
-      {mode === 'document' && (
-        <DocumentMode
-          markdown={markdown}
-          setMarkdown={setMarkdown}
-          rendered={renderedMarkdown}
-          colors={colors}
-          settings={documentSettings}
-          updateSettings={updateDocumentSettings}
-          onToast={showToast}
-        />
-      )}
-      {mode === 'card' && (
-        <CardMode
-          markdown={markdown}
-          setMarkdown={setMarkdown}
-          colors={colors}
-          platform={'xiaohongshu'}
-          setPlatform={setPlatform}
-          onToast={showToast}
-        />
-      )}
+      <Suspense fallback={<ModeLoading />}>
+        {mode === 'article' && (
+          <ArticleMode
+            markdown={markdown}
+            setMarkdown={setMarkdown}
+            colors={colors}
+            onToast={showToast}
+          />
+        )}
+        {mode === 'html' && <HtmlMode html={html} setHtml={setHtml} onToast={showToast} />}
+        {mode === 'document' && (
+          <DocumentMode
+            markdown={markdown}
+            setMarkdown={setMarkdown}
+            colors={colors}
+            settings={documentSettings}
+            updateSettings={updateDocumentSettings}
+            onToast={showToast}
+          />
+        )}
+        {mode === 'card' && (
+          <CardMode
+            markdown={markdown}
+            setMarkdown={setMarkdown}
+            colors={colors}
+            platform={platform === 'xiaohongshu' ? platform : 'xiaohongshu'}
+            setPlatform={setPlatform}
+            onToast={showToast}
+          />
+        )}
+      </Suspense>
 
       <Toast toast={toast} />
     </div>

@@ -6,7 +6,7 @@ import { exportLongImage } from '@/lib/export/longImage'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { useStore } from '@/lib/store'
-import { getFontFamilyCss } from '@/lib/fonts'
+import { getFontFamilyCss, type FontFamilyOption } from '@/lib/fonts'
 
 interface ArticlePreviewProps {
   rendered: MarkdownRenderResult
@@ -76,7 +76,7 @@ export function ArticlePreview({ rendered, scrollRef, markdown, onToast }: Artic
         <div className="flex items-center gap-2 shrink-0">
           <Select
             value={articleFont}
-            onChange={(e) => setArticleFont(e.target.value as any)}
+            onChange={(e) => setArticleFont(e.target.value as FontFamilyOption)}
           >
             <option value="songti">宋体</option>
             <option value="fangsong">仿宋</option>

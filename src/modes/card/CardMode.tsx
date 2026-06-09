@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useStore } from '@/lib/store'
-import { getFontFamilyCss } from '@/lib/fonts'
+import { getFontFamilyCss, type FontFamilyOption } from '@/lib/fonts'
 
 interface CardModeProps {
   markdown: string
@@ -253,7 +253,7 @@ export function CardMode({
             </Select>
             <Select
               value={cardFont}
-              onChange={(e) => setCardFont(e.target.value as any)}
+              onChange={(e) => setCardFont(e.target.value as FontFamilyOption)}
             >
               <option value="songti">宋体</option>
               <option value="fangsong">仿宋</option>

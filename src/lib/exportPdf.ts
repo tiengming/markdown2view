@@ -4,7 +4,7 @@
  * Modified by ZhongXiandou/markdown2view contributors.
  */
 
-import { iframeToBlob, elementToBlob, resolveBackground, captureElementInIframeToBlob } from './exportImage'
+import { resolveBackground, captureElementInIframeToBlob } from './exportImage'
 
 /**
  * 基于 iframe 截图的 PDF 导出。
@@ -32,7 +32,7 @@ export async function exportIframeToPdf(
   // 保存所有页面的原始 display 状态
   const originalStyles = pageNodes.map(n => n.style.display)
 
-  let pdf: any = null
+  let pdf: InstanceType<typeof jsPDF> | null = null
 
   try {
     for (let i = 0; i < pageNodes.length; i++) {
@@ -137,7 +137,7 @@ export async function exportElementsToPdf(
   const { jsPDF } = await import('jspdf')
   const { domToJpeg } = await import('modern-screenshot')
 
-  let pdf: any = null
+  let pdf: InstanceType<typeof jsPDF> | null = null
 
   for (let i = 0; i < elements.length; i++) {
     if (onProgress) onProgress(i + 1, elements.length)

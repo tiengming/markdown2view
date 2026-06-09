@@ -14,12 +14,14 @@ interface HtmlSandboxProps {
   refreshKey?: number
   // iframe 加载完成回调
   onLoad?: () => void
+  // 是否允许 iframe 内脚本执行；默认关闭，用户需要交互演示时再打开。
+  allowScripts?: boolean
 }
 
 // iframe 沙箱预览：通过 srcdoc 注入，sandbox 限制权限。
 // 移植自 html-anything 的 preview-pane 渲染策略。
 export const HtmlSandbox = forwardRef<HTMLIFrameElement, HtmlSandboxProps>(function HtmlSandbox(
-  { html, refreshKey = 0, onLoad },
+  { html, refreshKey = 0, onLoad, allowScripts = false },
   ref,
 ) {
   const display = useMemo(() => previewHtml(html), [html])
@@ -38,7 +40,7 @@ export const HtmlSandbox = forwardRef<HTMLIFrameElement, HtmlSandboxProps>(funct
       ref={ref}
       title="html-preview"
       srcDoc={display}
-      sandbox="allow-scripts allow-same-origin"
+      sandbox={`allow-same-origin${allowScripts ? ' allow-scripts' : ''}`}
       className="h-full w-full border-0"
       style={{ background: '#fff' }}
       onLoad={onLoad}

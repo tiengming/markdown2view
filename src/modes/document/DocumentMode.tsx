@@ -1,9 +1,9 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { MarkdownRenderResult } from '@/lib/render/markdown'
 import type { ThemeColors } from '@engine'
 import { parseMarkdown, makeColors } from '@engine'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { useScrollSync } from '@/lib/useScrollSync'
+import { renderMarkdown } from '@/lib/render/markdown'
 import {
   DEFAULT_DOCUMENT_SETTINGS,
   createDocumentModel,
@@ -19,7 +19,6 @@ import { Select } from '@/components/ui/Select'
 interface DocumentModeProps {
   markdown: string
   setMarkdown: (markdown: string) => void
-  rendered: MarkdownRenderResult
   colors: ThemeColors
   settings: DocumentSettings
   updateSettings: (patch: Partial<DocumentSettings>) => void
@@ -33,7 +32,6 @@ function footerText(template: string, page: number, total: number) {
 export function DocumentMode({
   markdown,
   setMarkdown,
-  rendered,
   colors,
   settings,
   updateSettings,
@@ -45,6 +43,7 @@ export function DocumentMode({
 
   useScrollSync(editorScrollerRef, previewScrollRef, [editorReady])
 
+  const rendered = useMemo(() => renderMarkdown(markdown, colors), [markdown, colors])
   const model = useMemo(
     () => createDocumentModel(markdown, rendered.meta, settings),
     [markdown, rendered.meta.title, rendered.meta.contentMarkdown, settings],

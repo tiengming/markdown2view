@@ -1,57 +1,111 @@
-export const DEMO_ARTICLE = `<title type="DA02" badge="ARTICLE" subtitle="一份适合公众号长文排版的模块专属示例。" chips="公众号|长文|组件">markdown2view 公众号文章示例</title>
+export const DEMO_ARTICLE = `<title type="DA02" badge="LONGFORM" subtitle="从 Markdown 草稿到可复制富文本与长图 PNG 的完整示例。" chips="长图文|公众号|组件化排版">markdown2view 长图文排版工作流</title>
 
 <reading-path></reading-path>
 
 <lead>
-这份示例用于展示公众号文章模式的排版能力：标题卡片、阅读路径、提示框、步骤流、对比卡片、标签徽章和结尾互动组件都可以直接复制到公众号编辑器。
+这份示例用于展示长图文模式的核心能力：用扩展 Markdown 写出适合公众号、知识长图和图文平台发布的文章，并一键复制富文本或导出完整长图。
 </lead>
 
-<p-title num="01" title="为什么需要多场景渲染" subtitle="ONE SOURCE · MULTI OUTPUT" level="1"></p-title>
+<p-title num="01" title="它解决什么问题" subtitle="ONE SOURCE · MULTI OUTPUT" level="1"></p-title>
 
-内容团队常常需要把同一份素材改写成公众号文章、正式文档、社交媒体卡片和风格化网页。markdown2view 的目标，是让创作者先专注内容，再选择交付形态。
+内容团队常常会遇到同一个问题：素材已经写好，但不同平台需要不同形态。公众号要富文本排版，正式交付要 A4 文档，小红书要分页卡片，活动展示又可能需要风格化 HTML。
 
-> [TIP] 你可以在左侧继续编辑 Markdown，右侧会实时预览公众号友好的富文本效果。
+markdown2view 的长图文模式把重点放在“文章表达”上：你仍然写 Markdown，但可以按需要插入标题卡、提示框、步骤流、对比卡片、标签、行动号召和结尾互动，让内容更像一篇已经排好版的发布稿。
+
+> [TIP] 你可以在左侧继续编辑 Markdown，右侧会实时预览长图文效果。完成后可复制富文本，也可导出为一张完整长图 PNG。
 
 <p-title num="02" title="推荐工作流" subtitle="WORKFLOW" level="1"></p-title>
 
-<steps label="HOW IT WORKS" title="从草稿到发布" hint="按顺序完成即可" active="2">
-- 写作 | 在 Markdown 中完成主文案和结构
-- 排版 | 通过标题、提示、对比、标签等组件增强表达
-- 复制 | 一键复制富文本，粘贴到公众号后台继续发布
+<steps label="HOW IT WORKS" title="从草稿到发布" hint="按顺序完成即可" active="3">
+- 写作 | 在 Markdown 中完成正文、标题层级和核心信息
+- 增强 | 使用扩展组件突出路径、步骤、对比、结论和行动入口
+- 预览 | 在右侧检查段落节奏、组件间距、代码块和公式显示效果
+- 交付 | 复制富文本到公众号，或导出长图用于知识平台分发
 </steps>
 
-<p-title num="03" title="组件风格展示" subtitle="COMPONENTS" level="1"></p-title>
+<p-title num="03" title="适合放进长图文的内容" subtitle="CONTENT PATTERN" level="1"></p-title>
 
-<badges tone="accent">React|Vite|TypeScript|Tailwind</badges>
+<badges tone="accent">产品介绍|教程文章|运营复盘|知识科普|项目更新</badges>
+
+长图文不是把所有信息堆在一页里，而是把读者的阅读路径安排清楚。一个实用结构通常包含：
+
+- 开头：一句话说明读者能获得什么。
+- 中段：用步骤、对比、表格或清单拆解复杂信息。
+- 结尾：给出结论、行动建议或下一步入口。
+
+<statement>长图文的关键不是装饰更多，而是让读者更快理解重点。</statement>
+
+<p-title num="04" title="对比：手工排版 vs 模块化输出" subtitle="BEFORE / AFTER" level="1"></p-title>
 
 <compare left-label="BEFORE" left-title="手工排版" right-label="AFTER" right-title="模块化输出">
 <left>
 - 重复调整字号和间距
 - 多平台样式难以统一
 - 复制导出容易变形
+- 后续复用成本较高
 </left>
 <right>
 - 组件化 Markdown 描述内容
 - 按场景生成不同成品
 - 导出链路可重复复用
+- 示例、指令和内容可持续迭代
 </right>
 </compare>
 
-<statement>先把内容写清楚，再把表达交给模板。</statement>
+<p-title num="05" title="常用 Markdown 能力" subtitle="MARKDOWN BASICS" level="1"></p-title>
 
-<p-title num="04" title="代码与公式" subtitle="TECH NOTES" level="1"></p-title>
+### 文本强调
+
+普通正文用于承载叙述，**加粗** 用于标记重点，*斜体* 用于轻量强调，\`inline code\` 适合标记字段、按钮名或命令。
+
+### 引用提示
+
+> [NOTE] 如果你准备把文章复制到公众号后台，建议先在这里完成结构、标题和组件排版，再去平台后台补充封面、合集和发布设置。
+
+### 表格
+
+| 输出方式 | 适合用途 | 说明 |
+| --- | --- | --- |
+| 复制富文本 | 公众号、图文编辑器 | 保留排版结构，便于继续发布 |
+| 导出长图 | 知识平台、社群传播 | 将整篇内容输出为单张 PNG |
+| 复制 AI 指令 | 外部 AI 改写 | 让 AI 按当前支持语法产出内容 |
+
+<p-title num="06" title="代码与公式也能放进长文" subtitle="TECH CONTENT" level="1"></p-title>
+
+技术类文章常常需要展示代码、配置或公式。长图文模式会继续复用 Markdown 渲染能力，让工程说明和知识教程更容易交付。
 
 \`\`\`ts
 const modes = ['article', 'document', 'card', 'html']
 
 function render(mode: string, content: string) {
-  return \`render \${mode} with \${content.length} chars\`
+  return 'render ' + mode + ' with ' + content.length + ' chars'
 }
 \`\`\`
 
-行内公式示例：当 $a \\ne 0$ 时，二次方程可以写成 $ax^2 + bx + c = 0$。
+行内公式示例：当 $a \\ne 0$ 时，二次方程可以写成 $ax^2 + bx + c = 0$。块级公式如下：
 
-<cta label="NEXT STEP" title="换到其他模式试试看" button="恢复当前模块示例"></cta>
+$$
+x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
+$$
 
-<engage type="DA02" title="感谢阅读" subtitle="继续把同一份内容变成更多成品。" color="green"></engage>
+<p-title num="07" title="什么时候切换到其他模式" subtitle="SCENARIO GUIDE" level="1"></p-title>
+
+<compare left-label="LONGFORM" left-title="继续使用长图文" right-label="OTHER MODES" right-title="切换到其他模式">
+<left>
+- 需要讲清一个完整主题
+- 希望读者连续阅读
+- 要复制富文本到公众号
+- 要导出一张完整长图
+</left>
+<right>
+- 正式归档：切到 A4 文档
+- 多张发布图：切到分页图文
+- 高度视觉化页面：切到 HTML 自由画布
+- 需要打印交付：切到 A4 文档
+</right>
+</compare>
+
+<cta label="NEXT STEP" title="把这篇示例改成你的发布稿" button="复制长图文 AI 指令"></cta>
+
+<engage type="DA02" title="感谢阅读" subtitle="继续把同一份内容变成更多可发布的成品。" color="green"></engage>
 `

@@ -9,6 +9,7 @@ describe('parseMarkdown - Caption parsing', () => {
     const md = '![img](url)\n图 1: 这是图片题注'
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-image"')
+    expect(html).toContain('data-caption-kind="image"')
     expect(html).toContain('style="margin:8px 0px 16px"')
     expect(html).toContain('这是图片题注')
   })
@@ -17,8 +18,17 @@ describe('parseMarkdown - Caption parsing', () => {
     const md = '表 2：这是表格题注\n| col1 | col2 |\n| --- | --- |\n| a | b |'
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-table"')
+    expect(html).toContain('data-caption-kind="table"')
     expect(html).toContain('style="margin:16px 0px 8px"')
     expect(html).toContain('这是表格题注')
+  })
+
+  it('only treats captions as valid in the required image/table positions', () => {
+    const imageCaptionAbove = '图 1: 图片题注不能写在图片上方\n![img](url)'
+    const tableCaptionBelow = '| col1 | col2 |\n| --- | --- |\n| a | b |\n表 1: 表格题注不能写在表格下方'
+
+    expect(parseMarkdown(imageCaptionAbove, colors)).not.toContain('document-caption')
+    expect(parseMarkdown(tableCaptionBelow, colors)).not.toContain('document-caption')
   })
 
   it('should parse English captions correctly in correct contexts', () => {

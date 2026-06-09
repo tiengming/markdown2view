@@ -15,6 +15,7 @@ import { copyText } from '@/lib/clipboard'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
+import { DOCUMENT_TITLE_STYLE_VARS } from './documentStyles'
 
 interface DocumentModeProps {
   markdown: string
@@ -214,6 +215,7 @@ export function DocumentMode({
             ref={measuringRef}
             className={`document-page document-content document-font-${settings.fontFamily} document-fontscale-${settings.fontScale} ${settings.centerTitle ? 'document-center-title' : ''} ${settings.indentParagraph ? 'document-indent-paragraph' : ''}`}
             style={{
+              ...DOCUMENT_TITLE_STYLE_VARS,
               position: 'absolute',
               visibility: 'hidden',
               top: -9999,
@@ -236,6 +238,7 @@ export function DocumentMode({
               key={page.pageNumber}
               className={`document-page document-font-${settings.fontFamily} document-fontscale-${settings.fontScale} ${settings.centerTitle ? 'document-center-title' : ''} ${settings.indentParagraph ? 'document-indent-paragraph' : ''}`}
               style={{
+                ...DOCUMENT_TITLE_STYLE_VARS,
                 width: settings.pageWidth,
                 height: settings.pageHeight,
                 position: 'relative',

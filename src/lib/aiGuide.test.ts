@@ -19,6 +19,10 @@ describe('AI Guide Prompts', () => {
     expect(guide).toContain('图片题注')
     expect(guide).toContain('图片下方')
     expect(guide).toContain('表格上方')
+    expect(guide).toContain('图片题注只能写在图片下方')
+    expect(guide).toContain('表格题注只能写在表格上方')
+    expect(guide).toContain('图 1: xxxx')
+    expect(guide).toContain('表 1: xxxx')
     expect(guide).toContain('<page-break>')
     expect(guide).toContain('导航栏主题色')
     // 确保去除了微信花哨的社交、互动组件的详细讲解模块

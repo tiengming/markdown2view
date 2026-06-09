@@ -194,7 +194,8 @@ body {
 
 .document-title-block h1 {
   text-align: center !important;
-  margin: 0.35em 0 1.4em !important;
+  line-height: var(--document-title-line-height, 1.5) !important;
+  margin: var(--document-title-margin, 0.85em 0 1.55em) !important;
 }
 
 /* Document Mode Paragraph Indentation */

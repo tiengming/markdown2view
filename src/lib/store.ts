@@ -11,7 +11,10 @@ export type RenderMode = 'article' | 'document' | 'card' | 'html'
 export type InputType = 'markdown' | 'html'
 export type PlatformPreset = 'longform' | 'xiaohongshu'
 
-const MD_STORAGE_KEY = 'm2v-markdown'
+const LEGACY_MD_STORAGE_KEY = 'm2v-markdown'
+const ARTICLE_MD_STORAGE_KEY = 'm2v-article-markdown'
+const DOCUMENT_MD_STORAGE_KEY = 'm2v-document-markdown'
+const CARD_MD_STORAGE_KEY = 'm2v-card-markdown'
 const THEME_STORAGE_KEY = 'm2v-theme'
 const HTML_STORAGE_KEY = 'm2v-html'
 const DOCUMENT_SETTINGS_STORAGE_KEY = 'm2v-document-settings'
@@ -22,9 +25,13 @@ const CARD_FONT_KEY = 'm2v-card-font'
 const FALLBACK_MARKDOWN = '# markdown2view\n\n正在加载示例内容，或直接在左侧输入 Markdown。'
 const FALLBACK_HTML = '<main style="padding:32px;font-family:sans-serif">正在加载示例 HTML，或直接粘贴 AI 生成的 HTML。</main>'
 
-function loadMarkdown(): string {
+function loadMarkdown(key: string, options: { legacyFallback?: boolean } = {}): string {
   if (typeof localStorage === 'undefined') return FALLBACK_MARKDOWN
-  return localStorage.getItem(MD_STORAGE_KEY) ?? FALLBACK_MARKDOWN
+  return (
+    localStorage.getItem(key)
+    ?? (options.legacyFallback ? localStorage.getItem(LEGACY_MD_STORAGE_KEY) : null)
+    ?? FALLBACK_MARKDOWN
+  )
 }
 
 function loadHtml(): string {
@@ -77,7 +84,9 @@ function loadFont(key: string, defaultVal: FontFamilyOption): FontFamilyOption {
 }
 
 interface AppState {
-  markdown: string
+  articleMarkdown: string
+  documentMarkdown: string
+  cardMarkdown: string
   html: string
   mode: RenderMode
   inputType: InputType
@@ -88,7 +97,9 @@ interface AppState {
   accent: string
   accentDark: string
   colors: ThemeColors
-  setMarkdown: (md: string) => void
+  setArticleMarkdown: (md: string) => void
+  setDocumentMarkdown: (md: string) => void
+  setCardMarkdown: (md: string) => void
   setHtml: (html: string) => void
   setMode: (mode: RenderMode) => void
   setInputType: (type: InputType) => void
@@ -111,7 +122,9 @@ const initDocumentSettings = loadDocumentSettings()
 applyCssVars(initTheme.accent, initTheme.dark)
 
 export const useStore = create<AppState>((set) => ({
-  markdown: loadMarkdown(),
+  articleMarkdown: loadMarkdown(ARTICLE_MD_STORAGE_KEY),
+  documentMarkdown: loadMarkdown(DOCUMENT_MD_STORAGE_KEY, { legacyFallback: true }),
+  cardMarkdown: loadMarkdown(CARD_MD_STORAGE_KEY),
   html: loadHtml(),
   mode: loadMode(),
   inputType: loadMode() === 'html' ? 'html' : 'markdown',
@@ -122,9 +135,17 @@ export const useStore = create<AppState>((set) => ({
   accent: initTheme.accent,
   accentDark: initTheme.dark,
   colors: makeColors(initTheme.accent, initTheme.dark),
-  setMarkdown: (md) => {
-    if (typeof localStorage !== 'undefined') localStorage.setItem(MD_STORAGE_KEY, md)
-    set({ markdown: md })
+  setArticleMarkdown: (md) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(ARTICLE_MD_STORAGE_KEY, md)
+    set({ articleMarkdown: md })
+  },
+  setDocumentMarkdown: (md) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(DOCUMENT_MD_STORAGE_KEY, md)
+    set({ documentMarkdown: md })
+  },
+  setCardMarkdown: (md) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(CARD_MD_STORAGE_KEY, md)
+    set({ cardMarkdown: md })
   },
   setHtml: (html) => {
     if (typeof localStorage !== 'undefined') localStorage.setItem(HTML_STORAGE_KEY, html)
@@ -165,7 +186,10 @@ export const useStore = create<AppState>((set) => ({
   },
 }))
 
-export function shouldHydrateDemoContent(): boolean {
+export function shouldHydrateDemoContent(mode: RenderMode): boolean {
   if (typeof localStorage === 'undefined') return false
-  return !localStorage.getItem(MD_STORAGE_KEY) && !localStorage.getItem(HTML_STORAGE_KEY)
+  if (mode === 'html') return !localStorage.getItem(HTML_STORAGE_KEY)
+  if (mode === 'article') return !localStorage.getItem(ARTICLE_MD_STORAGE_KEY)
+  if (mode === 'card') return !localStorage.getItem(CARD_MD_STORAGE_KEY)
+  return !localStorage.getItem(DOCUMENT_MD_STORAGE_KEY) && !localStorage.getItem(LEGACY_MD_STORAGE_KEY)
 }

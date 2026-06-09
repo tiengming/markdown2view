@@ -138,8 +138,8 @@ function estimateBlockHeight(markdown: string, kind: DocumentBlockKind): number 
 }
 
 export function splitMarkdownBlocks(markdown: string): DocumentBlock[] {
-  const normalized = markdown.replace(/\r\n/g, '\n').trim()
-  if (!normalized) return []
+  const normalized = markdown.replace(/\r\n/g, '\n').replace(/\s+$/g, '')
+  if (!normalized.trim()) return []
 
   const initialBlocks: string[] = []
   const current: string[] = []
@@ -147,8 +147,8 @@ export function splitMarkdownBlocks(markdown: string): DocumentBlock[] {
   let openTag: string | null = null
 
   const flush = () => {
-    const block = current.join('\n').trim()
-    if (block) initialBlocks.push(block)
+    const block = current.join('\n').trimEnd()
+    if (block.trim()) initialBlocks.push(block)
     current.length = 0
   }
 

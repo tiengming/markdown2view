@@ -48,6 +48,7 @@ export function DocumentMode({
     () => createDocumentModel(markdown, rendered.meta, settings),
     [markdown, rendered.meta.title, rendered.meta.contentMarkdown, settings],
   )
+  const firstHeadingId = model.blocks.find((block) => block.kind === 'heading')?.id
 
   const [actualHeights, setActualHeights] = useState<Record<string, number>>({})
   const measuringRef = useRef<HTMLDivElement>(null)
@@ -238,7 +239,7 @@ export function DocumentMode({
               <section
                 key={block.id}
                 data-block-id={block.id}
-                className="document-block"
+                className={`document-block ${block.id === firstHeadingId ? 'document-title-block' : ''}`}
                 data-kind={block.kind}
                 dangerouslySetInnerHTML={{ __html: parseMarkdown(block.markdown, docColors) }}
               />
@@ -285,7 +286,7 @@ export function DocumentMode({
                 {page.blocks.map((block) => (
                   <section
                     key={block.id}
-                    className="document-block"
+                    className={`document-block ${block.id === firstHeadingId ? 'document-title-block' : ''}`}
                     data-kind={block.kind}
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(block.markdown, docColors) }}
                   />

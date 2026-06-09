@@ -24,6 +24,11 @@ function firstContentElement(doc: Document): HTMLElement {
   )
 }
 
+function firstPreviewPage(doc: Document): HTMLElement | null {
+  const pageNodes = Array.from(doc.querySelectorAll<HTMLElement>('.page, .slide, .card'))
+  return pageNodes.find((node) => node.style.display !== 'none') || pageNodes[0] || null
+}
+
 async function nextFrame(): Promise<void> {
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 }
@@ -240,19 +245,25 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     const iframe = iframeRef.current
     if (!iframe) return
 
+    let cancelled = false
+    let contentObserver: ResizeObserver | null = null
+    const timers: ReturnType<typeof setTimeout>[] = []
+
     const handleResize = () => {
+      if (cancelled) return
       const doc = iframe.contentDocument
       if (!doc) return
       
       const viewW = iframe.clientWidth
       const viewH = iframe.clientHeight
+      if (!viewW || !viewH) return
       
       if (pages.length > 0) {
         // 多页模式：寻找当前可见页获取真实尺寸
-        const pagesEls = Array.from(doc.querySelectorAll('.page, .slide, .card')) as HTMLElement[]
-        const visiblePage = pagesEls.find(el => el.style.display !== 'none') || pagesEls[0]
+        const visiblePage = firstPreviewPage(doc)
         if (!visiblePage) return
 
+        doc.body.style.zoom = '1'
         const rawW = visiblePage.offsetWidth
         const rawH = visiblePage.offsetHeight
         
@@ -267,6 +278,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           || doc.querySelector('body > section') as HTMLElement
           || doc.body
 
+        doc.documentElement.style.removeProperty('--auto-scale')
         const oldZoom = doc.body.style.zoom
         doc.body.style.zoom = '1'
         const rawW = wrapper.offsetWidth
@@ -279,18 +291,48 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       }
     }
 
-    setTimeout(handleResize, 100)
+    const scheduleResize = (delay = 0) => {
+      const timer = setTimeout(() => requestAnimationFrame(handleResize), delay)
+      timers.push(timer)
+    }
+
+    const observeContent = () => {
+      contentObserver?.disconnect()
+      const doc = iframe.contentDocument
+      if (!doc) return
+
+      contentObserver = new ResizeObserver(() => scheduleResize())
+      contentObserver.observe(doc.documentElement)
+      contentObserver.observe(doc.body)
+      const page = firstPreviewPage(doc)
+      if (page) contentObserver.observe(page)
+
+      doc.fonts?.ready.then(() => scheduleResize()).catch(() => {})
+      doc.querySelectorAll('img').forEach((img) => {
+        if (!img.complete) img.addEventListener('load', () => scheduleResize(), { once: true })
+      })
+    }
+
+    const stabilizeScale = () => {
+      observeContent()
+      ;[0, 50, 150, 350, 800].forEach(scheduleResize)
+    }
+
+    stabilizeScale()
 
     const ro = new ResizeObserver(() => {
-      handleResize()
+      scheduleResize()
     })
     
     ro.observe(iframe)
 
     return () => {
+      cancelled = true
+      timers.forEach(clearTimeout)
       ro.disconnect()
+      contentObserver?.disconnect()
     }
-  }, [pages])
+  }, [html, refreshKey, pages, currentPage])
 
   const handleExport = async () => {
     if (!iframeRef.current) {

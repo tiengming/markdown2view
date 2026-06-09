@@ -59,6 +59,20 @@ describe('documentModel', () => {
     expect(blocks[0].kind).toBe('code')
   })
 
+  it('preserves leading spaces at the beginning of document paragraphs', () => {
+    const blocks = splitMarkdownBlocks([
+      '# 标题',
+      '',
+      '    第一段正文保留四个半角空格。',
+      '',
+      '　　第二段正文保留两个全角空格。',
+    ].join('\n'))
+
+    expect(blocks.map((b) => b.kind)).toEqual(['heading', 'paragraph', 'paragraph'])
+    expect(blocks[1].markdown).toBe('    第一段正文保留四个半角空格。')
+    expect(blocks[2].markdown).toBe('　　第二段正文保留两个全角空格。')
+  })
+
   it('paginates blocks without exceeding page content height when possible', () => {
     const blocks = [
       { id: 'a', kind: 'paragraph' as const, markdown: 'a', estimatedHeight: 300, avoidBreak: true },

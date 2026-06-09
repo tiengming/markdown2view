@@ -54,6 +54,7 @@ body {
 .document-block {
   break-inside: avoid;
   page-break-inside: avoid;
+  margin: 0 0 18px;
 }
 
 .document-block p {
@@ -62,6 +63,8 @@ body {
   letter-spacing: 0.2px !important;
   font-size: var(--doc-font-size, 15px) !important;
   line-height: var(--doc-line-height, 1.9) !important;
+  margin: 0.6em 0 1em !important;
+  white-space: pre-wrap !important;
 }
 
 .document-block h1 {
@@ -69,23 +72,31 @@ body {
   letter-spacing: 0 !important;
   font-size: var(--doc-h1-size, 26px) !important;
   font-weight: 700 !important;
+  line-height: 1.35 !important;
+  margin: 1.25em 0 0.9em !important;
 }
 
 .document-block h2 {
   color: #111827 !important;
   letter-spacing: 0 !important;
   font-size: var(--doc-h2-size, 20px) !important;
+  line-height: 1.45 !important;
+  margin: 1.3em 0 0.8em !important;
 }
 
 .document-block h3 {
   color: #111827 !important;
   letter-spacing: 0 !important;
   font-size: var(--doc-h3-size, 17px) !important;
+  line-height: 1.5 !important;
+  margin: 1.15em 0 0.7em !important;
 }
 
 .document-block h4 {
   color: #111827 !important;
   letter-spacing: 0 !important;
+  line-height: 1.5 !important;
+  margin: 1em 0 0.65em !important;
 }
 
 .document-block table {
@@ -183,6 +194,11 @@ body {
 /* Document Mode Heading Centering */
 .document-center-title .document-block h1 {
   text-align: center !important;
+}
+
+.document-title-block h1 {
+  text-align: center !important;
+  margin: 0.35em 0 1.4em !important;
 }
 
 /* Document Mode Paragraph Indentation */

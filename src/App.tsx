@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
-import { shouldHydrateDemoContent, useStore } from '@/lib/store'
+import { shouldHydrateDemoContent, useStore, type RenderMode } from '@/lib/store'
 import { Toast, type ToastState } from '@/components/ui/Toast'
 import { ModeTabs } from '@/components/layout/ModeTabs'
 import { THEMES } from '@engine/composables/useTheme'
@@ -17,10 +17,35 @@ function ModeLoading() {
   )
 }
 
+async function loadDemoForMode(mode: RenderMode): Promise<{ markdown?: string; html?: string }> {
+  switch (mode) {
+    case 'article': {
+      const { DEMO_ARTICLE } = await import('@/data/demoArticle')
+      return { markdown: DEMO_ARTICLE }
+    }
+    case 'document': {
+      const { DEMO_DOCUMENT } = await import('@/data/demoDocument')
+      return { markdown: DEMO_DOCUMENT }
+    }
+    case 'card': {
+      const { DEMO_CARD } = await import('@/data/demoCard')
+      return { markdown: DEMO_CARD }
+    }
+    case 'html': {
+      const { DEMO_HTML } = await import('@/data/demoHtml')
+      return { html: DEMO_HTML }
+    }
+  }
+}
+
 // 多场景渲染工作台：长图文 / A4 文档 / 小红书卡片 / HTML 可视化。
 export default function App() {
-  const markdown = useStore((s) => s.markdown)
-  const setMarkdown = useStore((s) => s.setMarkdown)
+  const articleMarkdown = useStore((s) => s.articleMarkdown)
+  const setArticleMarkdown = useStore((s) => s.setArticleMarkdown)
+  const documentMarkdown = useStore((s) => s.documentMarkdown)
+  const setDocumentMarkdown = useStore((s) => s.setDocumentMarkdown)
+  const cardMarkdown = useStore((s) => s.cardMarkdown)
+  const setCardMarkdown = useStore((s) => s.setCardMarkdown)
   const html = useStore((s) => s.html)
   const setHtml = useStore((s) => s.setHtml)
   const colors = useStore((s) => s.colors)
@@ -37,31 +62,30 @@ export default function App() {
   const [toast, setToast] = useState<ToastState | null>(null)
   const showToast = (message: string) => setToast({ message, key: Date.now() })
 
+  const applyDemo = (targetMode: RenderMode, demo: { markdown?: string; html?: string }) => {
+    if (targetMode === 'article' && demo.markdown) setArticleMarkdown(demo.markdown)
+    if (targetMode === 'document' && demo.markdown) setDocumentMarkdown(demo.markdown)
+    if (targetMode === 'card' && demo.markdown) setCardMarkdown(demo.markdown)
+    if (targetMode === 'html' && demo.html) setHtml(demo.html)
+  }
+
   useEffect(() => {
-    if (!shouldHydrateDemoContent()) return
+    if (!shouldHydrateDemoContent(mode)) return
     let cancelled = false
-    Promise.all([
-      import('@/data/demoContent'),
-      import('@/data/demoHtml'),
-    ]).then(([{ DEMO_CONTENT }, { DEMO_HTML }]) => {
-      if (cancelled || !shouldHydrateDemoContent()) return
-      setMarkdown(DEMO_CONTENT)
-      setHtml(DEMO_HTML)
+    loadDemoForMode(mode).then((demo) => {
+      if (cancelled || !shouldHydrateDemoContent(mode)) return
+      applyDemo(mode, demo)
     })
     return () => {
       cancelled = true
     }
-  }, [setMarkdown, setHtml])
+  }, [mode, setArticleMarkdown, setDocumentMarkdown, setCardMarkdown, setHtml])
 
   const handleRestoreDemo = () => {
-    if (window.confirm('确定要恢复示例文件吗？这将会覆盖你当前所有的输入内容。')) {
-      Promise.all([
-        import('@/data/demoContent'),
-        import('@/data/demoHtml')
-      ]).then(([ { DEMO_CONTENT }, { DEMO_HTML } ]) => {
-        setMarkdown(DEMO_CONTENT)
-        setHtml(DEMO_HTML)
-        showToast('已恢复示例文件')
+    if (window.confirm('确定要恢复当前模块的示例内容吗？这将会覆盖当前编辑区内容。')) {
+      loadDemoForMode(mode).then((demo) => {
+        applyDemo(mode, demo)
+        showToast('已恢复当前模块示例')
       })
     }
   }
@@ -87,7 +111,7 @@ export default function App() {
           <button
             onClick={handleRestoreDemo}
             className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
-            title="恢复默认的示例文件"
+            title="恢复当前模块的示例内容"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
             恢复示例
@@ -118,8 +142,8 @@ export default function App() {
       <Suspense fallback={<ModeLoading />}>
         {mode === 'article' && (
           <ArticleMode
-            markdown={markdown}
-            setMarkdown={setMarkdown}
+            markdown={articleMarkdown}
+            setMarkdown={setArticleMarkdown}
             colors={colors}
             onToast={showToast}
           />
@@ -127,8 +151,8 @@ export default function App() {
         {mode === 'html' && <HtmlMode html={html} setHtml={setHtml} onToast={showToast} />}
         {mode === 'document' && (
           <DocumentMode
-            markdown={markdown}
-            setMarkdown={setMarkdown}
+            markdown={documentMarkdown}
+            setMarkdown={setDocumentMarkdown}
             colors={colors}
             settings={documentSettings}
             updateSettings={updateDocumentSettings}
@@ -137,8 +161,8 @@ export default function App() {
         )}
         {mode === 'card' && (
           <CardMode
-            markdown={markdown}
-            setMarkdown={setMarkdown}
+            markdown={cardMarkdown}
+            setMarkdown={setCardMarkdown}
             colors={colors}
             platform={platform === 'xiaohongshu' ? platform : 'xiaohongshu'}
             setPlatform={setPlatform}

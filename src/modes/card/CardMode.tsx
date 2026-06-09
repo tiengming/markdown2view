@@ -287,6 +287,9 @@ export function CardMode({
               {model.caption || '从 frontmatter 或 <title> 中补充 title / summary / chips 后，这里会生成可复制文案。'}
             </pre>
           </aside>
+          <aside className="mx-auto w-full max-w-[480px] rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-[13px] leading-6 text-blue-800">
+            当前分页图文适合快速生成清晰、统一的多页卡片；如果需要更强的品牌风格、复杂版式或活动海报，可以切换到自由画布使用“小红书多页图文”风格深度生成。
+          </aside>
 
           <div className="flex flex-col items-center gap-6 pb-12">
             {/* 隐藏测量容器 */}

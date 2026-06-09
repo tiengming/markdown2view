@@ -9,10 +9,98 @@ export interface DesignStyle {
   category: string
   accent: string
   description: string
+  outputType: OutputType
+  visualTone: VisualTone
+  family: string
+  displayLevel: DisplayLevel
   style: string
 }
 
-export const DESIGN_STYLES: DesignStyle[] = [
+export const OUTPUT_TYPES = [
+  '幻灯片',
+  '长页',
+  '卡片',
+  '报告',
+  '仪表盘',
+  '文档',
+] as const
+
+export const VISUAL_TONES = [
+  '极简',
+  '编辑',
+  '科技',
+  '数据',
+  '温暖',
+  '代码',
+] as const
+
+export type OutputType = (typeof OUTPUT_TYPES)[number]
+export type VisualTone = (typeof VISUAL_TONES)[number]
+export type DisplayLevel = 'primary' | 'basic'
+
+type DesignStyleMetadata = Pick<DesignStyle, 'outputType' | 'visualTone' | 'family' | 'displayLevel'>
+type RawDesignStyle = Omit<DesignStyle, keyof DesignStyleMetadata>
+
+const meta = (
+  outputType: OutputType,
+  visualTone: VisualTone,
+  family: string,
+  displayLevel: DisplayLevel = 'primary',
+): DesignStyleMetadata => ({ outputType, visualTone, family, displayLevel })
+
+const STYLE_METADATA: Record<string, DesignStyleMetadata> = {
+  vercel: meta('长页', '极简', 'minimal-product'),
+  stripe: meta('长页', '科技', 'fintech-product'),
+  linear: meta('长页', '科技', 'product-tool'),
+  apple: meta('长页', '极简', 'brand-story'),
+  spotify: meta('长页', '编辑', 'media-entertainment'),
+  editorial: meta('长页', '编辑', 'editorial-magazine'),
+  terminal: meta('长页', '代码', 'developer-code'),
+  xiaohongshu: meta('卡片', '温暖', 'social-card-custom'),
+  notion: meta('文档', '温暖', 'knowledge-doc'),
+  'xhs-multipage': meta('卡片', '温暖', 'social-card-multipage'),
+  'ppt-slide': meta('幻灯片', '极简', 'presentation-basic', 'basic'),
+  dashboard: meta('仪表盘', '数据', 'business-dashboard'),
+  resume: meta('文档', '极简', 'resume-profile'),
+  claude: meta('长页', '温暖', 'ai-assistant'),
+  figma: meta('长页', '科技', 'design-tool'),
+  airbnb: meta('长页', '温暖', 'consumer-brand'),
+  supabase: meta('长页', '代码', 'developer-code'),
+  raycast: meta('长页', '科技', 'system-tool'),
+  mongodb: meta('长页', '科技', 'enterprise-data'),
+  framer: meta('长页', '科技', 'site-builder'),
+  github: meta('长页', '代码', 'developer-code'),
+  openai: meta('长页', '极简', 'frontier-ai'),
+  arc: meta('长页', '温暖', 'system-experience'),
+  discord: meta('长页', '科技', 'community-chat'),
+  tailwind: meta('长页', '极简', 'web-components'),
+  report: meta('报告', '编辑', 'annual-report'),
+  poster: meta('卡片', '编辑', 'poster-design'),
+  'ai-console': meta('仪表盘', '科技', 'ai-console'),
+  'blueprint-tech': meta('长页', '科技', 'blueprint-tech'),
+  'keynote-cinematic': meta('幻灯片', '编辑', 'keynote-cinematic'),
+  'consulting-deck': meta('幻灯片', '数据', 'consulting-deck'),
+  'startup-pitch': meta('幻灯片', '温暖', 'startup-pitch'),
+  'neon-tech-launch': meta('幻灯片', '科技', 'launch-event'),
+  'growth-review': meta('幻灯片', '数据', 'growth-review'),
+  'developer-conf': meta('幻灯片', '代码', 'developer-code'),
+  'project-kickoff-rally': meta('幻灯片', '温暖', 'project-kickoff'),
+  'roadmap-planning': meta('幻灯片', '数据', 'roadmap-planning'),
+  'project-retro': meta('幻灯片', '数据', 'project-retro'),
+  'annual-story-review': meta('幻灯片', '温暖', 'annual-story'),
+  'proposal-lab': meta('幻灯片', '科技', 'proposal-lab'),
+  'workshop-canvas': meta('幻灯片', '温暖', 'workshop-canvas'),
+  'swiss-grid': meta('卡片', '编辑', 'swiss-grid'),
+  'bauhaus-composition': meta('卡片', '编辑', 'bauhaus-composition'),
+  'newsroom-feature': meta('长页', '编辑', 'newsroom-feature'),
+  'documentary-scroll': meta('长页', '编辑', 'documentary-scroll'),
+  'data-command-center': meta('仪表盘', '数据', 'data-screen'),
+  'data-journalism': meta('报告', '数据', 'data-journalism'),
+  'academic-paper': meta('文档', '编辑', 'academic-paper'),
+  'product-spec': meta('文档', '数据', 'product-spec'),
+}
+
+const RAW_DESIGN_STYLES: RawDesignStyle[] = [
   {
     id: 'vercel',
     name: '极简黑白 · Vercel',
@@ -131,22 +219,22 @@ export const DESIGN_STYLES: DesignStyle[] = [
   },
   {
     id: 'terminal',
-    name: '终端赛博 · Warp',
+    name: '开发者代码 · Terminal',
     category: '科技产品/开发极客',
     accent: '#00ff9c',
-    description: '深色 IDE 风，等宽字体，命令行块，霓虹绿青',
-    style: `【视觉主题】终端与代码美学，硬核极客风（参考 Warp）
+    description: '等宽字体、命令片段、API 示例和调试信息清晰排布',
+    style: `【视觉主题】开发者代码工作台，清晰、克制、可信
 【色彩系统】
- - 基础底色：深灰黑 #0c0c0f 或 #1a1b26
- - 文本颜色：主灰白 #c0caf5
- - 强调色：霓虹绿 #00ff9c 与青色 #2ac3de
+ - 基础底色：深灰 #0f1115 或冷白 #f8fafc，按内容密度选择。
+ - 文本颜色：主文本高对比，注释与辅助信息使用中性灰。
+ - 强调色：青绿 #22c55e 或蓝 #38bdf8，仅用于命令提示、状态和关键参数。
 【排版规则】
- - 字体：通篇大量使用等宽字体（JetBrains Mono / Fira Code）。
- - 层级：极度清晰的缩进，类似代码高亮着色。
+ - 字体：代码、命令、参数使用 JetBrains Mono / Fira Code；说明文字使用现代无衬线体。
+ - 层级：先给结论，再给命令、输出、解释，避免满屏代码。
 【组件特征】
- - 卡片：仿佛是终端窗口，顶部带红黄绿三个圆点控制钮，带细微亮色描边。
- - 高亮：特定文本拥有轻微发光（text-shadow）。
-【布局原则】以代码块、命令行提示符（$ 或 >）为核心，视觉紧凑冷酷。`
+ - 代码块：带标题、语言标签、行号或输出区，边框清晰，不使用发光装饰。
+ - 信息块：API 请求、响应、环境变量、错误提示分别用稳定区块表达。
+【布局原则】适合 CLI 教程、SDK 说明、调试记录、技术方案附录；重点是可读和可复制。`
   },
   {
     id: 'xiaohongshu',
@@ -208,10 +296,10 @@ export const DESIGN_STYLES: DesignStyle[] = [
   },
   {
     id: 'ppt-slide',
-    name: 'PPT 演示文稿',
-    category: '演示汇报/商务幻灯',
+    name: '基础幻灯片',
+    category: '演示汇报/基础幻灯',
     accent: '#2563eb',
-    description: '16:9 横版幻灯片，每张用 .slide 包裹，适合演示与汇报',
+    description: '通用 16:9 横版幻灯片，适合作为空白起点',
     style: `【视觉主题】专业商务幻灯片，演示大屏展示
 【色彩系统】
  - 基础底色：深蓝商务底色或纯白底
@@ -579,38 +667,38 @@ export const DESIGN_STYLES: DesignStyle[] = [
     name: '创业路演',
     category: '演示汇报/年轻路演',
     accent: '#ff4d8d',
-    description: '年轻活跃的 Pitch Deck，渐变封面、强故事线、市场机会和产品亮点突出',
-    style: `【视觉主题】年轻创业团队路演，活跃、有冲劲、但仍然可信
+    description: '年轻清爽的 Pitch Deck，故事线、市场机会和产品证据突出',
+    style: `【视觉主题】年轻创业团队路演，清爽、有冲劲、但仍然可信
 【色彩系统】
- - 基础底色：亮白 #ffffff 或深紫黑 #140f2d，允许局部使用高饱和渐变。
- - 强调色：玫红 #ff4d8d、活力紫 #8b5cf6、亮青 #22d3ee，三者最多同时出现两种。
+ - 基础底色：亮白 #ffffff 或深紫灰 #171329。
+ - 强调色：玫红 #ff4d8d、靛紫 #8b5cf6、亮青 #22d3ee，单页最多使用两种。
  - 文本颜色：深色背景用 #ffffff / #cbd5e1，浅色背景用 #111827 / #4b5563。
 【排版规则】
- - 字体：现代圆润无衬线体，标题大胆、短促、有节奏。
+ - 字体：现代圆润无衬线体，标题短促有力，正文用证据支撑。
  - 单页限制：每页只讲一个路演问题，如痛点、方案、市场、商业模式、增长、团队。
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
  - 可使用大号数字、机会卡片、增长曲线、产品 mockup 框、投资亮点标签。
-【布局原则】适合融资 BP、Demo Day、创新项目汇报；视觉要年轻，但不能像社交海报一样散乱。`
+【布局原则】适合融资 BP、Demo Day、创新项目汇报；视觉年轻，但信息结构必须稳。`
   },
   {
     id: 'neon-tech-launch',
-    name: '霓虹科技发布',
+    name: '科技产品发布',
     category: '演示汇报/科技发布',
     accent: '#00e5ff',
-    description: '强科技发布会风，深色霓虹、产品光效、参数与能力模块有未来感',
-    style: `【视觉主题】高科技产品发布会，未来感、速度感、强产品中心
+    description: '高科技发布会风，深色舞台、产品能力、规格参数和路线图清晰',
+    style: `【视觉主题】高科技产品发布会，未来感来自结构、节奏和产品中心
 【色彩系统】
  - 基础底色：深黑蓝 #050816 或 #08111f。
- - 强调色：霓虹青 #00e5ff、电紫 #8b5cf6、激光蓝 #3b82f6。
- - 边框与光效：使用 rgba(0,229,255,0.25) 的细描边和弱发光，禁止大面积刺眼光晕。
+ - 强调色：电青 #00e5ff、冷蓝 #3b82f6、克制紫 #8b5cf6。
+ - 边框与高光：使用细描边和局部高光，禁止大面积刺眼光晕。
 【排版规则】
  - 字体：几何无衬线体；参数、版本号、规格值使用等宽字体。
  - 层级：产品名最大，能力模块次之，参数说明必须清晰可读。
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
- - 组件：能力芯片、规格矩阵、雷达式模块、产品框线、版本路线图可用 HTML/CSS 绘制。
-【布局原则】适合 AI、新硬件、SaaS 新功能发布；科技感来自结构和光效克制，不靠随机装饰。`
+ - 组件：能力芯片、规格矩阵、产品框线、版本路线图可用 HTML/CSS 绘制。
+【布局原则】适合 AI、新硬件、SaaS 新功能发布；发布感来自清楚的节奏，不靠随机装饰。`
   },
   {
     id: 'growth-review',
@@ -750,19 +838,19 @@ export const DESIGN_STYLES: DesignStyle[] = [
     name: '共创工作坊',
     category: '演示汇报/共创工作坊',
     accent: '#eab308',
-    description: '工作坊引导风，便利贴、分组任务、流程节奏和产出模板轻松但有秩序',
+    description: '工作坊引导风，议程、分组任务、讨论模板和产出看板轻松但有秩序',
     style: `【视觉主题】团队共创工作坊，轻松、开放、适合讨论和协作
 【色彩系统】
  - 基础底色：柔和米白 #fffbeb 或浅灰 #f8fafc。
- - 强调色：便利贴黄 #eab308、湖蓝 #06b6d4、珊瑚红 #fb7185。
+ - 强调色：黄 #eab308、湖蓝 #06b6d4、珊瑚红 #fb7185，作为标签和分组识别。
  - 文本颜色：主文本 #1f2937，辅助文本 #64748b。
 【排版规则】
  - 字体：圆润无衬线体，标题友好但不幼稚。
  - 结构：目标 / 议程 / 分组任务 / 讨论模板 / 投票规则 / 输出物。
 【组件特征】
  - **强制分页容器**：每一页必须使用 \`<section class="slide">\` 包裹，16:9 比例。
- - 组件：便利贴卡片、计时器、分组看板、投票点、问题引导卡、成果模板。
-【布局原则】适合工作坊、头脑风暴、需求共创、复盘会；风格要轻松活跃，但版面仍需整齐。`
+ - 组件：分组任务卡、计时器、讨论看板、投票点、问题引导卡、成果模板。
+【布局原则】适合工作坊、头脑风暴、需求共创、复盘会；轻松但必须整齐可执行。`
   },
   {
     id: 'swiss-grid',
@@ -917,6 +1005,14 @@ export const DESIGN_STYLES: DesignStyle[] = [
 【布局原则】适合产品方案、技术规格、项目需求；重点是让团队一眼看懂范围、状态和下一步。`
   }
 ]
+
+export const DESIGN_STYLES: DesignStyle[] = RAW_DESIGN_STYLES.map((style) => {
+  const metadata = STYLE_METADATA[style.id]
+  if (!metadata) {
+    throw new Error(`Missing design style metadata: ${style.id}`)
+  }
+  return { ...style, ...metadata }
+})
 
 const TEMPLATE = (style: string) => `你是一名资深网页设计师、信息架构师与前端工程师。请基于我提供的内容，输出一个**完整、自包含、可直接在浏览器打开**的 HTML 文档。
 

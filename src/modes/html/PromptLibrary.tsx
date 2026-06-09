@@ -1,5 +1,12 @@
-import { useMemo } from 'react'
-import { DESIGN_STYLES, type DesignStyle } from '@/data/designPrompts'
+import { useMemo, useState } from 'react'
+import {
+  DESIGN_STYLES,
+  OUTPUT_TYPES,
+  VISUAL_TONES,
+  type DesignStyle,
+  type OutputType,
+  type VisualTone,
+} from '@/data/designPrompts'
 
 interface PromptLibraryProps {
   open: boolean
@@ -8,26 +15,30 @@ interface PromptLibraryProps {
 }
 
 export function PromptLibrary({ open, onClose, onCopy }: PromptLibraryProps) {
+  const [outputType, setOutputType] = useState<OutputType>('幻灯片')
+  const [visualTone, setVisualTone] = useState<VisualTone | '全部'>('全部')
+  const [showBasic, setShowBasic] = useState(false)
+
+  const filteredStyles = useMemo(() => {
+    return DESIGN_STYLES.filter((style) => {
+      if (style.outputType !== outputType) return false
+      if (visualTone !== '全部' && style.visualTone !== visualTone) return false
+      if (!showBasic && style.displayLevel === 'basic') return false
+      return true
+    })
+  }, [outputType, visualTone, showBasic])
+
   const groupedStyles = useMemo(() => {
     const groups: Record<string, typeof DESIGN_STYLES> = {}
-    DESIGN_STYLES.forEach((s) => {
-      const mainCategory = s.category.split('/')[0] || '其他'
-      if (!groups[mainCategory]) groups[mainCategory] = []
-      groups[mainCategory].push(s)
+    filteredStyles.forEach((s) => {
+      if (!groups[s.visualTone]) groups[s.visualTone] = []
+      groups[s.visualTone].push(s)
     })
-
-    // 推荐展示顺序：用更少的风格系列收拢品牌/用途标签。
-    const order = ['演示汇报', '科技产品', '设计创意', '媒体内容', '数据分析', '文档知识']
 
     return Object.entries(groups).sort((a, b) => {
-      const idxA = order.indexOf(a[0])
-      const idxB = order.indexOf(b[0])
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB
-      if (idxA !== -1) return -1
-      if (idxB !== -1) return 1
-      return a[0].localeCompare(b[0], 'zh-CN')
+      return VISUAL_TONES.indexOf(a[0] as VisualTone) - VISUAL_TONES.indexOf(b[0] as VisualTone)
     })
-  }, [])
+  }, [filteredStyles])
 
   return (
     <>
@@ -63,13 +74,62 @@ export function PromptLibrary({ open, onClose, onCopy }: PromptLibraryProps) {
           </button>
         </header>
 
+        <div className="border-b border-slate-200 bg-white px-6 py-4">
+          <div className="mb-3 text-xs font-semibold text-slate-400">先选输出类型</div>
+          <div className="flex flex-wrap gap-2">
+            {OUTPUT_TYPES.map((item) => (
+              <button
+                key={item}
+                onClick={() => setOutputType(item)}
+                className={`rounded-md px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+                  outputType === item
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-4 mb-3 text-xs font-semibold text-slate-400">再选视觉气质</div>
+          <div className="flex flex-wrap items-center gap-2">
+            {(['全部', ...VISUAL_TONES] as const).map((item) => (
+              <button
+                key={item}
+                onClick={() => setVisualTone(item)}
+                className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  visualTone === item
+                    ? 'bg-[var(--accent)] text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+            <label className="ml-auto flex items-center gap-2 text-[13px] text-slate-500">
+              <input
+                type="checkbox"
+                checked={showBasic}
+                onChange={(event) => setShowBasic(event.target.checked)}
+              />
+              显示基础模板
+            </label>
+          </div>
+        </div>
+
         <div className="flex-1 overflow-y-auto p-6 lg:p-8">
           <div className="mx-auto space-y-10">
+            {groupedStyles.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+                当前组合下没有推荐风格，可以切换视觉气质，或勾选显示基础模板。
+              </div>
+            ) : null}
             {groupedStyles.map(([groupName, styles]) => (
               <section key={groupName}>
                 <h3 className="mb-4 flex items-center gap-2 border-b border-slate-200 pb-2 text-base font-bold text-slate-800">
                   <span className="h-4 w-1 rounded-full bg-[var(--accent)]"></span>
-                  {groupName}系列
+                  {groupName}气质
                   <span className="text-[13px] font-normal text-slate-400">({styles.length})</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">

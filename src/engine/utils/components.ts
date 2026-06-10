@@ -287,9 +287,9 @@ export function parseCallout(
   const border = borders[type] || t.accent
   let html = `<section style="margin:16px 0px;padding:16px 18px;background:${bg};border-left:4px solid ${border};border-radius:0px 10px 10px 0px">`
   if (title)
-    html += `<p style="margin:0px 0px 6px;font-size:14px;font-weight:700;color:rgb(51,65,85)">${leaf((icons[type] || '') + ' ' + title)}</p>`
+    html += `<p style="margin:0px 0px 6px;font-size:16px;font-weight:700;color:rgb(51,65,85)">${leaf((icons[type] || '') + ' ' + title)}</p>`
   if (body.trim())
-    html += `<section style="font-size:14px;color:rgb(85,85,85);line-height:1.7;letter-spacing:0.5px;text-align:justify">${inlineFormat(body.trim(), t)}</section>`
+    html += `<section style="font-size:16px;color:rgb(85,85,85);line-height:1.7;letter-spacing:0.5px;text-align:justify">${inlineFormat(body.trim(), t)}</section>`
   html += `</section>`
   return { html, next: i }
 }

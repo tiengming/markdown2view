@@ -364,7 +364,7 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
         ql.push(lines[i].replace(/^>\s?/, ''))
         i++
       }
-      html += `<section style="margin:14px 0px;padding:12px 16px;background:rgb(247,248,252);border-left:3px solid ${t.accent};border-radius:0px 6px 6px 0px;color:rgb(85,85,85);font-size:14px">`
+      html += `<section style="margin:14px 0px;padding:12px 16px;background:rgb(247,248,252);border-left:3px solid ${t.accent};border-radius:0px 6px 6px 0px;color:rgb(85,85,85);font-size:16px">`
       ql.forEach((l) => {
         html += `<section><p style="margin:4px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px">${inlineFormat(l, t)}</p></section>`
       })

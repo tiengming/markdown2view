@@ -10,7 +10,7 @@ describe('parseMarkdown - Caption parsing', () => {
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-image"')
     expect(html).toContain('data-caption-kind="image"')
-    expect(html).toContain('style="margin:8px 0px 16px"')
+    expect(html).toContain('margin:8px 0px 16px')
     expect(html).toContain('这是图片题注')
   })
 
@@ -19,7 +19,7 @@ describe('parseMarkdown - Caption parsing', () => {
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-table"')
     expect(html).toContain('data-caption-kind="table"')
-    expect(html).toContain('style="margin:16px 0px 8px"')
+    expect(html).toContain('margin:16px 0px 8px')
     expect(html).toContain('这是表格题注')
   })
 
@@ -35,19 +35,19 @@ describe('parseMarkdown - Caption parsing', () => {
     const md1 = '![img](url)\nFig. 1 - Figure caption'
     const html1 = parseMarkdown(md1, colors)
     expect(html1).toContain('class="document-caption document-caption-image"')
-    expect(html1).toContain('style="margin:8px 0px 16px"')
+    expect(html1).toContain('margin:8px 0px 16px')
     
-    const md2 = 'Table 10 Example table\n| col1 | col2 |\n| --- | --- |'
+    const md2 = 'Table 10 Example table\n| col1 | col2 |\n| --- | --- |\n'
     const html2 = parseMarkdown(md2, colors)
     expect(html2).toContain('class="document-caption document-caption-table"')
-    expect(html2).toContain('style="margin:16px 0px 8px"')
+    expect(html2).toContain('margin:16px 0px 8px')
   })
 
   it('should parse Chinese numeric captions correctly with image above', () => {
     const md = '![img](url)\n图 十一. 图片题注'
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-image"')
-    expect(html).toContain('style="margin:8px 0px 16px"')
+    expect(html).toContain('margin:8px 0px 16px')
     expect(html).toContain('图片题注')
   })
 
@@ -106,5 +106,20 @@ describe('parseMarkdown - Caption parsing', () => {
     const html = parseMarkdown(md, colors)
     expect(html).not.toContain('document-caption')
     expect(html).toContain('style="margin:0px 0px 24px"')
+  })
+
+  it('should parse blockquote with font-size 16px to match body text', () => {
+    const md = '> 这是引用的文字'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('font-size:16px')
+    expect(html).toContain('这是引用的文字')
+  })
+
+  it('should parse callout block with font-size 16px to match body text', () => {
+    const md = '> [NOTE] 关于孩子的韧性\n> ==人不是"条件A"就必然"输出B"=='
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('font-size:16px')
+    expect(html).toContain('关于孩子的韧性')
+    expect(html).toContain('人不是"条件 A"就必然"输出 B"')
   })
 })

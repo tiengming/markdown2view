@@ -1,6 +1,6 @@
 schema_version: 1
 module_path: markdown2view
-title: 多模态 Markdown 可视化渲染引擎
+title: Markdown 多场景渲染与可视化编辑器
 scope:
     - src/
 source_files: []

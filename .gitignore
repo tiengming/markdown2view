@@ -17,6 +17,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# TypeScript 构建产物
+*.tsbuildinfo
+
 # Excluded folders
 r-markdown/
 html-anything/

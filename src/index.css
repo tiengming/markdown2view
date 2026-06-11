@@ -6,6 +6,28 @@
   --accent-dark: #1e8449;
 }
 
+.app-logo-bg {
+  background: var(--accent);
+}
+
+.app-title-accent {
+  color: var(--accent);
+}
+
+.accent-bg {
+  background: var(--accent);
+}
+
+/* 文章预览的「手机框」容器：静态样式，避免内联 style */
+.phone-frame {
+  width: 100%;
+  max-width: 700px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
 html,
 body,
 #root {
@@ -58,8 +80,9 @@ body {
 }
 
 .document-block p {
+  /* 现代浏览器对 CJK 文本仅用 text-align: justify 即可实现两端对齐；
+     text-justify: inter-ideograph 仅旧版 IE/Edge 支持，已移除以消除兼容性告警 */
   text-align: justify !important;
-  text-justify: inter-ideograph;
   letter-spacing: 0.2px !important;
   font-size: var(--doc-font-size, 15px) !important;
   line-height: var(--doc-line-height, 1.9) !important;

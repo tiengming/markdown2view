@@ -75,11 +75,11 @@ export default function App() {
       <header className="app-header relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 shadow-sm">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md text-white shadow-sm" style={{ background: 'var(--accent)' }}>
+            <div className="app-logo-bg flex h-7 w-7 items-center justify-center rounded-md text-white shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
             </div>
             <h1 className="text-[17px] font-bold tracking-tight text-slate-800">
-              markdown<span style={{ color: 'var(--accent)' }}>2</span>view
+              markdown<span className="app-title-accent">2</span>view
             </h1>
           </div>
           {/* 多模式切换 */}

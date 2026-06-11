@@ -21,11 +21,9 @@ export function Toast({ toast }: { toast: ToastState | null }) {
 
   return (
     <div
-      className="pointer-events-none fixed bottom-8 left-1/2 z-50 -translate-x-1/2 transition-all duration-300"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: `translateX(-50%) translateY(${visible ? 0 : 12}px)`,
-      }}
+      className={`pointer-events-none fixed bottom-8 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ${
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+      }`}
     >
       <div className="rounded-lg bg-gray-900/90 px-4 py-2.5 text-sm font-medium text-white shadow-lg">
         {toast.message}

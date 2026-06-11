@@ -127,17 +127,7 @@ export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewP
           </section>
         )}
 
-        <div
-          className="phone-frame mx-auto"
-          style={{
-            width: '100%',
-            maxWidth: 700,
-            background: '#fff',
-            borderRadius: 12,
-            boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="phone-frame mx-auto">
           <div
             ref={contentRef}
             style={{

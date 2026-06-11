@@ -1,5 +1,5 @@
 /**
- * Portions of this file are derived from html-anything (https://github.com/nexu-io/open-design),
+ * Portions of this file are derived from html-anything (https://github.com/nexu-io/html-anything),
  * licensed under the Apache License, Version 2.0.
  * Modified by ZhongXiandou/markdown2view contributors.
  */

@@ -11,17 +11,18 @@
 
 ## ✨ 核心亮点与四大排版模式
 
-### 1. 📝 长图文排版模式 (WeChat Longform)
+### 1. 🖨️ A4 规范文档模式 (A4 Document)
+- **纯前端智能分页**：内置高度实测机制，结合 `ResizeObserver` 及图片 `load` 监听，实时精确计算 A4 页面物理高度并进行平滑跨页分页。
+- **封面页等距分布**：首页仅含标题和信息表格时，自动垂直等距分布（标题到页眉、标题到表格、表格到页脚间距相等）。
+- **自定义页眉页脚**：支持设置页码、标题、首行缩进及字体倍率。
+- **完美跨页导出**：直接调用浏览器打印机制或客户端 PDF 生成，避免图片被截断。
+
+### 2. 📝 长图文排版模式 (WeChat Longform)
 - **公众号无损渲染**：支持自定义组件（`<steps>` 步骤条、`<timeline>` 时间线、`<compare>` 对比卡、`<slider>` 轮播图等）并直接复用公众号排版引擎。
 - **一键复制富文本**：完美兼容微信公众平台、知乎、头条等图文编辑器。
 - **本地性能优化**：通过输入防抖 (Debounce) 和状态解耦，保证万字长文编辑依旧流畅不卡顿。
 
-### 2. 🖨️ A4 规范文档模式 (A4 Document)
-- **纯前端智能分页**：内置高度实测机制，结合 `ResizeObserver` 及图片 `load` 监听，实时精确计算 A4 页面物理高度并进行平滑跨页分页。
-- **自定义页眉页脚**：支持设置页码、标题、首行缩进及字体倍率。
-- **完美跨页导出**：直接调用浏览器打印机制或客户端 PDF 生成，避免图片被截断。
-
-### 3. 📷 小红书多页卡片模式 (Social Cards)
+### 3. 📷 分页图文卡片模式 (Social Cards)
 - **多尺寸卡片生成**：支持 `3:4` 与 `9:16` 比例卡片，带自动序号、作者角标与品牌 Logo。
 - **配图与文案一键复制**：从 Frontmatter 提取 metadata 智能生成社交平台发布文案。
 - **批量导出**：支持打包 ZIP 下载所有生成卡片，或逐张下载高清 PNG。
@@ -90,9 +91,9 @@ src/
 │   ├── editor/            # CodeMirror 6 编辑器 React 封装
 │   └── ui/                # Toast / Button 等通用 UI 元件
 ├── modes/
-│   ├── article/           # 长图文工作台
 │   ├── document/          # A4 文档排版工作台
-│   ├── card/              # 小红书卡片排版工作台
+│   ├── article/           # 长图文工作台
+│   ├── card/              # 分页图文卡片排版工作台
 │   └── html/              # HTML 自由画布可视化工作台
 ├── lib/                   # store (Zustand) / exportImage (高清截图) / 滚动联动等通用逻辑
 ├── data/                  # 示例数据（包含 demoArticle / demoHtml / AI Prompt 指令集）
@@ -104,11 +105,11 @@ src/
 
 ## 🤝 开源参考与设计致敬
 
-| 项目 | 借鉴与致敬内容 |
-| :--- | :--- |
-| [r-markdown](https://github.com/RobocopMao/r-markdown) | 移植了微信公众号渲染引擎的核心解析逻辑、多款排版组件以及主题配色方案。 |
-| [html-anything](https://github.com/nexu-io/open-design) | 启发了 HTML 可视化画布中基于 `iframe` 容器的安全隔离设计与导图规范。 |
-| [guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | 自由画布中「电子杂志」「瑞士国际主义」的风格参考，以及网页 PPT 主题节奏、标准图片比例、版式校验、低性能兜底等经验启发。原项目采用 AGPL-3.0，本项目仅做设计经验与提示词层面的转译吸收，未并入其模板源码。 |
+| 项目 | 协议 | 借鉴与致敬内容 |
+| :--- | :--- | :--- |
+| [r-markdown](https://github.com/RobocopMao/r-markdown) | MIT（声明） | 移植了微信公众号渲染引擎的核心解析逻辑、多款排版组件以及主题配色方案。 |
+| [html-anything](https://github.com/nexu-io/html-anything) | Apache-2.0 | 启发了 HTML 可视化画布中基于 `iframe` 容器的安全隔离设计与导出层架构。 |
+| [guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | AGPL-3.0 | 自由画布中「电子杂志」「瑞士国际主义」的风格参考，以及网页 PPT 主题节奏、标准图片比例、版式校验等经验启发。本项目仅做设计经验与提示词层面的转译吸收，未并入其模板源码。 |
 
 ---
 

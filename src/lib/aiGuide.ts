@@ -169,6 +169,35 @@ const DOCUMENT_RULES_SECTION = `## 四、排版规范与要求（重要）
 4. 不要在正文中写死颜色、字号、字体或 HTML 样式；系统会统一使用导航栏主题色与 A4 文档样式。
 5. 直接输出可粘贴的 Markdown 正文，不要有任何多余的解释，不要用代码块包住整篇文档。`;
 
+const DOCUMENT_COVER_SECTION = `## 三、封面页写法
+
+如果文档需要封面页，在第一个 \\\`<page-break/>\\\` 之前只写一个一级标题和一个信息表格。系统会自动识别封面页并将内容在垂直方向等距分布（标题到页眉、标题到表格、表格到页脚的间距相等）。
+
+封面页参考格式：
+
+\\\`\\\`\\\`
+# 文档正式标题
+
+|  |  |
+| --- | --- |
+| 文档编号 | XXX-DOC-2026-001 |
+| 版本号 | V1.0 |
+| 编写 | 编写人/编写组 |
+| 编写日期 | 2026-06-11 |
+| 审核 | 审核人/审核组 |
+| 审核日期 | 2026-06-12 |
+| 发布状态 | 草稿/已发布 |
+| 机密等级 | 绝密/机密/内部公开/授权公开/公开 |
+
+<page-break/>
+\\\`\\\`\\\`
+
+封面页要求：
+- 一级标题只能有一个，作为文档主标题。
+- 信息表格采用两列键值对格式（字段名 | 值），字段可根据实际情况增减。
+- 封面页内不要使用列表、代码块、图片等非标题/表格元素。
+- \\\`<page-break/>\\\` 之后开始写正文。`;
+
 export function buildArticleAiGuide(): string {
   return [
     "# 长图文排版 Markdown 语法指令",
@@ -215,6 +244,8 @@ export function buildDocumentAiGuide(): string {
     DOCUMENT_META_SECTION,
     "",
     DOCUMENT_STANDARD_SECTION,
+    "",
+    DOCUMENT_COVER_SECTION,
     "",
     MATH_SECTION,
     "",

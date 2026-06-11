@@ -31,14 +31,3 @@ export function detectPages(doc: Document): PageInfo[] {
     }
   })
 }
-
-/**
- * 滚动 iframe 到指定页面节点。
- */
-export function scrollToPage(doc: Document, pageIndex: number): void {
-  const nodes = doc.querySelectorAll<HTMLElement>(PAGE_SELECTOR)
-  const target = nodes[pageIndex]
-  if (target) {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}

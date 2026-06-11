@@ -1,5 +1,5 @@
 /**
- * Portions of this file are derived from html-anything (https://github.com/nexu-io/open-design),
+ * Portions of this file are derived from html-anything (https://github.com/nexu-io/html-anything),
  * licensed under the Apache License, Version 2.0.
  * Modified by ZhongXiandou/markdown2view contributors.
  */
@@ -137,65 +137,6 @@ export function resolveBackground(doc: Document, win: Window, override?: string)
   return '#ffffff'
 }
 
-function fullScrollHeight(doc: Document): number {
-  const b = doc.body
-  const h = doc.documentElement
-  return Math.max(
-    b?.scrollHeight ?? 0,
-    b?.offsetHeight ?? 0,
-    h?.scrollHeight ?? 0,
-    h?.offsetHeight ?? 0,
-    h?.clientHeight ?? 0,
-  )
-}
-
-export async function iframeToBlob(iframe: HTMLIFrameElement, opts: ImageOpts = {}): Promise<Blob> {
-  const doc = iframe.contentDocument
-  const win = iframe.contentWindow
-  if (!doc || !win) throw new Error('iframe 尚未就绪')
-
-  await waitForDocumentReady(doc, win)
-
-  const prevIframeHeight = iframe.style.height
-  const prevDocOverflow = doc.documentElement.style.overflow
-  const prevBodyOverflow = doc.body.style.overflow
-
-  const fullHeight = fullScrollHeight(doc)
-  if (!fullHeight) throw new Error('预览暂无内容')
-  iframe.style.height = `${fullHeight}px`
-  doc.documentElement.style.overflow = 'visible'
-  doc.body.style.overflow = 'visible'
-
-  await waitForStability(doc, win, 1000)
-
-  try {
-    const layoutWidth =
-      doc.documentElement.clientWidth || iframe.clientWidth || doc.body.scrollWidth
-    const layoutHeight = fullScrollHeight(doc)
-
-    const scale = opts.scale ?? 2
-    const safeMax = opts.maxHeight ?? Math.floor(16000 / scale)
-    const captureHeight = Math.min(layoutHeight, safeMax)
-
-    const backgroundColor = resolveBackground(doc, win, opts.backgroundColor)
-
-    const blob = await domToBlob(doc.documentElement as unknown as HTMLElement, {
-      scale,
-      type: opts.type ?? 'image/png',
-      backgroundColor,
-      width: layoutWidth,
-      height: captureHeight,
-      fetch: { requestInit: { cache: 'force-cache' } },
-    })
-    if (!blob) throw new Error('截图失败')
-    return blob
-  } finally {
-    iframe.style.height = prevIframeHeight
-    doc.documentElement.style.overflow = prevDocOverflow
-    doc.body.style.overflow = prevBodyOverflow
-  }
-}
-
 export async function elementToBlob(element: HTMLElement, opts: ImageOpts = {}): Promise<Blob> {
   await waitForStability(element, element.ownerDocument.defaultView || window, 1000)
 
@@ -225,14 +166,6 @@ export function downloadBlob(blob: Blob, filename: string) {
   a.click()
   a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
-
-export async function downloadIframeAsImage(
-  iframe: HTMLIFrameElement,
-  basename = 'markdown2view',
-): Promise<void> {
-  const blob = await iframeToBlob(iframe)
-  downloadBlob(blob, `${basename}-${Date.now()}.png`)
 }
 
 /**

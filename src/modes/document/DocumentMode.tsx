@@ -302,6 +302,7 @@ export function DocumentMode({
                   right: settings.marginRight,
                   bottom: settings.marginBottom,
                   overflow: 'hidden',
+                  ...(page.isCover ? { display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly' } : {}),
                 }}
               >
                 {page.blocks.map((block) => (

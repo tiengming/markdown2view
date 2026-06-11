@@ -25,6 +25,7 @@ export interface DocumentPage {
   blocks: DocumentBlock[]
   usedHeight: number
   oversized: boolean
+  isCover?: boolean
 }
 
 export interface DocumentSettings {
@@ -262,6 +263,24 @@ export function fontScaleFactor(scale: DocumentSettings['fontScale']): number {
   }
 }
 
+/**
+ * 判断一组块是否符合"封面页"结构：
+ * 仅包含 1 个 heading + 0~1 个 table，可含 paragraph（通常是摘要文字）。
+ * 用于在第一个 pagebreak 前自动识别封面页并启用等距分布布局。
+ */
+function isCoverPageBlocks(blocks: DocumentBlock[]): boolean {
+  if (blocks.length === 0) return false
+  let headingCount = 0
+  let tableCount = 0
+  for (const b of blocks) {
+    if (b.kind === 'heading') headingCount++
+    else if (b.kind === 'table') tableCount++
+    else if (b.kind === 'paragraph') continue // 允许封面页含摘要段落
+    else return false // 其他块类型（code、image、list 等）不算封面
+  }
+  return headingCount === 1 && tableCount <= 1
+}
+
 export function paginateDocumentBlocks(
   blocks: DocumentBlock[],
   settings: Pick<DocumentSettings, 'pageHeight' | 'marginTop' | 'marginBottom' | 'fontScale'>,
@@ -288,7 +307,21 @@ export function paginateDocumentBlocks(
 
   for (const block of blocks) {
     if (block.kind === 'pagebreak') {
-      pushPage()
+      // 第一个 pagebreak 触发分页时，检测是否为封面页
+      if (pages.length === 0 && isCoverPageBlocks(current)) {
+        const page: DocumentPage = {
+          pageNumber: 1,
+          blocks: current,
+          usedHeight,
+          oversized: false,
+          isCover: true,
+        }
+        pages.push(page)
+        current = []
+        usedHeight = 0
+      } else {
+        pushPage()
+      }
       continue // Drop the pagebreak marker itself from rendering
     }
 

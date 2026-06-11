@@ -337,123 +337,22 @@ body {
   color: rgba(255,255,255,0.45);
 }
 
-/* ── SLIDE 4: MODE 1 ── */
+/* ── SLIDE 4: A4 MODE ── */
 .s4-inner {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: 280px 1fr;
-}
-
-.s4-left {
-  background: var(--ink);
-  padding: 48px 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-}
-
-.mode-badge {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  background: rgba(192,160,96,0.15);
-  color: #c0a060;
-  padding: 4px 8px;
-  border-radius: 2px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  margin-bottom: 16px;
-}
-
-.mode-num {
-  font-family: var(--serif);
-  font-size: 80px;
-  font-weight: 900;
-  color: rgba(192,160,96,0.15);
-  line-height: 1;
-  margin-bottom: -8px;
-}
-
-.mode-title {
-  font-family: var(--serif);
-  font-size: 20px;
-  font-weight: 700;
-  color: #f5f0e4;
-  line-height: 1.3;
-}
-
-.mode-en {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  color: rgba(245,240,228,0.3);
-  margin-top: 6px;
-}
-
-.s4-right {
-  padding: 40px 40px 40px 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0;
-}
-
-.feature-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.feature-card {
-  background: var(--paper-light);
-  border: 1px solid var(--rule);
-  padding: 16px;
-  border-radius: 2px;
-}
-
-.feature-card-title {
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-
-.feature-card-body {
-  font-family: var(--sans);
-  font-size: 10px;
-  color: var(--ink-muted);
-  line-height: 1.6;
-}
-
-.feature-highlight {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--accent);
-  margin-top: 6px;
-  letter-spacing: 0.04em;
-}
-
-/* ── SLIDE 5: A4 MODE ── */
-.s5-inner {
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-columns: 1fr 280px;
 }
 
-.s5-left {
+.s4-left {
   padding: 40px 40px 40px 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.s5-right {
+.s4-right {
   background: var(--ink);
   padding: 48px 32px;
   display: flex;
@@ -520,6 +419,107 @@ body {
   border: 1px solid rgba(44,74,140,0.2);
   padding: 3px 8px;
   border-radius: 2px;
+}
+
+/* ── SLIDE 5: MODE 2 (Longform) ── */
+.s5-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+
+.s5-left {
+  background: var(--ink);
+  padding: 48px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.mode-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  background: rgba(192,160,96,0.15);
+  color: #c0a060;
+  padding: 4px 8px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.mode-num {
+  font-family: var(--serif);
+  font-size: 80px;
+  font-weight: 900;
+  color: rgba(192,160,96,0.15);
+  line-height: 1;
+  margin-bottom: -8px;
+}
+
+.mode-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #f5f0e4;
+  line-height: 1.3;
+}
+
+.mode-en {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: rgba(245,240,228,0.3);
+  margin-top: 6px;
+}
+
+.s5-right {
+  padding: 40px 40px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.feature-card {
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  padding: 16px;
+  border-radius: 2px;
+}
+
+.feature-card-title {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.feature-card-body {
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.feature-highlight {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--accent);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
 }
 
 /* ── SLIDE 6: SOCIAL CARDS ── */
@@ -1131,8 +1131,8 @@ body {
       <div class="s1-stat-label">后端依赖</div>
     </div>
     <div class="s1-stat">
-      <div class="s1-stat-num">∞</div>
-      <div class="s1-stat-label">导出自由度</div>
+      <div class="s1-stat-num">5+</div>
+      <div class="s1-stat-label">导出格式</div>
     </div>
   </div>
   <div class="footer-bar" style="border-top-color:rgba(192,160,96,0.15)">
@@ -1187,62 +1187,18 @@ body {
 <section class="slide s3">
   <div class="s3-content">
     <div class="s3-mark">&ldquo;</div>
-    <div class="s3-quote">彻底抛弃粗暴的延时 sleep，改用基于 MutationObserver 探测 DOM 稳定性的 waitForStability 高清截图导出方案</div>
-    <div class="s3-source">markdown2view · HTML 可视化自由画布 · 高清导出技术</div>
+    <div class="s3-quote">同一份 Markdown 草稿，一键切换为公众号长图、A4 文档、社交卡片或网页 PPT —— 内容一次创作，多端无损分发</div>
+    <div class="s3-source">markdown2view · 核心产品理念</div>
   </div>
   <div class="page-label" style="color:rgba(255,255,255,0.25);">03 / 12</div>
 </section>
 
-<!-- ── SLIDE 4: 长图文模式 ── -->
-<section class="slide">
-  <div class="header-strip warm"></div>
-  <div class="s4-inner">
-    <div class="s4-left">
-      <div class="mode-badge">📝 MODE 01</div>
-      <div class="mode-num">01</div>
-      <div class="mode-title">长图文<br>排版模式</div>
-      <div class="mode-en">WeChat Longform</div>
-    </div>
-    <div class="s4-right">
-      <div class="section-eyebrow warm" style="margin-bottom:20px;">核心能力</div>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-card-title">公众号无损渲染</div>
-          <div class="feature-card-body">支持自定义组件 steps、timeline、compare、slider，直接复用公众号排版引擎</div>
-          <div class="feature-highlight">自定义 Markdown 语法扩展</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">一键复制富文本</div>
-          <div class="feature-card-body">完美兼容微信公众平台、知乎、头条等图文编辑器，保留格式无偏差</div>
-          <div class="feature-highlight">clipboard API · 富文本保真</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">万字流畅编辑</div>
-          <div class="feature-card-body">输入防抖 Debounce 与状态解耦保证万字长文编辑时不卡顿</div>
-          <div class="feature-highlight">CodeMirror 6 · Zustand 状态管理</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-title">本地持久化</div>
-          <div class="feature-card-body">Zustand persist 中间件自动将草稿写入 localStorage，关窗不丢内容</div>
-          <div class="feature-highlight">零后端 · 离线可用</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bar">
-    <span class="brand">markdown2view</span>
-    <span class="dot"></span>
-    <span class="tagline">长图文排版 · 公众号生态</span>
-  </div>
-  <div class="page-label">04 / 12</div>
-</section>
-
-<!-- ── SLIDE 5: A4 文档模式 ── -->
+<!-- ── SLIDE 4: A4 文档模式 ── -->
 <section class="slide">
   <div class="header-strip"></div>
-  <div class="s5-inner">
-    <div class="s5-left">
-      <div class="section-eyebrow" style="margin-bottom:20px;">🖨 MODE 02 — A4 规范文档模式</div>
+  <div class="s4-inner">
+    <div class="s4-left">
+      <div class="section-eyebrow" style="margin-bottom:20px;">🖨 MODE 01 — A4 规范文档模式</div>
       <div class="section-title" style="font-size:24px;margin-bottom:16px;">纯前端智能分页<br>完美还原印刷质感</div>
       <div class="section-body" style="margin-bottom:16px;">
         内置高度实测机制，结合 ResizeObserver 及图片 load 监听，实时精确计算 A4 页面物理高度并进行平滑跨页分页，彻底解决图片被截断的痛点。
@@ -1273,7 +1229,7 @@ body {
             </li>
             <li class="principle-item">
               <span class="principle-num">③</span>
-              <span class="principle-text" style="font-size:11px;"><strong>实时预览</strong> — 编辑即时渲染，所见即所得，分页结果实时展示</span>
+              <span class="principle-text" style="font-size:11px;"><strong>封面页等距分布</strong> — 首页仅含标题和表格时自动垂直居中排版</span>
             </li>
           </ul>
         </div>
@@ -1285,9 +1241,9 @@ body {
         <span class="tech-tag">高度实测分页算法</span>
       </div>
     </div>
-    <div class="s5-right">
-      <div class="mode-badge">🖨 MODE 02</div>
-      <div class="mode-num">02</div>
+    <div class="s4-right">
+      <div class="mode-badge">🖨 MODE 01</div>
+      <div class="mode-num">01</div>
       <div class="mode-title">A4 规范<br>文档模式</div>
       <div class="mode-en">A4 Document</div>
     </div>
@@ -1296,6 +1252,50 @@ body {
     <span class="brand">markdown2view</span>
     <span class="dot"></span>
     <span class="tagline">A4 文档 · 无损打印 · 前端分页</span>
+  </div>
+  <div class="page-label">04 / 12</div>
+</section>
+
+<!-- ── SLIDE 5: 长图文模式 ── -->
+<section class="slide">
+  <div class="header-strip warm"></div>
+  <div class="s5-inner">
+    <div class="s5-left">
+      <div class="mode-badge">📝 MODE 02</div>
+      <div class="mode-num">02</div>
+      <div class="mode-title">长图文<br>排版模式</div>
+      <div class="mode-en">WeChat Longform</div>
+    </div>
+    <div class="s5-right">
+      <div class="section-eyebrow warm" style="margin-bottom:20px;">核心能力</div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-card-title">公众号无损渲染</div>
+          <div class="feature-card-body">支持自定义组件 steps、timeline、compare、slider，直接复用公众号排版引擎</div>
+          <div class="feature-highlight">自定义 Markdown 语法扩展</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">一键复制富文本</div>
+          <div class="feature-card-body">完美兼容微信公众平台、知乎、头条等图文编辑器，保留格式无偏差</div>
+          <div class="feature-highlight">clipboard API · 富文本保真</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">万字流畅编辑</div>
+          <div class="feature-card-body">输入防抖 Debounce 与状态解耦保证万字长文编辑时不卡顿</div>
+          <div class="feature-highlight">CodeMirror 6 · Zustand 状态管理</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">本地持久化</div>
+          <div class="feature-card-body">Zustand persist 中间件自动将草稿写入 localStorage，关窗不丢内容</div>
+          <div class="feature-highlight">零后端 · 离线可用</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="brand">markdown2view</span>
+    <span class="dot"></span>
+    <span class="tagline">长图文排版 · 公众号生态</span>
   </div>
   <div class="page-label">05 / 12</div>
 </section>

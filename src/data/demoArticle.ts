@@ -128,7 +128,7 @@ $$
 </right>
 </compare>
 
-<p-title num="08" title="高级图片版式：轮播图" subtitle="CAROUSEL / SLIDER" level="1"></p-title>
+<p-title num="09" title="高级图片版式：轮播图" subtitle="CAROUSEL / SLIDER" level="1"></p-title>
 
 如果你有更多的图片想要展示，还可以使用轮播组件。这在展示多个产品细节、多步骤操作演示时非常有用。由于它利用 SVG 原生动画，因此复制到公众号或各大知识平台时均可完美展示，无需任何额外插件。
 

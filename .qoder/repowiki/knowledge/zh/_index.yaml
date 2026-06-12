@@ -2,19 +2,54 @@
 schema_version: 1
 locale: zh-CN
 branch: master
-exported_at: "2026-06-11T17:03:07Z"
+exported_at: "2026-06-11T18:34:15Z"
 modules:
     "":
-        dir_name: Markdown 多模态可视化与 AI 创作平台
-        title: Markdown 多模态可视化与 AI 创作平台
+        dir_name: 多模态 Markdown 可视化创作平台
+        title: 多模态 Markdown 可视化创作平台
+        scope: []
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    decisions:
+        dir_name: 决策记录
+        title: 决策记录
+        scope: []
+        source_files: []
+        children:
+            - decisions/70214b184e46_73bdacd0b1fa
+            - decisions/70214b184e46_44604519f0e9
+            - decisions/70214b184e46_b831b0baaa0e
+        depends_on: []
+        related_to: []
+    decisions/70214b184e46_73bdacd0b1fa:
+        dir_name: 拒绝抽取HiddenMeasureContainer通用组件
+        title: 拒绝抽取HiddenMeasureContainer通用组件
+        scope: []
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    decisions/70214b184e46_44604519f0e9:
+        dir_name: 维持Zustand v5原子Selector模式而非合并为对象Hook
+        title: 维持Zustand v5原子Selector模式而非合并为对象Hook
+        scope: []
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    decisions/70214b184e46_b831b0baaa0e:
+        dir_name: A4文档封面页采用内容结构自动推导机制
+        title: A4文档封面页采用内容结构自动推导机制
         scope: []
         source_files: []
         children: []
         depends_on: []
         related_to: []
     markdown2view:
-        dir_name: Markdown 多场景渲染与可视化编辑器
-        title: Markdown 多场景渲染与可视化编辑器
+        dir_name: 多模态 Markdown 可视化渲染引擎
+        title: 多模态 Markdown 可视化渲染引擎
         scope:
             - src/
         source_files: []

@@ -9,6 +9,13 @@
 - [fonts.ts](file://src/lib/fonts.ts)
 </cite>
 
+## 更新摘要
+**所做更改**
+- 移除了废弃的 iframeToBlob 和 downloadIframeAsImage 函数相关文档
+- 更新了导出接口列表，仅保留当前活跃的API
+- 修正了许可证归属URL引用
+- 更新了图片导出API的接口描述，移除了已废弃的函数
+
 ## 目录
 1. [简介](#简介)
 2. [项目结构](#项目结构)
@@ -49,17 +56,10 @@ EIMG --> FONTS
 ```
 
 **图表来源**
-- [exportPdf.ts:1-192](file://src/lib/exportPdf.ts#L1-L192)
-- [exportImage.ts:1-387](file://src/lib/exportImage.ts#L1-L387)
+- [exportPdf.ts:1-194](file://src/lib/exportPdf.ts#L1-L194)
+- [exportImage.ts:1-320](file://src/lib/exportImage.ts#L1-L320)
 - [extractHtml.ts:1-113](file://src/lib/extractHtml.ts#L1-L113)
-- [multipage.ts:1-45](file://src/lib/multipage.ts#L1-L45)
-- [fonts.ts:1-16](file://src/lib/fonts.ts#L1-L16)
-
-**章节来源**
-- [exportPdf.ts:1-192](file://src/lib/exportPdf.ts#L1-L192)
-- [exportImage.ts:1-387](file://src/lib/exportImage.ts#L1-L387)
-- [extractHtml.ts:1-113](file://src/lib/extractHtml.ts#L1-L113)
-- [multipage.ts:1-45](file://src/lib/multipage.ts#L1-L45)
+- [multipage.ts:1-34](file://src/lib/multipage.ts#L1-L34)
 - [fonts.ts:1-16](file://src/lib/fonts.ts#L1-L16)
 
 ## 核心组件
@@ -84,14 +84,14 @@ EIMG --> FONTS
   - CSS字符串生成
 
 **章节来源**
-- [exportPdf.ts:20-182](file://src/lib/exportPdf.ts#L20-L182)
-- [exportImage.ts:152-385](file://src/lib/exportImage.ts#L152-L385)
+- [exportPdf.ts:20-184](file://src/lib/exportPdf.ts#L20-L184)
+- [exportImage.ts:160-318](file://src/lib/exportImage.ts#L160-L318)
 - [extractHtml.ts:5-112](file://src/lib/extractHtml.ts#L5-L112)
-- [multipage.ts:18-44](file://src/lib/multipage.ts#L18-L44)
+- [multipage.ts:18-33](file://src/lib/multipage.ts#L18-L33)
 - [fonts.ts:1-16](file://src/lib/fonts.ts#L1-L16)
 
 ## 架构概览
-导出流程采用“截图+合成”的架构：先通过现代截图库对DOM进行高质量截图，再由PDF引擎合成最终产物。多页面通过CSS打印媒体查询实现分页控制。
+导出流程采用"截图+合成"的架构：先通过现代截图库对DOM进行高质量截图，再由PDF引擎合成最终产物。多页面通过CSS打印媒体查询实现分页控制。
 
 ```mermaid
 sequenceDiagram
@@ -113,7 +113,7 @@ Note over PDF,JS : "多页循环直至完成"
 
 **图表来源**
 - [exportPdf.ts:21-89](file://src/lib/exportPdf.ts#L21-L89)
-- [exportImage.ts:250-385](file://src/lib/exportImage.ts#L250-L385)
+- [exportImage.ts:183-318](file://src/lib/exportImage.ts#L183-L318)
 
 ## 详细组件分析
 
@@ -172,10 +172,10 @@ Save --> End(["结束"])
 **图表来源**
 - [exportPdf.ts:21-89](file://src/lib/exportPdf.ts#L21-L89)
 - [exportPdf.ts:92-127](file://src/lib/exportPdf.ts#L92-L127)
-- [exportPdf.ts:131-182](file://src/lib/exportPdf.ts#L131-L182)
+- [exportPdf.ts:131-184](file://src/lib/exportPdf.ts#L131-L184)
 
 **章节来源**
-- [exportPdf.ts:21-182](file://src/lib/exportPdf.ts#L21-L182)
+- [exportPdf.ts:21-184](file://src/lib/exportPdf.ts#L21-L184)
 
 ### 图片导出API
 - 截图配置(ImageOpts)
@@ -183,12 +183,6 @@ Save --> End(["结束"])
   - type?: 'image/png' | 'image/jpeg' | 'image/webp'（图片类型，默认PNG）
   - backgroundColor?: string（背景色）
   - maxHeight?: number（最大高度，用于分段截图）
-- iframe整体截图
-  - 函数：iframeToBlob
-  - 行为
-    - 等待文档、样式、字体、图片加载完成
-    - 临时调整iframe高度与溢出属性，确保完整布局
-    - 计算安全最大高度，避免超大文档内存问题
 - 指定元素截图（推荐用于PDF导出）
   - 函数：captureElementInIframeToBlob
   - 行为
@@ -214,7 +208,6 @@ class ImageOpts {
 +number maxHeight
 }
 class ExportImage {
-+iframeToBlob(iframe, opts) Blob
 +elementToBlob(element, opts) Blob
 +captureElementInIframeToBlob(iframe, element, opts) Blob
 +downloadBlob(blob, filename) void
@@ -225,13 +218,13 @@ ImageOpts <.. ExportImage : "使用"
 
 **图表来源**
 - [exportImage.ts:16-21](file://src/lib/exportImage.ts#L16-L21)
-- [exportImage.ts:152-217](file://src/lib/exportImage.ts#L152-L217)
-- [exportImage.ts:250-385](file://src/lib/exportImage.ts#L250-L385)
+- [exportImage.ts:183-318](file://src/lib/exportImage.ts#L183-L318)
+- [exportImage.ts:160-169](file://src/lib/exportImage.ts#L160-L169)
 
 **章节来源**
 - [exportImage.ts:16-21](file://src/lib/exportImage.ts#L16-L21)
-- [exportImage.ts:152-217](file://src/lib/exportImage.ts#L152-L217)
-- [exportImage.ts:250-385](file://src/lib/exportImage.ts#L250-L385)
+- [exportImage.ts:183-318](file://src/lib/exportImage.ts#L183-L318)
+- [exportImage.ts:160-169](file://src/lib/exportImage.ts#L160-L169)
 
 ### HTML提取API
 - extractHtml(streamed: string): string
@@ -277,26 +270,9 @@ Fallback --> End
     - 检测<section class="page|slide|card">节点
     - 返回页面索引、标签与节点引用
     - 无匹配返回空数组（单页长文档）
-- scrollToPage(doc: Document, pageIndex: number): void
-  - 行为
-    - 平滑滚动到指定页面节点
-
-```mermaid
-sequenceDiagram
-participant Doc as "iframe文档"
-participant Detector as "detectPages"
-participant Scroller as "scrollToPage"
-Doc->>Detector : "查询section.page/slide/card"
-Detector-->>Doc : "返回页面信息数组"
-Doc->>Scroller : "滚动到指定索引"
-Scroller-->>Doc : "页面可见"
-```
-
-**图表来源**
-- [multipage.ts:18-44](file://src/lib/multipage.ts#L18-L44)
 
 **章节来源**
-- [multipage.ts:18-44](file://src/lib/multipage.ts#L18-L44)
+- [multipage.ts:18-33](file://src/lib/multipage.ts#L18-L33)
 
 ### 字体嵌入与资源管理API
 - getFontFamilyCss(option: FontFamilyOption): string
@@ -350,15 +326,13 @@ IMG --> F["fonts.ts"]
   - 默认缩放系数为2-3倍，兼顾清晰度与文件大小
   - PDF启用压缩选项
 - 大文档分段处理
-  - iframeToBlob与captureElementInIframeToBlob内置maxHeight限制，避免超大文档内存溢出
+  - captureElementInIframeToBlob内置maxHeight限制，避免超大文档内存溢出
 - 资源加载优化
   - 截图前等待字体、图片、样式表加载完成，减少重排与回流
   - 使用缓存策略（fetch: { requestInit: { cache: 'force-cache' } }）
 - 多页导出
   - 逐页隐藏/显示，避免一次性渲染所有页面
   - 进度回调提升用户体验
-
-[本节为通用性能指导，无需特定文件引用]
 
 ## 故障排除指南
 - 常见错误与处理
@@ -380,9 +354,7 @@ IMG --> F["fonts.ts"]
 - [extractHtml.ts:55-59](file://src/lib/extractHtml.ts#L55-L59)
 
 ## 结论
-Markdown2View的导出功能通过“高质量截图+PDF合成”的架构实现了稳定的多格式导出能力。PDF导出支持多页与单页模式，图片导出提供灵活的格式与质量控制，HTML提取确保从AI输出中获得可用的可渲染内容，多页面管理与字体配置进一步完善了导出体验。配合进度监控与错误处理机制，开发者可以构建健壮的导出流程。
-
-[本节为总结性内容，无需特定文件引用]
+Markdown2View的导出功能通过"高质量截图+PDF合成"的架构实现了稳定的多格式导出能力。PDF导出支持多页与单页模式，图片导出提供灵活的格式与质量控制，HTML提取确保从AI输出中获得可用的可渲染内容，多页面管理与字体配置进一步完善了导出体验。配合进度监控与错误处理机制，开发者可以构建健壮的导出流程。
 
 ## 附录
 
@@ -392,7 +364,6 @@ Markdown2View的导出功能通过“高质量截图+PDF合成”的架构实现
   - exportSinglePageToPdf(iframe, filename)
   - exportElementsToPdf(elements, filename, opts?, onProgress?)
 - 图片导出
-  - iframeToBlob(iframe, opts?)
   - elementToBlob(element, opts?)
   - captureElementInIframeToBlob(iframe, element, opts?)
   - downloadBlob(blob, filename)
@@ -401,13 +372,12 @@ Markdown2View的导出功能通过“高质量截图+PDF合成”的架构实现
   - previewHtml(input): string
 - 多页面
   - detectPages(doc): PageInfo[]
-  - scrollToPage(doc, index): void
 - 字体
   - getFontFamilyCss(option): string
 
 **章节来源**
-- [exportPdf.ts:21-182](file://src/lib/exportPdf.ts#L21-L182)
-- [exportImage.ts:152-228](file://src/lib/exportImage.ts#L152-L228)
+- [exportPdf.ts:21-184](file://src/lib/exportPdf.ts#L21-L184)
+- [exportImage.ts:160-318](file://src/lib/exportImage.ts#L160-L318)
 - [extractHtml.ts:5-112](file://src/lib/extractHtml.ts#L5-L112)
-- [multipage.ts:18-44](file://src/lib/multipage.ts#L18-L44)
+- [multipage.ts:18-33](file://src/lib/multipage.ts#L18-L33)
 - [fonts.ts:1-16](file://src/lib/fonts.ts#L1-L16)

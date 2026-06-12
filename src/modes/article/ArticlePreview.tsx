@@ -4,9 +4,11 @@ import { copyText, copyRichText, copyHtmlSource } from '@/lib/clipboard'
 import { buildArticleAiGuide } from '@/lib/aiGuide'
 import { exportLongImage } from '@/lib/export/longImage'
 import { Button } from '@/components/ui/Button'
-import { FontSelect } from '@/components/ui/FontSelect'
 import { useStore } from '@/lib/store'
 import { getFontFamilyCss } from '@/lib/fonts'
+
+/** 长图文模式固定使用黑体系统字体栈，确保复制到微信公众号时字体一致 */
+const ARTICLE_FONT = getFontFamilyCss('heiti')
 
 interface ArticlePreviewProps {
   rendered: MarkdownRenderResult
@@ -20,8 +22,6 @@ interface ArticlePreviewProps {
 export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const { html, meta } = rendered
-  const articleFont = useStore((s) => s.articleFont)
-  const setArticleFont = useStore((s) => s.setArticleFont)
   const imageHostConfig = useStore((s) => s.imageHostConfig)
 
   const hasLocalImages = html.includes('blob:') || html.includes('img://') || meta.contentMarkdown.includes('img://')
@@ -49,7 +49,7 @@ export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewP
 
   const handleCopyRichText = async () => {
     if (!contentRef.current) return
-    const ok = await copyRichText(contentRef.current)
+    const ok = await copyRichText(contentRef.current, ARTICLE_FONT)
     onToast(ok ? '已复制富文本，可粘贴到长图文编辑器' : '复制失败，请重试')
   }
 
@@ -70,7 +70,6 @@ export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewP
       {/* 复制类操作工具栏 */}
       <div className="sticky top-0 z-10 flex items-center justify-end border-b border-slate-200 bg-white/95 px-5 py-2.5 shadow-sm backdrop-blur">
         <div className="flex items-center gap-2 shrink-0">
-          <FontSelect value={articleFont} onChange={setArticleFont} />
           <div className="w-px h-4 bg-slate-200 mx-1" />
           <Button onClick={handleCopyGuide} title="复制一段语法说明，发给 AI 让它按支持的排版语法输出长图文">
             ✨ 复制指令
@@ -140,7 +139,7 @@ export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewP
               color: '#333',
               fontSize: 15,
               lineHeight: 1.8,
-              fontFamily: getFontFamilyCss(articleFont),
+              fontFamily: ARTICLE_FONT,
               wordWrap: 'break-word',
               overflowWrap: 'break-word',
               backgroundColor: '#fff',

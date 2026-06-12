@@ -64,9 +64,10 @@ async function compileElementImages(contentEl: HTMLElement): Promise<HTMLElement
 }
 
 /** 复制富文本：保留内联样式，并在后台自动编译本地图片为 base64 */
-export async function copyRichText(contentEl: HTMLElement): Promise<boolean> {
+export async function copyRichText(contentEl: HTMLElement, fontFamily?: string): Promise<boolean> {
   const compiledEl = await compileElementImages(contentEl)
-  const html = `<section style="background-color:#fff;color:#333;padding:0">${compiledEl.innerHTML}</section>`
+  const fontCss = fontFamily ? `;font-family:${fontFamily}` : ''
+  const html = `<section style="background-color:#fff;color:#333;padding:0${fontCss}">${compiledEl.innerHTML}</section>`
   const text = compiledEl.innerText
 
   try {

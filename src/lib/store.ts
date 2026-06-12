@@ -204,13 +204,19 @@ export const useStore = create<AppState>()(
           }
         }),
       restoreDemo: (mode, demos) =>
-        set(() => {
+        set((state) => {
           const next: Partial<AppState> = {}
           if (mode === 'article') { next.articleMarkdown = demos.article; next.articleDirty = false }
           else if (mode === 'document') {
             next.documentMarkdown = demos.document
             next.documentDirty = false
-            next.documentSettings = DEFAULT_DOCUMENT_SETTINGS
+            const cur = state.documentSettings
+            const def = DEFAULT_DOCUMENT_SETTINGS
+            next.documentSettings = {
+              ...def,
+              headerLeft: cur.headerLeft || def.headerLeft,
+              headerRight: cur.headerRight || def.headerRight,
+            }
           }
           else if (mode === 'card') { next.cardMarkdown = demos.card; next.cardDirty = false }
           else if (mode === 'html') { next.html = demos.html; next.htmlDirty = false }

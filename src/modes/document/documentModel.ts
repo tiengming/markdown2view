@@ -56,7 +56,7 @@ export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
   marginLeft: 72,
   headerHeight: 36,
   footerHeight: 34,
-  headerLeft: '',
+  headerLeft: 'markdown2view',
   headerRight: 'Pintley Tasia',
   footerText: '第 {page} / {total} 页',
   theme: 'business',

@@ -14,6 +14,8 @@ export interface DesignStyle {
   family: string;
   displayLevel: DisplayLevel;
   style: string;
+  /** 可选的微型 HTML 预览片段，用于缩略图展示 */
+  previewHtml?: string;
 }
 
 export const OUTPUT_TYPES = [
@@ -116,6 +118,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "科技产品/极简工程",
     accent: "#000000",
     description: "黑白精确主义，大留白，Geist 风格无衬线，锐利分割线",
+    previewHtml: `<div style="font-family: Geist, Inter, sans-serif; background: #fff; padding: 16px; height: 100%; border: 1px solid #eaeaea; display: flex; flex-direction: column;">
+  <div style="font-size: 14px; font-weight: 700; color: #000; margin-bottom: 8px;">Vercel Deploy</div>
+  <div style="font-size: 8px; color: #666; margin-bottom: auto;">Push your code and deploy instantly.</div>
+  <div style="margin-top: 12px; display: flex; gap: 6px;">
+    <div style="background: #000; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 6px; font-weight: 500;">Deploy</div>
+    <div style="border: 1px solid #eaeaea; color: #666; padding: 4px 8px; border-radius: 6px; font-size: 6px;">Cancel</div>
+  </div>
+</div>`,
     style: `【视觉主题】黑白精确主义，极简工程师审美（参考 Vercel）
 【色彩系统】
  - 基础底色：纯白 #ffffff
@@ -136,6 +146,11 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "科技产品/金融科技",
     accent: "#635bff",
     description: "标志性紫色渐变，weight-300 轻盈优雅，斜切色块",
+    previewHtml: `<div style="font-family: sans-serif; background: #fff; padding: 16px; height: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(99,91,255,0.1); display: flex; flex-direction: column;">
+  <div style="font-size: 14px; font-weight: 400; color: #30313d; margin-bottom: 8px;">Payment</div>
+  <div style="font-size: 8px; color: #425466; margin-bottom: auto;">Secure processing with Stripe.</div>
+  <div style="background: linear-gradient(90deg, #635bff, #00d4ff); color: #fff; padding: 6px; border-radius: 12px; font-size: 8px; font-weight: 600; text-align: center; margin-top: 12px;">Pay $120</div>
+</div>`,
     style: `【视觉主题】科技与优雅融合，顶级金融科技质感（参考 Stripe）
 【色彩系统】
  - 基础底色：纯白 #ffffff 或极浅灰
@@ -155,6 +170,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "科技产品/精密工具",
     accent: "#5e6ad2",
     description: "超极简深色，精密网格，淡紫强调，克制动效",
+    previewHtml: `<div style="font-family: Inter, sans-serif; background: linear-gradient(180deg, #1c1c1f, #08090a); padding: 16px; height: 100%; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column;">
+  <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+    <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #5e6ad2;"></div>
+    <div style="font-size: 10px; font-weight: 600; color: #f7f8f8;">LIN-128</div>
+  </div>
+  <div style="font-size: 12px; font-weight: 600; color: #f7f8f8; margin-bottom: 4px;">Update API</div>
+  <div style="font-size: 8px; color: #8a8f98;">Implement the new v2 endpoints.</div>
+</div>`,
     style: `【视觉主题】精密深色界面，冷峻的工程师审美（参考 Linear）
 【色彩系统】
  - 基础底色：深色底（#08090a ~ #1c1c1f 渐变）
@@ -175,6 +198,12 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "设计创意/品牌叙事",
     accent: "#0071e3",
     description: "SF Pro 风格，超大留白，居中叙事，电影感大标题",
+    previewHtml: `<div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f7; padding: 16px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+  <div style="font-size: 18px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; margin-bottom: 4px;">Pro cameras.</div>
+  <div style="font-size: 18px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.5px; margin-bottom: 8px;">Pro display.</div>
+  <div style="font-size: 8px; color: #86868b; margin-bottom: 12px;">The most advanced system yet.</div>
+  <div style="background: #0071e3; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 6px; font-weight: 500;">Buy</div>
+</div>`,
     style: `【视觉主题】极简、高级、电影感叙事（参考 Apple 官网）
 【色彩系统】
  - 基础底色：纯净白底或极浅灰 #f5f5f7
@@ -194,6 +223,12 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "媒体内容/音乐娱乐",
     accent: "#1db954",
     description: "深黑底霓虹绿，超粗大标题，专辑封面式视觉",
+    previewHtml: `<div style="font-family: Circular, sans-serif; background: linear-gradient(180deg, #333, #121212); padding: 16px; height: 100%; border-radius: 8px; display: flex; flex-direction: column;">
+  <div style="width: 100%; aspect-ratio: 1; background: #282828; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></div>
+  <div style="font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px;">Daily Mix 1</div>
+  <div style="font-size: 8px; color: #b3b3b3; line-height: 1.4;">Made for you</div>
+  <div style="margin-top: auto; align-self: flex-end; width: 24px; height: 24px; border-radius: 50%; background: #1db954; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+</div>`,
     style: `【视觉主题】暗色活力、音乐与情绪驱动（参考 Spotify）
 【色彩系统】
  - 基础底色：近黑 #121212 与深灰渐变
@@ -270,6 +305,14 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "文档知识/知识文档",
     accent: "#0f0f0f",
     description: "暖白底，衬线标题，柔和表面，文档阅读优化",
+    previewHtml: `<div style="font-family: -apple-system, sans-serif; background: #ffffff; padding: 16px 20px; height: 100%; display: flex; flex-direction: column;">
+  <div style="font-family: Lyon-Text, Georgia, serif; font-size: 18px; font-weight: 700; color: #37352f; margin-bottom: 12px;">Project Spec</div>
+  <div style="background: #f1f1ef; padding: 8px; border-radius: 4px; display: flex; gap: 6px; margin-bottom: 12px;">
+    <span>💡</span>
+    <div style="font-size: 8px; color: #37352f;">This is an important callout block.</div>
+  </div>
+  <div style="font-size: 8px; color: #787774; line-height: 1.6;">Start writing here...</div>
+</div>`,
     style: `【视觉主题】专注阅读与书写的暖色极简文档（参考 Notion）
 【色彩系统】
  - 基础底色：暖白 #ffffff 或 #f7f6f3
@@ -547,6 +590,13 @@ const RAW_DESIGN_STYLES: RawDesignStyle[] = [
     category: "科技产品/开发框架",
     accent: "#38bdf8",
     description: "系统化字体，柔和阴影，蓝青主色，标准实用主义",
+    previewHtml: `<div style="font-family: ui-sans-serif, system-ui; background: #f9fafb; padding: 16px; height: 100%; display: flex; flex-direction: column;">
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    <div style="font-size: 12px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">Beautiful UI</div>
+    <div style="font-size: 8px; color: #475569; margin-bottom: 12px;">Built with utility classes.</div>
+    <div style="background: #38bdf8; color: #fff; padding: 6px; border-radius: 6px; font-size: 7px; font-weight: 500; text-align: center;">Get Started</div>
+  </div>
+</div>`,
     style: `【视觉主题】完美的实用主义现代网页标杆（参考 Tailwind UI）
 【色彩系统】
  - 基础底色：白 #ffffff 配 浅灰 #f9fafb。
@@ -1128,4 +1178,12 @@ ${style}
 // 生成某风格完整可复制的指令
 export function buildDesignPrompt(s: DesignStyle): string {
   return TEMPLATE(s.style);
+}
+
+/**
+ * 为自定义指令生成完整可复制的提示词。
+ * 复用内置 TEMPLATE，将自定义 content 作为 style 令牌部分传入。
+ */
+export function buildCustomDesignPrompt(content: string): string {
+  return TEMPLATE(content);
 }

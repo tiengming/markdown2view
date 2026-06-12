@@ -6,6 +6,24 @@ import {
   type DocumentSettings,
 } from '@/modes/document/documentModel'
 import type { FontFamilyOption } from '@/lib/fonts'
+import type { OutputType, VisualTone } from '@/data/designPrompts'
+
+/** 用户自定义指令数据结构 */
+export interface CustomInstruction {
+  id: string
+  name: string
+  content: string      // 指令文本（对应 style 字段）
+  accent: string       // 强调色
+  description: string  // 简短描述
+  outputType: OutputType
+  visualTone: VisualTone
+  createdAt: number
+  updatedAt: number
+  mode?: import('./store').RenderMode // 兼容历史数据，未定义的视为 'html'
+}
+
+const MAX_CUSTOM_INSTRUCTIONS = 50
+const MAX_CONTENT_LENGTH = 5000
 
 export type RenderMode = 'article' | 'document' | 'card' | 'html'
 export type InputType = 'markdown' | 'html'
@@ -89,6 +107,11 @@ interface AppState {
   setArticleFont: (f: FontFamilyOption) => void
   setCardFont: (f: FontFamilyOption) => void
   setTheme: (accent: string, dark: string) => void
+  // 自定义指令管理
+  customInstructions: CustomInstruction[]
+  addCustomInstruction: (inst: Omit<CustomInstruction, 'id' | 'createdAt' | 'updatedAt'>) => boolean
+  updateCustomInstruction: (id: string, patch: Partial<Omit<CustomInstruction, 'id' | 'createdAt'>>) => void
+  removeCustomInstruction: (id: string) => void
 }
 
 function applyCssVars(accent: string, dark: string) {
@@ -238,12 +261,44 @@ export const useStore = create<AppState>()(
         applyCssVars(accent, dark)
         set({ accent, accentDark: dark, colors: makeColors(accent, dark) })
       },
+      // 自定义指令管理
+      customInstructions: [],
+      addCustomInstruction: (inst) => {
+        let success = false
+        set((state) => {
+          if (state.customInstructions.length >= MAX_CUSTOM_INSTRUCTIONS) return state
+          const now = Date.now()
+          success = true
+          return {
+            customInstructions: [
+              ...state.customInstructions,
+              { ...inst, content: inst.content.slice(0, MAX_CONTENT_LENGTH), id: crypto.randomUUID(), createdAt: now, updatedAt: now },
+            ],
+          }
+        })
+        return success
+      },
+      updateCustomInstruction: (id, patch) =>
+        set((state) => ({
+          customInstructions: state.customInstructions.map((inst) =>
+            inst.id === id
+              ? { ...inst, ...patch, content: (patch.content ?? inst.content).slice(0, MAX_CONTENT_LENGTH), updatedAt: Date.now() }
+              : inst
+          ),
+        })),
+      removeCustomInstruction: (id) =>
+        set((state) => ({
+          customInstructions: state.customInstructions.filter((inst) => inst.id !== id),
+        })),
     }),
     {
       name: 'm2v-store',
       onRehydrateStorage: () => (state) => {
         if (state) {
           applyCssVars(state.accent, state.accentDark)
+          if (!state.customInstructions) {
+            (state as any).customInstructions = []
+          }
         }
       },
     }

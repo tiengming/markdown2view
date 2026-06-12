@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { CodeEditor } from '@/components/editor/CodeEditor'
+import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
 import { HtmlSandbox } from '@/components/preview/HtmlSandbox'
 import { downloadBlob, resolveBackground, captureElementInIframeToBlob } from '@/lib/exportImage'
 import { downloadAsZip, type ZipEntry } from '@/lib/export/zipDownload'
@@ -9,6 +10,11 @@ import { PromptLibrary } from './PromptLibrary'
 import { useEditorDocSync } from '@/lib/useEditorDocSync'
 import { detectPages, type PageInfo } from '@/lib/multipage'
 import { Button } from '@/components/ui/Button'
+import { Tooltip } from '@/components/ui/Tooltip'
+import { useImageUpload } from '@/lib/useImageUpload'
+import { exportHtmlSource } from '@/lib/exportSource'
+import { UI_LABELS } from '@/lib/uiLabels'
+import { UserGuidePopover } from './UserGuidePopover'
 
 interface HtmlModeProps {
   html: string
@@ -99,7 +105,13 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   const [promptOpen, setPromptOpen] = useState(false)
   const [editorReady, setEditorReady] = useState(0)
   const [exporting, setExporting] = useState(false)
-  const [allowScripts, setAllowScripts] = useState(true)
+  const [allowScripts, setAllowScripts] = useState(false)
+
+  // 提前通过 DOMParser 检测预期的页面数量，避免 iframe 加载完成前后工具栏发生抖动闪烁（即所谓的“加载两次”视觉效果）
+  const expectedPageCount = useMemo(() => {
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    return doc.querySelectorAll('.page, .slide, .card').length
+  }, [html])
 
   // store ↔ 编辑器双向同步（防抖回写 + 外部变更信号）
   const {
@@ -108,6 +120,9 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     setLocalValue: setLocalHtml,
     externalVersion,
   } = useEditorDocSync(html, setHtml)
+
+  // 图片上传
+  const { fileInputRef, uploading, triggerUpload, handleFileChange } = useImageUpload(onToast)
 
   const [pages, setPages] = useState<PageInfo[]>([])
   const [currentPage, setCurrentPage] = useState(0)
@@ -442,81 +457,133 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     onToast(ok ? `已复制「${style.name}」风格指令` : '复制失败，请重试')
   }
 
+  const toolbarActions: ToolbarItem[] = [
+    {
+      id: 'fullscreen',
+      icon: '📺',
+      label: UI_LABELS.toolbar.fullscreen.label,
+      tooltip: UI_LABELS.toolbar.fullscreen.tooltip,
+      onClick: () => iframeRef.current?.requestFullscreen?.(),
+    },
+    {
+      id: 'refresh',
+      icon: '🔄',
+      label: UI_LABELS.toolbar.refresh.label,
+      tooltip: UI_LABELS.toolbar.refresh.tooltip,
+      onClick: () => setRefreshKey((n) => n + 1),
+    },
+    ...(pages.length > 1 || expectedPageCount > 1
+      ? [
+          {
+            id: 'pagination',
+            label: '分页控制',
+            node: (
+              <div className="flex items-center gap-0.5 px-1">
+                <Button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0} className="px-2">◀</Button>
+                <span className="text-[12px] text-slate-500 font-medium px-1.5 tabular-nums">
+                  {currentPage + 1} / {Math.max(pages.length, expectedPageCount)}
+                </span>
+                <Button onClick={() => setCurrentPage(Math.min(currentPage + 1, pages.length - 1))} disabled={currentPage >= Math.max(pages.length, expectedPageCount) - 1 || pages.length === 0} className="px-2">▶</Button>
+              </div>
+            ),
+          } as ToolbarItem,
+        ]
+      : []),
+    'separator',
+    {
+      id: 'promptLibrary',
+      icon: '📚',
+      label: UI_LABELS.toolbar.promptLibrary.label,
+      tooltip: UI_LABELS.toolbar.promptLibrary.tooltip,
+      onClick: () => setPromptOpen(true),
+      variant: 'primary',
+      className: 'shadow-sm',
+    },
+    'separator',
+    {
+      id: 'uploadImage',
+      icon: '🖼️',
+      label: uploading ? '上传中…' : UI_LABELS.toolbar.uploadImage.label,
+      tooltip: UI_LABELS.toolbar.uploadImage.tooltip,
+      onClick: triggerUpload,
+      disabled: uploading,
+    },
+    {
+      id: 'allowScripts',
+      label: '互动脚本控制',
+      tooltip: UI_LABELS.toolbar.allowScripts.tooltip,
+      node: (
+        <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none px-1">
+          <input
+            type="checkbox"
+            checked={allowScripts}
+            onChange={(e) => {
+              setAllowScripts(e.target.checked)
+              setRefreshKey((n) => n + 1)
+            }}
+            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+          {UI_LABELS.toolbar.allowScripts.label}
+        </label>
+      ),
+    },
+    'separator',
+  ]
+
+  if (pages.length > 0 || expectedPageCount > 1) {
+    toolbarActions.push({
+      id: 'exportCurrentPage',
+      icon: '🖼️',
+      label: UI_LABELS.toolbar.exportCurrentPage.label,
+      tooltip: UI_LABELS.toolbar.exportCurrentPage.tooltip,
+      onClick: handleExportCurrentPage,
+      disabled: exporting || pages.length === 0,
+    })
+    toolbarActions.push({
+      id: 'exportZip',
+      icon: '📦',
+      label: exporting ? '打包中…' : UI_LABELS.toolbar.exportZip.label,
+      tooltip: UI_LABELS.toolbar.exportZip.tooltip,
+      onClick: handleExportPagesZip,
+      disabled: exporting || pages.length === 0,
+    })
+  }
+
+  toolbarActions.push({
+    id: 'exportSource',
+    icon: '💾',
+    label: UI_LABELS.toolbar.exportSource.label,
+    tooltip: UI_LABELS.toolbar.exportSource.tooltip,
+    onClick: () => exportHtmlSource(localHtml),
+  })
+
+  if (pages.length === 0 && expectedPageCount <= 1) {
+    toolbarActions.push({
+      id: 'exportPng',
+      icon: '🖼️',
+      label: exporting ? '导出中…' : UI_LABELS.toolbar.exportPng.label,
+      tooltip: UI_LABELS.toolbar.exportPng.tooltip,
+      onClick: handleExport,
+      disabled: exporting,
+    })
+  }
+
+  toolbarActions.push({
+    id: 'exportPdf',
+    icon: '🖨️',
+    label: UI_LABELS.toolbar.exportPdf.label,
+    tooltip: UI_LABELS.toolbar.exportPdf.tooltip,
+    onClick: handleExportPdf,
+    disabled: exporting,
+    variant: 'primary',
+    className: 'shadow-sm',
+  })
+
   return (
     <main className="flex min-h-0 flex-1 flex-col">
       {/* 工具栏 */}
-      <div className="sticky top-0 z-10 flex items-center justify-end border-b border-slate-200 bg-white/95 px-5 py-2.5 shadow-sm backdrop-blur">
-        <div className="flex items-center gap-2 shrink-0">
-          {pages.length > 0 && (
-            <div className="flex items-center gap-1 mr-2">
-              <span className="text-[12px] text-slate-500 font-medium px-1">
-                {currentPage + 1} / {pages.length}
-              </span>
-              <Button
-                onClick={() => {
-                  const prev = Math.max(0, currentPage - 1)
-                  setCurrentPage(prev)
-                }}
-                disabled={currentPage === 0}
-                className="px-2"
-              >
-                ◀
-              </Button>
-              <Button
-                onClick={() => {
-                  const next = Math.min(currentPage + 1, pages.length - 1)
-                  setCurrentPage(next)
-                }}
-                disabled={currentPage === pages.length - 1}
-                className="px-2"
-              >
-                ▶
-              </Button>
-            </div>
-          )}
-
-          <div className="w-px h-4 bg-slate-200 mx-1" />
-          <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={allowScripts}
-              onChange={(e) => {
-                setAllowScripts(e.target.checked)
-                setRefreshKey((n) => n + 1)
-              }}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            互动脚本
-          </label>
-          <Button onClick={() => setPromptOpen(true)}>
-            📚 指令库
-          </Button>
-          <Button onClick={() => setRefreshKey((n) => n + 1)} title="重新渲染预览">
-            🔄 刷新
-          </Button>
-          <Button onClick={() => iframeRef.current?.requestFullscreen?.()} title="全屏查看展示区内容">
-            📺 全屏
-          </Button>
-          <Button onClick={handleExportPdf} disabled={exporting} title="截图式高保真导出，视觉完全一致">
-            🖨️ 高保真 PDF
-          </Button>
-
-          {pages.length > 0 ? (
-            <>
-              <Button onClick={handleExportCurrentPage} disabled={exporting}>
-                🖼️ 导出当前页
-              </Button>
-              <Button variant="primary" onClick={handleExportPagesZip} disabled={exporting}>
-                {exporting ? '打包中…' : '📦 打包 ZIP'}
-              </Button>
-            </>
-          ) : (
-            <Button variant="primary" onClick={handleExport} disabled={exporting}>
-              {exporting ? '导出中…' : '🖼️ 导出 PNG'}
-            </Button>
-          )}
-        </div>
-      </div>
+      <PreviewToolbar actions={toolbarActions} />
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
 
       {/* 左右分栏 */}
       <div className="grid min-h-0 flex-1 grid-cols-2 gap-px bg-gray-200">
@@ -552,10 +619,13 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       </div>
 
       <PromptLibrary
+        mode="html"
         open={promptOpen}
         onClose={() => setPromptOpen(false)}
         onCopy={handleCopyPrompt}
+        onToast={onToast}
       />
+      <UserGuidePopover />
     </main>
   )
 }

@@ -5,7 +5,7 @@
 
 > 💡 **设计初衷**：免去繁琐的后端依赖与服务部署，利用浏览器原生的渲染能力、排版实测技术和沙箱机制，实现极致的内容分发与设计自由。
 > 
-> 规划文档：[`docs/技术架构设计.md`](./docs/技术架构设计.md)、[`docs/技术路线图.md`](./docs/技术路线图.md)
+> 规划与规范文档：[`docs/技术架构设计.md`](./docs/技术架构设计.md)、[`docs/技术路线图.md`](./docs/技术路线图.md)、[`docs/代码与提交规范.md`](./docs/代码与提交规范.md)
 
 ---
 
@@ -30,7 +30,8 @@
 ### 4. 🎨 HTML 可视化自由画布 (HTML Visualize)
 - **沙箱隔离渲染**：内置基于 `iframe` 容器的隔离机制，防止样式污染，支持导入 Tailwind Play CDN 等外部样式。
 - **网页 PPT 专属呈现**：吸收 `guizang-ppt-skill` 的设计精髓，支持生成带有 WebGL 背景、极致字号对比的「电子杂志风格」和「瑞士国际主义风格」横向翻页网页 PPT（键盘/手势切换）。
-- **高清大图导出**：彻底抛弃粗暴的延时 `sleep`，改用基于 `MutationObserver` 探测 DOM 稳定性的 `waitForStability` 高清截图导出方案。
+- **统一指令库与预设方案**：全模式打通 AI 提示词库持久化存储，将晦涩的系统指令对用户隐匿，提供极其清爽的“一键复制去生成”体验。
+- **高清导出与性能极限优化**：基于 `MutationObserver` 的高稳定度导出流（现代截图与 PDF）；利用精确的 `manualChunks` 与组件懒加载机制，避免核心大包冗余阻塞，提供秒级的冷热启动速度。
 
 ---
 
@@ -89,6 +90,7 @@ src/
 │   └── composables/       # 全局主题配置与类型定义
 ├── components/
 │   ├── editor/            # CodeMirror 6 编辑器 React 封装
+│   ├── layout/            # 核心全局组件（ModeTabs / PreviewToolbar 抽象统一操作栏 / CustomPromptPopover）
 │   └── ui/                # Toast / Button 等通用 UI 元件
 ├── modes/
 │   ├── document/          # A4 文档排版工作台

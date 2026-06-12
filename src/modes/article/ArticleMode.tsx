@@ -45,6 +45,7 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
       <section className="min-h-0 overflow-hidden bg-gray-50">
         <ArticlePreview
           rendered={rendered}
+          markdown={debouncedMarkdown}
           scrollRef={previewScrollRef}
           onToast={onToast}
         />

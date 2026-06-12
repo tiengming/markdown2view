@@ -1,10 +1,13 @@
-import { useRef } from 'react'
+import { useState, useRef } from 'react'
 import type { MarkdownRenderResult } from '@/lib/render/markdown'
 import { copyText, copyRichText, copyHtmlSource } from '@/lib/clipboard'
-import { buildArticleAiGuide } from '@/lib/aiGuide'
+import { exportMarkdownSource } from '@/lib/exportSource'
 import { exportLongImage } from '@/lib/export/longImage'
-import { Button } from '@/components/ui/Button'
+import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
+import { CustomPromptPopover } from '@/components/layout/CustomPromptPopover'
+import { buildArticleAiGuide } from '@/lib/aiGuide'
 import { useStore } from '@/lib/store'
+import { UI_LABELS } from '@/lib/uiLabels'
 import { getFontFamilyCss } from '@/lib/fonts'
 
 /** 长图文模式固定使用黑体系统字体栈，确保复制到微信公众号时字体一致 */
@@ -12,6 +15,7 @@ const ARTICLE_FONT = getFontFamilyCss('heiti')
 
 interface ArticlePreviewProps {
   rendered: MarkdownRenderResult
+  markdown: string
   // 滚动容器引用，供滚动联动使用
   scrollRef: React.RefObject<HTMLDivElement>
   // 统一 Toast 反馈
@@ -19,7 +23,7 @@ interface ArticlePreviewProps {
 }
 
 // 长图文预览：标题/摘要作为独立可复制元信息展示，正文继续复用共享 Markdown 渲染内核。
-export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewProps) {
+export function ArticlePreview({ rendered, markdown, scrollRef, onToast }: ArticlePreviewProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const { html, meta } = rendered
   const imageHostConfig = useStore((s) => s.imageHostConfig)
@@ -65,26 +69,56 @@ export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewP
     }
   }
 
+  const toolbarActions: ToolbarItem[] = [
+    {
+      id: 'copyGuide',
+      icon: '✨',
+      label: '复制排版指令',
+      tooltip: '复制长图文排版 AI 指令',
+      onClick: handleCopyGuide,
+    },
+    {
+      id: 'customPrompt',
+      label: '自定义指令',
+      node: <CustomPromptPopover mode="article" onToast={onToast} />
+    },
+    'separator',
+    {
+      id: 'exportSource',
+      icon: '💾',
+      label: UI_LABELS.toolbar.exportSource.label,
+      tooltip: '导出为 .md 文件',
+      onClick: () => exportMarkdownSource(markdown),
+    },
+    {
+      id: 'copyHtml',
+      icon: '📋',
+      label: '复制源码',
+      tooltip: '复制渲染后的完整 HTML 源码（含内联样式）',
+      onClick: handleCopyHtml,
+    },
+    {
+      id: 'exportImage',
+      icon: '🖼️',
+      label: UI_LABELS.toolbar.exportLongImage.label,
+      tooltip: UI_LABELS.toolbar.exportLongImage.tooltip,
+      onClick: handleExportLongImage,
+    },
+    {
+      id: 'copyRichText',
+      icon: '🚀',
+      label: UI_LABELS.toolbar.copyRichText.label,
+      tooltip: UI_LABELS.toolbar.copyRichText.tooltip,
+      onClick: handleCopyRichText,
+      variant: 'primary',
+      className: 'shadow-sm',
+    },
+  ]
+
   return (
-    <div className="flex h-full flex-col">
-      {/* 复制类操作工具栏 */}
-      <div className="sticky top-0 z-10 flex items-center justify-end border-b border-slate-200 bg-white/95 px-5 py-2.5 shadow-sm backdrop-blur">
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="w-px h-4 bg-slate-200 mx-1" />
-          <Button onClick={handleCopyGuide} title="复制一段语法说明，发给 AI 让它按支持的排版语法输出长图文">
-            ✨ 复制指令
-          </Button>
-          <Button onClick={handleCopyHtml} title="复制带内联样式的 HTML 源码">
-            📄 HTML源码
-          </Button>
-          <Button onClick={handleExportLongImage} title="将文章内容导出为长图 PNG">
-            🖼️ 导出长图
-          </Button>
-          <Button variant="primary" onClick={handleCopyRichText} title="复制富文本，可直接粘贴到公众号等长图文编辑器，排版不丢失">
-            📋 复制富文本
-          </Button>
-        </div>
-      </div>
+    <section className="flex h-full flex-col">
+      {/* 操作工具栏 */}
+      <PreviewToolbar actions={toolbarActions} />
 
       {/* 公众号本地图片裂图警告 */}
       {hasLocalImages && imageHostConfig.activeType === 'local' && (
@@ -148,6 +182,6 @@ export function ArticlePreview({ rendered, scrollRef, onToast }: ArticlePreviewP
           />
         </div>
       </div>
-    </div>
+    </section>
   )
 }

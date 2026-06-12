@@ -18,6 +18,11 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { FontSelect } from '@/components/ui/FontSelect'
 import { DOCUMENT_TITLE_STYLE_VARS } from './documentStyles'
+import { UI_LABELS } from '@/lib/uiLabels'
+import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
+import { CustomPromptPopover } from '@/components/layout/CustomPromptPopover'
+import { exportMarkdownSource } from '@/lib/exportSource'
+
 
 interface DocumentModeProps {
   markdown: string
@@ -156,10 +161,102 @@ export function DocumentMode({
     }
   }
 
-  const copyGuide = async () => {
+  const handleCopyGuide = async () => {
     const ok = await copyText(buildDocumentAiGuide())
-    onToast(ok ? '已复制 A4 文档 AI 指令' : '复制失败，请重试')
+    onToast(ok ? '已复制 A4 文档排版指令，可发给 AI 使用' : '复制失败，请重试')
   }
+
+  const toolbarActions: ToolbarItem[] = [
+    {
+      id: 'copyGuide',
+      icon: '✨',
+      label: '复制排版指令',
+      tooltip: '复制 A4 文档排版 AI 指令',
+      onClick: handleCopyGuide,
+    },
+    {
+      id: 'customPrompt',
+      label: '自定义指令',
+      node: <CustomPromptPopover mode="document" onToast={onToast} />
+    },
+    'separator',
+    {
+      id: 'exportSource',
+      icon: '💾',
+      label: UI_LABELS.toolbar.exportSource.label,
+      tooltip: '导出为 .md 文件',
+      onClick: () => exportMarkdownSource(debouncedMarkdown),
+    },
+    {
+      id: 'exportPdf',
+      icon: '🖨️',
+      label: exporting ? `导出 ${exportProgress}` : UI_LABELS.toolbar.exportPdf.label,
+      tooltip: UI_LABELS.toolbar.exportPdf.tooltip,
+      onClick: handleExportPdf,
+      disabled: exporting,
+      variant: 'primary',
+      className: 'shadow-sm',
+    },
+  ]
+
+  const toolbarLeftContent = (
+    <>
+      <label className="flex items-center gap-1.5 text-[12px] text-slate-500 shrink-0">
+        左页眉
+        <Input
+          value={settings.headerLeft}
+          onChange={(e) => updateSettings({ headerLeft: e.target.value })}
+          className="w-24"
+        />
+      </label>
+      <label className="flex items-center gap-1.5 text-[12px] text-slate-500 ml-1 border-r border-slate-200 pr-3 shrink-0">
+        右页眉
+        <Input
+          value={settings.headerRight}
+          onChange={(e) => updateSettings({ headerRight: e.target.value })}
+          className="w-24"
+        />
+      </label>
+      <FontSelect
+        value={settings.fontFamily as 'songti' | 'fangsong' | 'heiti' | 'lxgwwenkai'}
+        onChange={(v) => updateSettings({ fontFamily: v })}
+      />
+      <div className="flex items-center gap-0.5 border border-slate-200 rounded-md p-0.5 bg-slate-50 mr-1 shrink-0">
+        {(['small', 'normal', 'large'] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => updateSettings({ fontScale: s })}
+            className={`rounded text-[11px] px-2 py-1 transition-colors ${
+              settings.fontScale === s
+                ? 'bg-white text-slate-900 shadow-sm font-medium'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            {{ small: '小', normal: '标准', large: '大' }[s]}
+          </button>
+        ))}
+      </div>
+      <div className="w-px h-4 bg-slate-200 mx-1 shrink-0" />
+      <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none shrink-0">
+        <input
+          type="checkbox"
+          checked={settings.centerTitle}
+          onChange={(e) => updateSettings({ centerTitle: e.target.checked })}
+          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        />
+        标题居中
+      </label>
+      <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none shrink-0">
+        <input
+          type="checkbox"
+          checked={settings.indentParagraph}
+          onChange={(e) => updateSettings({ indentParagraph: e.target.checked })}
+          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+        />
+        首行缩进
+      </label>
+    </>
+  )
 
   return (
     <main className="document-shell grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(620px,1.08fr)] gap-px bg-gray-200">
@@ -176,71 +273,7 @@ export function DocumentMode({
       </section>
 
       <section ref={previewScrollRef} className="document-workspace min-h-0 overflow-y-auto bg-slate-100">
-        <div className="document-toolbar sticky top-0 z-10 flex items-center justify-end border-b border-slate-200 bg-white/95 px-5 py-2.5 shadow-sm backdrop-blur">
-          <div className="flex items-center gap-2 shrink-0">
-              <label className="flex items-center gap-1.5 text-[12px] text-slate-500">
-                左页眉
-                <Input
-                  value={settings.headerLeft}
-                  onChange={(e) => updateSettings({ headerLeft: e.target.value })}
-                  className="w-24"
-                />
-              </label>
-              <label className="flex items-center gap-1.5 text-[12px] text-slate-500 ml-1 border-r border-slate-200 pr-3">
-                右页眉
-                <Input
-                  value={settings.headerRight}
-                  onChange={(e) => updateSettings({ headerRight: e.target.value })}
-                  className="w-24"
-                />
-              </label>
-              <FontSelect
-                value={settings.fontFamily as 'songti' | 'fangsong' | 'heiti' | 'lxgwwenkai'}
-                onChange={(v) => updateSettings({ fontFamily: v })}
-              />
-              <div className="flex items-center gap-0.5 border border-slate-200 rounded-md p-0.5 bg-slate-50 mr-1">
-                {(['small', 'normal', 'large'] as const).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => updateSettings({ fontScale: s })}
-                    className={`rounded text-[11px] px-2 py-1 transition-colors ${
-                      settings.fontScale === s
-                        ? 'bg-white text-slate-900 shadow-sm font-medium'
-                        : 'text-slate-500 hover:text-slate-800'
-                    }`}
-                  >
-                    {{ small: '小', normal: '标准', large: '大' }[s]}
-                  </button>
-                ))}
-              </div>
-              <div className="w-px h-4 bg-slate-200 mx-1" />
-              <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={settings.centerTitle}
-                  onChange={(e) => updateSettings({ centerTitle: e.target.checked })}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                标题居中
-              </label>
-              <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={settings.indentParagraph}
-                  onChange={(e) => updateSettings({ indentParagraph: e.target.checked })}
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                首行缩进
-              </label>
-              <div className="w-px h-4 bg-slate-200 mx-1" />
-              <Button onClick={copyGuide} title="复制 AI 指令">
-                ✨ 复制指令
-              </Button>
-              <Button variant="primary" onClick={handleExportPdf} disabled={exporting}>
-                {exporting ? `导出 ${exportProgress}` : '🖨️ 导出 PDF'}
-              </Button>
-            </div>
-        </div>
+        <PreviewToolbar leftContent={toolbarLeftContent} actions={toolbarActions} className="document-toolbar" />
 
         <div className="document-print-area mx-auto flex w-full flex-col items-center gap-6 px-6 py-6">
           {/* 隐藏测量容器 */}

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ThemeColors } from '@engine'
 import { parseMarkdown } from '@engine'
 import { CodeEditor } from '@/components/editor/CodeEditor'

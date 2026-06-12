@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useScrollSync } from "@/lib/useScrollSync";
 import { CodeEditor } from "@/components/editor/CodeEditor";
 import { copyText } from "@/lib/clipboard";

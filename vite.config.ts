@@ -13,4 +13,25 @@ export default defineConfig({
       '@engine': fileURLToPath(new URL('./src/engine', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'codemirror-vendor': [
+            '@codemirror/language',
+            '@codemirror/lang-markdown',
+            '@codemirror/lang-html',
+            '@uiw/react-codemirror',
+            'codemirror'
+          ],
+          'engine-vendor': ['highlight.js', 'katex']
+        }
+      }
+    }
+  },
+  esbuild: {
+    pure: ['console.log'],
+    drop: ['debugger']
+  }
 })

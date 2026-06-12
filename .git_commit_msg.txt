@@ -1,0 +1,10 @@
+build: 生产环境构建与加载性能优化
+
+1. Vite 构建分块优化 (Chunk Splitting)：
+   配置 `manualChunks`，将 `react`、`codemirror` 以及 `highlight.js` 等核心大体积第三方依赖抽离为独立的 vendor 块。解决了原有业务代码和库代码混杂在一个 1MB 以上大体积 chunk 中的问题，大幅提升了浏览器缓存利用率。
+
+2. 生产环境构建净化：
+   在 vite.config.ts 中加入 `esbuild` 配置，打包时自动 `drop` `debugger` 并且移除 `console.log`，精简了构建产物并保障线上环境整洁（保留了 error/warn 等异常输出）。
+
+3. 字体加载优化：
+   在 `index.html` 中为 `cdn.jsdelivr.net` 添加了 `<link rel="preconnect" />`，提前进行 DNS 和 TLS 预连接，微弱但确定地缩减了霞鹜文楷外部字体的加载延迟，优化首屏性能。

@@ -51,6 +51,7 @@ import { Engage_DA01 } from './Engage_DA01'
 import { Engage_DA02 } from './Engage_DA02'
 import { Timeline_DA01 } from './Timeline_DA01'
 import { Slider_DA01 } from './Slider_DA01'
+import { Img_DA01 } from './Img_DA01'
 
 export const components: ComponentDef[] = [
   Title_DA01,
@@ -71,6 +72,7 @@ export const components: ComponentDef[] = [
   Engage_DA02,
   Timeline_DA01,
   Slider_DA01,
+  Img_DA01,
 ]
 
 /** 按 id 索引 */

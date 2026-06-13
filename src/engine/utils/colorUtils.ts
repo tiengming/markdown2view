@@ -49,7 +49,7 @@ export const NAMED_COLORS: Record<string, string> = {
 }
 
 /**
- * 将任意颜色值（hex / 颜色名）解析为标准 hex
+ * 将任意颜色值（hex / 颜色名）解析为 standard hex
  * @param color - 颜色值，如 '#e74c3c'、'red'、'rgb(231,76,60)'
  * @returns 标准 hex 字符串，如 '#e74c3c'；无法解析时返回原值
  */
@@ -84,4 +84,21 @@ export function colorToAlpha(color: string, opacity = 0.12): string {
     return `rgba(${r},${g},${b},${opacity})`
   }
   return `rgba(0,0,0,${opacity})`
+}
+
+/**
+ * 将颜色值加深指定比例
+ * @param color - 任意颜色值
+ * @param amount - 加深比例，默认 0.15
+ * @returns 加深后的 hex 字符串
+ */
+export function darkenColor(color: string, amount = 0.15): string {
+  const hex = resolveColor(color)
+  if (hex.startsWith('#') && hex.length === 7) {
+    const r = Math.round(parseInt(hex.slice(1, 3), 16) * (1 - amount))
+    const g = Math.round(parseInt(hex.slice(3, 5), 16) * (1 - amount))
+    const b = Math.round(parseInt(hex.slice(5, 7), 16) * (1 - amount))
+    return `#${Math.min(r, 255).toString(16).padStart(2, '0')}${Math.min(g, 255).toString(16).padStart(2, '0')}${Math.min(b, 255).toString(16).padStart(2, '0')}`
+  }
+  return hex
 }

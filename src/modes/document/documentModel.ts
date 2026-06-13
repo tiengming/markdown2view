@@ -102,7 +102,7 @@ function estimateTextHeight(text: string, base: number, charsPerLine: number, li
 function classifyBlock(markdown: string): DocumentBlockKind {
   const text = markdown.trim()
   if (/^#{1,6}\s/.test(text) || /^<title\b/.test(text) || /^<p-title\b/.test(text)) return 'heading'
-  if (/^!\[/.test(text)) return 'image'
+  if (/^(<\s*!\[|!\[)/.test(text)) return 'image'
   if (/^```/.test(text)) return 'code'
   if (/^>/.test(text)) return 'quote'
   if (/^([-*+]\s|\d+\.\s)/.test(text)) return 'list'

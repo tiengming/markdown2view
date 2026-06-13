@@ -3,6 +3,7 @@ import { leaf, esc, parseAttrs } from './helpers'
 import { inlineFormat } from './inlineFormat'
 import { extractMath, restoreMath } from './math'
 import { renderCodeBlock } from './codeBlock'
+import { renderMath } from './mathRenderer'
 import {
   renderFrontMatter,
   parseCtaBlock,
@@ -27,11 +28,12 @@ import { Engage_DA01 } from '@engine/editor-components/Engage_DA01'
 import { Engage_DA02 } from '@engine/editor-components/Engage_DA02'
 import { Timeline_DA01 } from '@engine/editor-components/Timeline_DA01'
 import { Slider_DA01 } from '@engine/editor-components/Slider_DA01'
+import { Img_DA01 } from '@engine/editor-components/Img_DA01'
 
 function isImageLine(line: string | undefined): boolean {
   if (!line) return false
   const trimmed = line.trim()
-  return /^\s*(<!\[|!\[|<img)/i.test(trimmed)
+  return /^\s*(<\s*!\[|!\[|<img)/i.test(trimmed)
 }
 
 function isTableStartLine(lines: string[], idx: number): boolean {
@@ -107,14 +109,88 @@ export function extractBlock(lines: string[], start: number, openTagRegex: RegEx
   return { attrs, body: body.trim(), next: i }
 }
 
-export function parseMarkdown(md: string, t: ThemeColors): string {
-  // 先抽取数学公式（$$...$$ / $...$）为占位符，避免被后续 Markdown 规则破坏
-  const { text: mathText, store: mathStore } = extractMath(md)
+/**
+ * 收集 md 中所有公式（去重），按 inline/block 分类返回，用于预渲染。
+ */
+export function collectFormulas(md: string): Array<{ formula: string; display: boolean }> {
+  const seen = new Set<string>()
+  const result: Array<{ formula: string; display: boolean }> = []
+
+  // 删除代码块（围栏 + 行内），避免其中的 $ / $$ 被误判为公式分隔符
+  const cleaned = md
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/`[^`]+`/g, '')
+
+  // 行内公式 $...$
+  const inlineRe = /(?<!\$)(?<!\d)\$(?!\d)([^\$]+?)\$(?!\$|[\w])/g
+  let m: RegExpExecArray | null
+  while ((m = inlineRe.exec(cleaned)) !== null) {
+    const f = m[1].trim()
+    const key = `i:${f}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      result.push({ formula: f, display: false })
+    }
+  }
+
+  // 块级公式 $$...$$ （单行和多行）
+  const blockRe = /\$\$([\s\S]+?)\$\$/g
+  while ((m = blockRe.exec(cleaned)) !== null) {
+    // 跳过空行 $$ $$ 前面的 $$
+    if (m[0] === '$$') continue
+    const f = m[1].trim()
+    if (!f) continue
+    const key = `b:${f}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      result.push({ formula: f, display: true })
+    }
+  }
+
+  return result
+}
+
+/**
+ * 批量预渲染公式为 SVG。
+ */
+export async function preRenderFormulas(
+  formulas: Array<{ formula: string; display: boolean }>,
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>()
+  const results = await Promise.all(
+    formulas.map(async (f) => {
+      const prefix = f.display ? 'b' : 'i'
+      const svg = await renderMath(f.formula, f.display)
+      return { key: `${prefix}:${f.formula}`, svg }
+    }),
+  )
+  for (const { key, svg } of results) {
+    map.set(key, svg)
+  }
+  return map
+}
+
+/**
+ * 一步完成：收集公式 → 预渲染 → 解析。
+ * 推荐所有 caller 使用这个入口。
+ */
+export async function parseMarkdownAsync(md: string, t: ThemeColors): Promise<string> {
+  const formulas = collectFormulas(md)
+  const formulaMap = formulas.length > 0 ? await preRenderFormulas(formulas) : undefined
+  return parseMarkdown(md, t, formulaMap)
+}
+
+export function parseMarkdown(md: string, t: ThemeColors, formulaMap?: Map<string, string>): string {
+  // 双引擎逻辑：若传入了 formulaMap（MathJax 模式），则不采用 KaTeX 抽取
+  const isKaTeX = !formulaMap
+  const { text: processedMdText, store: mathStore } = isKaTeX 
+    ? extractMath(md) 
+    : { text: md, store: null }
 
   // 收集脚注：[text](url "desc") 带引号标题的链接 → 脚注
   const footnotes: { label: string; url: string; desc: string }[] = []
   const footnoteRegex = /\[([^\]]+)\]\(([^)\s]+)\s+"([^"]+)"\)/g
-  const processedMd = mathText.replace(footnoteRegex, (_match, _label, url, desc) => {
+  const processedMd = processedMdText.replace(footnoteRegex, (_match, _label, url, desc) => {
     // 检查是否已存在相同的脚注（根据 url 和 desc 判断）
     const existing = footnotes.findIndex((f) => f.url === url && f.desc === desc)
     let num: number
@@ -140,8 +216,9 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
       i = 1
       const meta: Record<string, string> = {}
       while (i < lines.length && lines[i].trim() !== '---') {
-        const m = lines[i].match(/^(\w+):\s*(.+)/)
-        if (m) meta[m[1]] = m[2].trim()
+        const m = lines[i].match(/^(\w+):\s*(Meta.+|.+)/)
+        const finalMatch = m || lines[i].match(/^(\w+):\s*(.+)/)
+        if (finalMatch) meta[finalMatch[1]] = finalMatch[2].trim()
         i++
       }
       i++
@@ -366,7 +443,7 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
       }
       html += `<section style="margin:14px 0px;padding:12px 16px;background:rgb(247,248,252);border-left:3px solid ${t.accent};border-radius:0px 6px 6px 0px;color:rgb(85,85,85);font-size:16px">`
       ql.forEach((l) => {
-        html += `<section><p style="margin:4px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px">${inlineFormat(l, t)}</p></section>`
+        html += `<section><p style="margin:4px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px">${inlineFormat(l, t, formulaMap)}</p></section>`
       })
       html += `</section>`
       continue
@@ -424,29 +501,60 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
     // 标题 — Markdown 原生语法，不走 PTitle
     const h1m = line.match(/^#\s+(.+)/)
     if (h1m) {
-      html += `<h1 style="margin:0px 0px 16px;font-size:24px;font-weight:700;color:rgb(17,24,39);line-height:1.4">${inlineFormat(h1m[1], t)}</h1>`
+      html += `<h1 style="margin:0px 0px 16px;font-size:24px;font-weight:700;color:rgb(17,24,39);line-height:1.4">${inlineFormat(h1m[1], t, formulaMap)}</h1>`
       i++
       continue
     }
 
     const h2m = line.match(/^##\s+(.+)/)
     if (h2m) {
-      html += `<h2 style="margin:28px 0px 12px;font-size:20px;font-weight:700;color:rgb(17,24,39);line-height:1.4">${inlineFormat(h2m[1], t)}</h2>`
+      html += `<h2 style="margin:28px 0px 12px;font-size:20px;font-weight:700;color:rgb(17,24,39);line-height:1.4">${inlineFormat(h2m[1], t, formulaMap)}</h2>`
       i++
       continue
     }
 
     const h3m = line.match(/^###\s+(.+)/)
     if (h3m) {
-      html += `<h3 style="margin:24px 0px 10px;font-size:17px;font-weight:700;color:rgb(31,41,55);line-height:1.4">${inlineFormat(h3m[1], t)}</h3>`
+      html += `<h3 style="margin:24px 0px 10px;font-size:17px;font-weight:700;color:rgb(31,41,55);line-height:1.4">${inlineFormat(h3m[1], t, formulaMap)}</h3>`
       i++
       continue
     }
 
     const h4m = line.match(/^####\s+(.+)/)
     if (h4m) {
-      html += `<h4 style="margin:20px 0px 8px;font-size:15px;font-weight:700;color:rgb(55,65,81);line-height:1.4">${inlineFormat(h4m[1], t)}</h4>`
+      html += `<h4 style="margin:20px 0px 8px;font-size:15px;font-weight:700;color:rgb(55,65,81);line-height:1.4">${inlineFormat(h4m[1], t, formulaMap)}</h4>`
       i++
+      continue
+    }
+
+    // 块级公式 $$...$$ — 优先取 formulaMap 中的预渲染 SVG
+    if (/^\$\$/.test(line)) {
+      const resolveSvg = (f: string) => {
+        if (formulaMap) {
+          const svg = formulaMap.get(`b:${f}`)
+          if (svg) return svg
+        }
+        // 降级：使用 KaTeX 模式的错误输出外观或行内 fallback
+        return `<code style="display:inline-block;background:#f3f4f6;padding:6px 12px;border-radius:6px;font-size:14px;font-family:SF Mono,Consolas,monospace;color:#e83e8c;max-width:100%;overflow-x:auto;white-space:nowrap">$$${esc(f)}$$</code>`
+      }
+      // 单行模式：$$formula$$
+      const singleMatch = line.match(/^\$\$(.+?)\$\$/)
+      if (singleMatch) {
+        const formula = singleMatch[1].trim()
+        html += `<section style="text-align:center;margin:24px 0;overflow-x:auto;color:#333">${resolveSvg(formula)}</section>`
+        i++
+        continue
+      }
+      // 多行模式：$$ 独占一行开头 → 收集行直到闭合 $$
+      i++
+      const formulaLines: string[] = []
+      while (i < lines.length && !/^\$\$/.test(lines[i])) {
+        formulaLines.push(lines[i])
+        i++
+      }
+      if (i < lines.length) i++ // 跳过闭合的 $$
+      const formula = formulaLines.join('\n').trim()
+      html += `<section style="text-align:center;margin:24px 0;overflow-x:auto;color:#333">${resolveSvg(formula)}</section>`
       continue
     }
 
@@ -491,13 +599,13 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
       
       html += `<section style="margin:0px 0px 30px;display:flex;justify-content:center;width:100%"><section style="box-shadow:rgba(15,23,42,0.05) 0px 10px 24px;border-radius:12px;border:1px solid rgba(229,231,235,0.9);overflow:hidden;background:#ffffff;max-width:100%;width:max-content"><section style="padding:16px;background:#ffffff"><section class="tableWrapper" style="width:100%;overflow-x:auto"><table style="border-collapse:collapse;table-layout:auto;width:100%;border:1px solid rgb(226,232,240)"><thead><tr style="background-color:rgb(248,250,252)">`
       headers.forEach((h) => {
-        html += `<th valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;font-weight:700;color:rgb(51,65,85)">${inlineFormat(h, t)}</th>`
+        html += `<th valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;font-weight:700;color:rgb(51,65,85)">${inlineFormat(h, t, formulaMap)}</th>`
       })
       html += `</tr></thead><tbody>`
       rows.forEach((r) => {
         html += `<tr>`
         r.forEach((c) => {
-          html += `<td valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;color:rgb(51,65,85)">${inlineFormat(c, t)}</td>`
+          html += `<td valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;color:rgb(51,65,85)">${inlineFormat(c, t, formulaMap)}</td>`
         })
         html += `</tr>`
       })
@@ -520,9 +628,9 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
           const checkSvg = isChecked
             ? '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             : `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="${uncheckedBorder}" stroke-width="1.5" fill="none"/></svg>`
-          html += `<section style="margin:5px 0px"><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;${isChecked ? `background:${t.accent};border-radius:4px` : ''}">${checkSvg}</span><span>${inlineFormat(cb[2], t)}</span></span></section>`
+          html += `<section style="margin:5px 0px"><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;${isChecked ? `background:${t.accent};border-radius:4px` : ''}">${checkSvg}</span><span>${inlineFormat(cb[2], t, formulaMap)}</span></span></section>`
         } else {
-          html += `<section style="margin:5px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${t.accent};margin-right:10px;margin-top:10px;flex-shrink:0"></span><span style="flex:1">${inlineFormat(li, t)}</span></section>`
+          html += `<section style="margin:5px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${t.accent};margin-right:10px;margin-top:10px;flex-shrink:0"></span><span style="flex:1">${inlineFormat(li, t, formulaMap)}</span></section>`
         }
         i++
       }
@@ -537,7 +645,7 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
         const match = lines[i].match(/^\s*(\d+)\.\s/)
         const num = match ? match[1] : '1'
         const content = lines[i].replace(/^\s*\d+\.\s/, '')
-        html += `<section style="margin:5px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="color:${t.accent};font-weight:800;margin-right:8px;flex-shrink:0;min-width:16px">${num}.</span><span style="flex:1">${inlineFormat(content, t)}</span></section>`
+        html += `<section style="margin:5px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="color:${t.accent};font-weight:800;margin-right:8px;flex-shrink:0;min-width:16px">${num}.</span><span style="flex:1">${inlineFormat(content, t, formulaMap)}</span></section>`
         i++
       }
       html += `</section>`
@@ -554,6 +662,14 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
       } else {
         html += `<section style="margin:12px 0px;display:flex;justify-content:center"><img src="${esc(src)}" alt="${esc(alt)}" style="max-width:100%;border-radius:6px;display:block;margin:0 auto"></section>`
       }
+      i++
+      continue
+    }
+
+    // <img>
+    if (/^<img\s/.test(line.trim())) {
+      const attrs = parseAttrs(line)
+      html += Img_DA01.render(attrs, '', t)
       i++
       continue
     }
@@ -589,9 +705,9 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
       const captionClass = isTableCaption ? 'document-caption document-caption-table' : 'document-caption document-caption-image'
       const captionKind = isTableCaption ? 'table' : 'image'
       const sectionStyle = isTableCaption ? 'margin:16px 0px 8px' : 'margin:8px 0px 16px'
-      html += `<section data-caption-kind="${captionKind}" style="${sectionStyle};display:flex;justify-content:center;width:100%"><p class="${captionClass}" style="margin:0px;font-size:13px;color:rgb(100,116,139);line-height:1.5;text-align:center;overflow-wrap:break-word">${inlineFormat(trimmedLine, t)}</p></section>`
+      html += `<section data-caption-kind="${captionKind}" style="${sectionStyle};display:flex;justify-content:center;width:100%"><p class="${captionClass}" style="margin:0px;font-size:13px;color:rgb(100,116,139);line-height:1.5;text-align:center;overflow-wrap:break-word">${inlineFormat(trimmedLine, t, formulaMap)}</p></section>`
     } else {
-      html += `<section style="margin:0px 0px 24px"><p style="margin:0px;font-size:16px;color:rgb(51,65,85);line-height:1.85;letter-spacing:0.5px;text-align:justify;overflow-wrap:break-word">${inlineFormat(line, t)}</p></section>`
+      html += `<section style="margin:0px 0px 24px"><p style="margin:0px;font-size:16px;color:rgb(51,65,85);line-height:1.85;letter-spacing:0.5px;text-align:justify;overflow-wrap:break-word">${inlineFormat(line, t, formulaMap)}</p></section>`
     }
     i++
   }
@@ -607,8 +723,11 @@ export function parseMarkdown(md: string, t: ThemeColors): string {
     html += `</section></section>`
   }
 
-  // 回填数学公式的 KaTeX HTML
-  return restoreMath(html, mathStore)
+  // 回填数学公式的 KaTeX HTML（仅在 KaTeX 模式下生效）
+  if (mathStore) {
+    return restoreMath(html, mathStore)
+  }
+  return html
 }
 
 export interface TableData {

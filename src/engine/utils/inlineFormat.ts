@@ -2,7 +2,7 @@ import type { ThemeColors } from '../composables/useTheme'
 import { esc, leaf, lightenHex, pangu } from './helpers'
 import { localImageUrls } from '@/lib/editor/imageStorage'
 
-export function inlineFormat(text: string, t: ThemeColors): string {
+export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<string, string>): string {
   // 中英文/数字自动加空格：先保护行内代码与链接/图片 URL，避免破坏代码与网址
   {
     const stash: string[] = []
@@ -14,6 +14,7 @@ export function inlineFormat(text: string, t: ThemeColors): string {
     text = pangu(text)
     text = text.replace(/\uE000(\d+)\uE001/g, (_m, n: string) => stash[Number(n)])
   }
+
   // 脚注占位符 __FN_N__（渲染为带下划线的文字 + 上标数字）
   // 格式：__FN_N__|显示文字，其中显示文字由 markdownParser 传入
   text = text.replace(
@@ -27,6 +28,32 @@ export function inlineFormat(text: string, t: ThemeColors): string {
     (_m, p1: string) =>
       `<sup style="color:${t.accent};font-weight:600;cursor:pointer">[${parseInt(p1) + 1}]</sup>`,
   )
+
+  // `行内代码` — 先用占位符隔离，避免内部 $...$ / ** / ^ / ~ 等被后续正则误匹配
+  const codeStore: string[] = []
+  text = text.replace(
+    /`([^`]+)`/g,
+    (_m, p1: string) => {
+      const idx = codeStore.length
+      codeStore.push(`<code style="background:#f0f0f5;padding:2px 6px;border-radius:4px;font-size:13px;font-family:SF Mono,Consolas,monospace;color:#e83e8c">${leaf(p1)}</code>`)
+      return `\x00CODE_${idx}\x00`
+    },
+  )
+
+  // $行内公式$ — 仅在提供 formulaMap 时（MathJax 模式）进行替换；
+  // 否则（KaTeX 模式）由于公式已被 extractMath 提取为占位符，此处正则不会匹配到它。
+  if (formulaMap) {
+    text = text.replace(
+      /(?<!\$)(?<!\d)\$(?!\d)([^\$]+?)\$(?!\$|[\w])/g,
+      (_m, formula: string) => {
+        const svg = formulaMap.get(`i:${formula}`)
+        if (svg) return svg
+        // 降级：显示公式原文
+        return `<code style="font-style:italic;background:#f3f4f6;padding:1px 4px;border-radius:3px">${esc(formula)}</code>`
+      },
+    )
+  }
+
   // ==渐变背景==
   text = text.replace(
     /==([^=]+)==/g,
@@ -68,12 +95,7 @@ export function inlineFormat(text: string, t: ThemeColors): string {
   text = text.replace(/\*\*([^*]+)\*\*/g, (_m, p1: string) => `<strong style="font-weight:800;color:rgb(17,24,39)">${leaf(p1)}</strong>`)
   // *斜体*
   text = text.replace(/\*([^*]+)\*/g, (_m, p1: string) => `<em>${leaf(p1)}</em>`)
-  // `行内代码`
-  text = text.replace(
-    /`([^`]+)`/g,
-    (_m, p1: string) =>
-      `<code style="background:#f0f0f5;padding:2px 6px;border-radius:4px;font-size:13px;font-family:SF Mono,Consolas,monospace;color:#e83e8c">${leaf(p1)}</code>`,
-  )
+
   // 图片 ![alt](src)[size]
   text = text.replace(
     /!\[([^\]]*)\]\(([^)]+)\)(?:\[([^\]]+)\])?/g,
@@ -97,6 +119,9 @@ export function inlineFormat(text: string, t: ThemeColors): string {
     /\[([^\]]+)\]\(([^)\s]+)\)/g,
     (_m, p1: string, p2: string) => `<a href="${p2}" style="color:${t.accent}">${leaf(p1)}</a>`,
   )
+  // 还原行内代码占位符
+  text = text.replace(/\x00CODE_(\d+)\x00/g, (_m, p1: string) => codeStore[parseInt(p1)] || _m)
+
   // 多行内容（如 callout/breaking 正文）换行：\n 转 <br>，并吃掉行首/行尾缩进空格做到顶格
   text = text.replace(/[ \t]*\n[ \t]*/g, '<br>')
   return text

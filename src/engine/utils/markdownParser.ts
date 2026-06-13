@@ -630,7 +630,7 @@ export function parseMarkdown(md: string, t: ThemeColors, formulaMap?: Map<strin
             : `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="${uncheckedBorder}" stroke-width="1.5" fill="none"/></svg>`
           html += `<section style="margin:5px 0px"><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;${isChecked ? `background:${t.accent};border-radius:4px` : ''}">${checkSvg}</span><span>${inlineFormat(cb[2], t, formulaMap)}</span></span></section>`
         } else {
-          html += `<section style="margin:5px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${t.accent};margin-right:10px;margin-top:10px;flex-shrink:0"></span><span style="flex:1">${inlineFormat(li, t, formulaMap)}</span></section>`
+          html += `<section style="margin:5px 0px;line-height:1.8;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${t.accent};margin-right:10px;margin-top:10px;flex-shrink:0"></span><span style="flex:1">${inlineFormat(li, t, formulaMap)}</span></section>`
         }
         i++
       }
@@ -645,7 +645,7 @@ export function parseMarkdown(md: string, t: ThemeColors, formulaMap?: Map<strin
         const match = lines[i].match(/^\s*(\d+)\.\s/)
         const num = match ? match[1] : '1'
         const content = lines[i].replace(/^\s*\d+\.\s/, '')
-        html += `<section style="margin:5px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="color:${t.accent};font-weight:800;margin-right:8px;flex-shrink:0;min-width:16px">${num}.</span><span style="flex:1">${inlineFormat(content, t, formulaMap)}</span></section>`
+        html += `<section style="margin:5px 0px;line-height:1.8;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="color:${t.accent};font-weight:800;margin-right:8px;flex-shrink:0;min-width:16px">${num}.</span><span style="flex:1">${inlineFormat(content, t, formulaMap)}</span></section>`
         i++
       }
       html += `</section>`

@@ -268,7 +268,10 @@ export function CardMode({
       icon: '💾',
       label: UI_LABELS.toolbar.exportSource.label,
       tooltip: '导出为 .md 文件',
-      onClick: () => exportMarkdownSource(debouncedMarkdown),
+      onClick: () => {
+        const title = fileSafe(model.meta.title) || 'card'
+        exportMarkdownSource(debouncedMarkdown, `${title}.md`)
+      },
     },
     {
       id: "copyCaption",

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseMarkdown } from './markdownParser'
+import { parseMarkdown, parseTableMarkdown } from './markdownParser'
 import { makeColors } from '../index'
 
 describe('parseMarkdown - Caption parsing', () => {
@@ -122,4 +122,34 @@ describe('parseMarkdown - Caption parsing', () => {
     expect(html).toContain('关于孩子的韧性')
     expect(html).toContain('人不是"条件 A"就必然"输出 B"')
   })
+
+  it('should parse tables with empty cells correctly', () => {
+    const md = [
+      '| **纯材料合计** | | | | **1.72元/m** | **1.31元/m** |',
+      '| --- | --- | --- | --- | --- | --- |',
+      '| 加3%损耗 | | | | 1.77元/m | 1.35元/m |',
+    ].join('\n')
+
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('纯材料合计')
+    expect(html).toContain('>&nbsp;</td>')
+  })
+
+  it('parseTableMarkdown should preserve empty cells and headers', () => {
+    const md = [
+      '| **纯材料合计** | | | | **1.72元/m** | **1.31元/m** |',
+      '| --- | --- | --- | --- | --- | --- |',
+      '| 加3%损耗 | | | | 1.77元/m | 1.35元/m |',
+    ].join('\n')
+
+    const result = parseTableMarkdown(md)
+    expect(result).not.toBeNull()
+    expect(result?.headers).toHaveLength(6)
+    expect(result?.headers[1]).toBe('')
+    expect(result?.headers[2]).toBe('')
+    expect(result?.headers[3]).toBe('')
+    expect(result?.rows[0]).toHaveLength(6)
+    expect(result?.rows[0][1]).toBe('')
+  })
 })
+

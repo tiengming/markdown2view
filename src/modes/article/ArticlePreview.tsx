@@ -88,7 +88,10 @@ export function ArticlePreview({ rendered, markdown, scrollRef, onToast }: Artic
       icon: '💾',
       label: UI_LABELS.toolbar.exportSource.label,
       tooltip: '导出为 .md 文件',
-      onClick: () => exportMarkdownSource(markdown),
+      onClick: () => {
+        const title = (meta.title || 'article').replace(/[\\/:*?"<>|]/g, '_').slice(0, 40)
+        exportMarkdownSource(markdown, `${title}.md`)
+      },
     },
     {
       id: 'copyHtml',

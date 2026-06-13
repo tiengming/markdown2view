@@ -599,13 +599,13 @@ export function parseMarkdown(md: string, t: ThemeColors, formulaMap?: Map<strin
       
       html += `<section style="margin:0px 0px 30px;display:flex;justify-content:center;width:100%"><section style="box-shadow:rgba(15,23,42,0.05) 0px 10px 24px;border-radius:12px;border:1px solid rgba(229,231,235,0.9);overflow:hidden;background:#ffffff;max-width:100%;width:max-content"><section style="padding:16px;background:#ffffff"><section class="tableWrapper" style="width:100%;overflow-x:auto"><table style="border-collapse:collapse;table-layout:auto;width:100%;border:1px solid rgb(226,232,240)"><thead><tr style="background-color:rgb(248,250,252)">`
       headers.forEach((h) => {
-        html += `<th valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;font-weight:700;color:rgb(51,65,85)">${inlineFormat(h, t, formulaMap)}</th>`
+        html += `<th valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;font-weight:700;color:rgb(51,65,85)">${inlineFormat(h, t, formulaMap) || '&nbsp;'}</th>`
       })
       html += `</tr></thead><tbody>`
       rows.forEach((r) => {
         html += `<tr>`
         r.forEach((c) => {
-          html += `<td valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;color:rgb(51,65,85)">${inlineFormat(c, t, formulaMap)}</td>`
+          html += `<td valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;color:rgb(51,65,85)">${inlineFormat(c, t, formulaMap) || '&nbsp;'}</td>`
         })
         html += `</tr>`
       })
@@ -759,22 +759,22 @@ export function parseTableMarkdown(markdown: string): TableData | null {
   
   if (headerIndex === -1 || separatorIndex === -1) return null
   
+  const parseRow = (rowStr: string) => {
+    let s = rowStr.trim()
+    if (s.startsWith('|')) s = s.substring(1)
+    if (s.endsWith('|')) s = s.substring(0, s.length - 1)
+    return s.split('|').map(x => x.trim())
+  }
+
   // 解析表头
-  const headers = lines[headerIndex]
-    .split('|')
-    .map(s => s.trim())
-    .filter(Boolean)
+  const headers = parseRow(lines[headerIndex])
   
   // 解析数据行
   const rows: string[][] = []
   for (let i = separatorIndex + 1; i < lines.length; i++) {
     const line = lines[i].trim()
     if (line.includes('|')) {
-      const cells = line
-        .split('|')
-        .map(s => s.trim())
-        .filter(Boolean)
-      rows.push(cells)
+      rows.push(parseRow(line))
     }
   }
   

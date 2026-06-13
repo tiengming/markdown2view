@@ -8,7 +8,6 @@ import {
   type VisualTone,
 } from '@/data/designPrompts'
 import { StyleThumbnail } from './StyleThumbnail'
-import { StylePreviewModal } from './StylePreviewModal'
 import { CustomInstructionEditor } from './CustomInstructionEditor'
 import { useStore, type RenderMode } from '@/lib/store'
 import { UI_LABELS } from '@/lib/uiLabels'
@@ -78,7 +77,6 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
   const [outputType, setOutputType] = useState<OutputType>('幻灯片')
   const [visualTone, setVisualTone] = useState<VisualTone | '全部'>('全部')
   const [showBasic, setShowBasic] = useState(false)
-  const [previewStyle, setPreviewStyle] = useState<DesignStyle | null>(null)
 
   // Custom instruction states
   const [showEditor, setShowEditor] = useState(false)
@@ -252,7 +250,7 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
                             className="group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
                           >
                             <div className="mb-3">
-                              <StyleThumbnail style={s} onPreview={() => setPreviewStyle(s)} />
+                              <StyleThumbnail style={s} />
                             </div>
                             <div className="mb-2 flex items-center gap-2">
                               <span
@@ -384,7 +382,6 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
           </div>
         )}
       </aside>
-      <StylePreviewModal style={previewStyle} onClose={() => setPreviewStyle(null)} />
     </>
   )
 }

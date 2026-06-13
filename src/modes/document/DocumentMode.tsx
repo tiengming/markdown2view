@@ -153,7 +153,7 @@ export function DocumentMode({
       icon: '💾',
       label: UI_LABELS.toolbar.exportSource.label,
       tooltip: '导出为 .md 文件',
-      onClick: () => exportMarkdownSource(debouncedMarkdown),
+      onClick: () => exportMarkdownSource(debouncedMarkdown, model.filename.replace(/\.pdf$/, '.md')),
     },
     {
       id: 'exportPdf',

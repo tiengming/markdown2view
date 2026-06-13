@@ -122,6 +122,18 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     externalVersion,
   } = useEditorDocSync(html, setHtml)
 
+  const htmlTitle = useMemo(() => {
+    try {
+      const doc = new DOMParser().parseFromString(localHtml, 'text/html')
+      const titleText = doc.querySelector('title')?.textContent?.trim()
+        || doc.querySelector('h1')?.textContent?.trim()
+        || ''
+      return titleText ? titleText.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 40) : ''
+    } catch {
+      return ''
+    }
+  }, [localHtml])
+
   // 图片上传
   const { fileInputRef, uploading, triggerUpload, handleFileChange } = useImageUpload(onToast)
 
@@ -355,7 +367,8 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     runExport(async () => {
       await withScaleReset(doc, async () => {
         const blob = await captureIframeElement(iframeRef.current!, firstContentElement(doc))
-        downloadBlob(blob, `html-${Date.now()}.png`)
+        const title = htmlTitle || 'html'
+        downloadBlob(blob, `${title}.png`)
       })
       return '已导出 PNG'
     })
@@ -373,7 +386,8 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       await withScaleReset(doc, async () => {
         await withVisiblePage(allNodes, currentPage, async () => {
           const blob = await captureIframeElement(iframe, page.node)
-          downloadBlob(blob, `html-page-${currentPage + 1}.png`)
+          const title = htmlTitle || 'html'
+          downloadBlob(blob, `${title}-page-${currentPage + 1}.png`)
         })
       })
       return `已导出 ${page.label}`
@@ -390,15 +404,17 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       const entries: ZipEntry[] = []
 
       await withScaleReset(doc, async () => {
+        const title = htmlTitle || 'html'
         for (let i = 0; i < pages.length; i++) {
           const blob = await withVisiblePage(allNodes, i, () => captureIframeElement(iframe, pages[i].node))
           entries.push({
-            filename: `html-page-${String(i + 1).padStart(2, '0')}.png`,
+            filename: `${title}-page-${String(i + 1).padStart(2, '0')}.png`,
             blob,
           })
         }
       })
-      await downloadAsZip(entries, `html-pages-${Date.now()}.zip`)
+      const title = htmlTitle || 'html'
+      await downloadAsZip(entries, `${title}-pages.zip`)
       return `已打包 ${pages.length} 页`
     })
   }
@@ -412,18 +428,19 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
 
     runExport(async () => {
       await withScaleReset(doc, async () => {
+        const title = htmlTitle || 'html'
         if (pages.length > 0) {
           // 多页模式：在 iframe 内逐页截图，保留完整样式
           const { exportIframeToPdf } = await import('@/lib/exportPdf')
           await exportIframeToPdf(
             iframe,
             pages.map(p => p.node),
-            `html-${Date.now()}.pdf`
+            `${title}.pdf`
           )
         } else {
           // 单页模式：直接截取 iframe 全部内容
           const { exportSinglePageToPdf } = await import('@/lib/exportPdf')
-          await exportSinglePageToPdf(iframe, `html-${Date.now()}.pdf`)
+          await exportSinglePageToPdf(iframe, `${title}.pdf`)
         }
       })
       return 'PDF 导出成功'
@@ -534,7 +551,10 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     icon: '💾',
     label: UI_LABELS.toolbar.exportSource.label,
     tooltip: UI_LABELS.toolbar.exportSource.tooltip,
-    onClick: () => exportHtmlSource(localHtml),
+    onClick: () => {
+      const title = htmlTitle || 'html'
+      exportHtmlSource(localHtml, `${title}.html`)
+    },
   })
 
   if (pages.length === 0 && expectedPageCount <= 1) {

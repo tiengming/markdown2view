@@ -25,6 +25,7 @@ import { exportMarkdownSource } from '@/lib/exportSource'
 import { useBlockHeights } from '@/lib/useBlockHeights'
 import { useExportAction } from '@/lib/useExportAction'
 import { getFontFamilyCss } from '@/lib/fonts'
+import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 
 
 interface DocumentModeProps {
@@ -342,6 +343,28 @@ export function DocumentMode({
           ))}
         </div>
       </section>
+      <UserGuidePopover
+        guideKey="m2v-document-guide-seen"
+        title="A4 规范文档 快速开始"
+        subtitle="编写并排版符合 A4 标准的学术与正式报告"
+        steps={[
+          {
+            icon: '📝',
+            title: '编写 Markdown 内容',
+            desc: '在左侧编辑器中使用 Markdown 编写文档，支持标题、表格、代码块及公式。',
+          },
+          {
+            icon: '📐',
+            title: '配置排版参数',
+            desc: '在控制面板设置页眉页脚、页码、字体、字号以及首行缩进等样式参数。',
+          },
+          {
+            icon: '🖨️',
+            title: '预览与完美导出',
+            desc: '预览区支持精准的智能跨页分页，点击右上角「导出 PDF」即可生成无损的 A4 打印文件。',
+          },
+        ]}
+      />
     </main>
   )
 }

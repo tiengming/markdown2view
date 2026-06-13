@@ -14,7 +14,7 @@ import { Tooltip } from '@/components/ui/Tooltip'
 import { useImageUpload } from '@/lib/useImageUpload'
 import { exportHtmlSource } from '@/lib/exportSource'
 import { UI_LABELS } from '@/lib/uiLabels'
-import { UserGuidePopover } from './UserGuidePopover'
+import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useExportAction } from '@/lib/useExportAction'
 
 interface HtmlModeProps {
@@ -605,7 +605,28 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         onCopy={handleCopyPrompt}
         onToast={onToast}
       />
-      <UserGuidePopover />
+      <UserGuidePopover
+        guideKey="m2v-html-guide-seen"
+        title="自由画布 快速开始"
+        subtitle="三步生成精美的可视化 HTML 作品"
+        steps={[
+          {
+            icon: '📚',
+            title: '选择风格并复制指令',
+            desc: '打开「指令库」，选择喜欢的风格，点击「复制提示词」',
+          },
+          {
+            icon: '🤖',
+            title: '发送给 AI 生成 HTML',
+            desc: '将指令 + 你的内容发送给 AI。推荐使用 Claude / ChatGPT / Gemini',
+          },
+          {
+            icon: '📋',
+            title: '粘贴 HTML 到编辑器',
+            desc: '将 AI 返回的 HTML 代码粘贴到左侧编辑器中，右侧即可实时渲染',
+          },
+        ]}
+      />
     </main>
   )
 }

@@ -3,6 +3,7 @@ dist
 dist-ssr
 *.local
 .DS_Store
+.git_commit_msg.txt
 
 # 编辑器
 .vscode/*

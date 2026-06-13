@@ -30,6 +30,7 @@ import { CustomPromptPopover } from "@/components/layout/CustomPromptPopover";
 import { exportMarkdownSource } from '@/lib/exportSource'
 import { useBlockHeights } from '@/lib/useBlockHeights'
 import { useExportAction } from '@/lib/useExportAction'
+import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 
 interface CardModeProps {
   markdown: string;
@@ -444,6 +445,28 @@ export function CardMode({
           </div>
         </div>
       </section>
+      <UserGuidePopover
+        guideKey="m2v-card-guide-seen"
+        title="图文卡片 快速开始"
+        subtitle="制作高颜值的多页社交媒体分享与知识卡片"
+        steps={[
+          {
+            icon: '🖼️',
+            title: '输入多页卡片文本',
+            desc: '在左侧输入 Markdown，使用特殊分隔符（---）或让排版引擎根据字数进行智能自动分页。',
+          },
+          {
+            icon: '🎨',
+            title: '设计卡片主题与比例',
+            desc: '在上方控制栏选择卡片长宽比例（3:4/9:16）、字体、背景颜色以及作者名等。',
+          },
+          {
+            icon: '📥',
+            title: '打包导出高清图片',
+            desc: '可一键复制生成的社交发布文案，并将卡片一键批量打包导出为高清 PNG 压缩包。',
+          },
+        ]}
+      />
     </main>
   );
 }

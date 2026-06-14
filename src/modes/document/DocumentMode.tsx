@@ -201,7 +201,8 @@ export function DocumentMode({
         />
         首行缩进
       </label>
-      <span className="text-[12px] text-slate-400 ml-1 shrink-0">
+      <span className="text-[12px] text-slate-400 ml-1 shrink-0 flex items-center gap-1">
+        {status === 'rendering' && <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />}
         {status === 'rendering' ? '分页中…' : status === 'done' ? `共 ${pageCount} 页` : ''}
       </span>
     </>
@@ -250,7 +251,22 @@ export function DocumentMode({
         <section className={`document-workspace min-h-0 overflow-hidden bg-slate-100 flex flex-col ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}>
           <PreviewToolbar leftContent={toolbarLeftContent} actions={toolbarActions} className="document-toolbar shrink-0" />
 
-          <div ref={previewScrollRef} className="document-preview-area w-full flex-1 overflow-auto px-4 py-4">
+          <div ref={previewScrollRef} className="document-preview-area w-full flex-1 overflow-auto px-4 py-4 relative">
+            {status !== 'done' && (
+              <div className="document-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-100/70 animate-fade-in">
+                <div className="document-skeleton" aria-hidden="true">
+                  <div className="skeleton-title" />
+                  <div className="skeleton-line w-[90%]" />
+                  <div className="skeleton-line w-full" />
+                  <div className="skeleton-line w-[75%]" />
+                  <div className="skeleton-line w-full" />
+                  <div className="skeleton-line w-[60%]" />
+                </div>
+                <span className="text-sm text-slate-500 mt-6">
+                  {status === 'init' ? '正在加载分页引擎…' : status === 'error' ? '分页渲染出错' : '正在分页排版，请稍候…'}
+                </span>
+              </div>
+            )}
             <iframe
               ref={iframeRef}
               title="A4 文档预览"

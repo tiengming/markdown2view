@@ -313,6 +313,47 @@ body {
   width: 100% !important;
 }
 
+/* A4 文档模式加载遮罩：半透明背景 + A4 纸张骨架屏 */
+.document-loading-overlay {
+  /* 入场淡出复用 .animate-fade-in；出场随条件渲染硬切（可接受） */
+}
+/* A4 纸张骨架：白底 + 页边距呼吸感（顶部 32px、左右 30px，呼应项目排版偏好） */
+.document-skeleton {
+  width: 240px;
+  height: 320px;
+  padding: 32px 30px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+  animation: document-breathe 1.8s ease-in-out infinite;
+}
+.skeleton-title,
+.skeleton-line {
+  background: #e2e8f0; /* slate-200 */
+  border-radius: 3px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-title {
+  height: 14px;
+  width: 55%;
+  margin-bottom: 18px;
+}
+.skeleton-line {
+  height: 8px;
+  margin-bottom: 10px;
+}
+.skeleton-line:last-child {
+  margin-bottom: 0;
+}
+@keyframes document-breathe {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-3px); opacity: 0.92; }
+}
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* 移动端侧边菜单的滑入及渐变动画 */
 @keyframes fadeIn {
   from { opacity: 0; }

@@ -196,12 +196,32 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
   }, [editorReady, refreshKey])
 
-  // 多页模式：只显示当前页，隐藏其他页
+  // 多页模式：只显示当前页，隐藏其他页，并触发缩放
   useEffect(() => {
     if (pages.length === 0) return
     pages.forEach((p, i) => {
       p.node.style.display = i === currentPage ? '' : 'none'
     })
+    // 页面切换后触发一次缩放，确保当前页正确适配
+    const iframe = iframeRef.current
+    if (iframe) {
+      requestAnimationFrame(() => {
+        const doc = iframe.contentDocument
+        if (!doc) return
+        const viewW = iframe.clientWidth
+        const viewH = iframe.clientHeight
+        if (!viewW || !viewH) return
+        const visiblePage = firstPreviewPage(doc)
+        if (!visiblePage) return
+        doc.body.style.zoom = '1'
+        const rawW = visiblePage.offsetWidth
+        const rawH = visiblePage.offsetHeight
+        if (rawW && rawH) {
+          const scale = Math.min(viewW / rawW, viewH / rawH)
+          doc.documentElement.style.setProperty('--auto-scale', scale.toString())
+        }
+      })
+    }
   }, [pages, currentPage])
 
   // 键盘翻页支持
@@ -374,7 +394,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       ro.disconnect()
       contentObserver?.disconnect()
     }
-  }, [debouncedHtml, refreshKey, pages, currentPage])
+  }, [debouncedHtml, refreshKey])
 
   const handleExport = () => {
     if (!iframeRef.current) {
@@ -673,7 +693,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
                   setPreviewLoading(false)
                   return
                 }
-                // 直接检测页面，无需延迟等待
+                // 检测页面并批量更新状态，React 会自动批处理
                 const detected = detectPages(iframe.contentDocument!)
                 setPages(detected)
                 setCurrentPage(0)

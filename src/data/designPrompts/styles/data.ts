@@ -7,28 +7,29 @@ export const dataStyles: RawDesignStyle[] = [
       category: "数据分析/仪表盘",
       accent: "#3b82f6",
       description: "B端现代数据面板，Bento网格布局，清晰的信息层级与微交互",
-      previewHtml: `<div style="font-family: sans-serif; background: #f8fafc; padding: 12px; height: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
+      previewHtml: `<div style="font-family: sans-serif; background: #f8fafc; padding: 14px; height: 100%; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 11px; font-weight: bold; color: #0f172a;">Business Panel</span>
-      <span style="font-size: 8px; background: #e2e8f0; color: #475569; padding: 1px 4px; border-radius: 4px; font-weight: bold;">LIVE</span>
+      <span style="font-size: 13px; font-weight: bold; color: #0f172a;">Business Panel</span>
+      <span style="font-size: 10px; background: #e2e8f0; color: #475569; padding: 2px 7px; border-radius: 4px; font-weight: bold;">LIVE</span>
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex: 1;">
-      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
-        <span style="font-size: 9px; color: #64748b;">Daily Revenue</span>
-        <span style="font-size: 15px; font-weight: 800; color: #2563eb;">$12.4K</span>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 11px; color: #64748b;">Daily Revenue</span>
+        <span style="font-size: 18px; font-weight: 800; color: #2563eb;">$12.4K</span>
       </div>
-      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
-        <span style="font-size: 9px; color: #64748b;">Conversion</span>
-        <span style="font-size: 15px; font-weight: 800; color: #10b981;">3.42%</span>
+      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 11px; color: #64748b;">Conversion</span>
+        <span style="font-size: 18px; font-weight: 800; color: #10b981;">3.42%</span>
       </div>
     </div>
-    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-      <span style="font-size: 9px; color: #64748b;">Active Users</span>
-      <div style="display: flex; gap: 2px; align-items: flex-end; height: 16px;">
-        <div style="width: 3px; height: 8px; background: #2563eb; border-radius: 1px;"></div>
-        <div style="width: 3px; height: 12px; background: #2563eb; border-radius: 1px;"></div>
-        <div style="width: 3px; height: 6px; background: #2563eb; border-radius: 1px;"></div>
-        <div style="width: 3px; height: 14px; background: #2563eb; border-radius: 1px;"></div>
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto;">
+      <span style="font-size: 11px; color: #64748b;">Active Users</span>
+      <div style="display: flex; gap: 3px; align-items: flex-end; height: 22px;">
+        <div style="width: 4px; height: 10px; background: #2563eb; border-radius: 1px;"></div>
+        <div style="width: 4px; height: 16px; background: #2563eb; border-radius: 1px;"></div>
+        <div style="width: 4px; height: 8px; background: #2563eb; border-radius: 1px;"></div>
+        <div style="width: 4px; height: 18px; background: #2563eb; border-radius: 1px;"></div>
+        <div style="width: 4px; height: 22px; background: #2563eb; border-radius: 1px;"></div>
       </div>
     </div>
   </div>`,
@@ -47,35 +48,35 @@ export const dataStyles: RawDesignStyle[] = [
     },
   {
       id: "data-command-center",
-      previewHtml: `<div style="font-family: Consolas, Monaco, monospace; background: #06111f; color: #e5f2ff; padding: 14px; height: 100%; border: 1px solid #06b6d4; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(6,182,212,0.3); padding-bottom: 6px; margin-bottom: 8px;">
-      <div style="display: flex; align-items: center; gap: 4px;">
-        <div style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%;"></div>
-        <span style="font-size: 9px; font-weight: bold; color: #06b6d4;">CORE DATACENTER</span>
+      previewHtml: `<div style="font-family: Consolas, Monaco, monospace; background: #06111f; color: #e5f2ff; padding: 16px; height: 100%; border: 1px solid #06b6d4; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(6,182,212,0.35); padding-bottom: 8px; margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
+        <span style="font-size: 11px; font-weight: bold; color: #06b6d4;">CORE DATACENTER</span>
       </div>
-      <span style="font-size: 8px; color: rgba(229,242,255,0.5);">SYS_OK</span>
+      <span style="font-size: 10px; color: rgba(229,242,255,0.6);">SYS_OK</span>
     </div>
-    <div style="display: flex; gap: 6px; margin-bottom: auto;">
-      <div style="flex: 1.2; background: #0f1b2d; padding: 6px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.15);">
-        <div style="font-size: 8px; color: #8aa4bf;">CPU USAGE</div>
-        <div style="font-size: 16px; font-weight: bold; color: #06b6d4; margin-top: 2px;">42.8%</div>
-        <div style="display: flex; gap: 2px; align-items: flex-end; height: 12px; margin-top: 4px;">
-          <div style="height: 4px; flex: 1; background: #06b6d4; opacity: 0.3;"></div>
-          <div style="height: 6px; flex: 1; background: #06b6d4; opacity: 0.5;"></div>
-          <div style="height: 5px; flex: 1; background: #06b6d4; opacity: 0.4;"></div>
-          <div style="height: 8px; flex: 1; background: #06b6d4; opacity: 0.8;"></div>
-          <div style="height: 10px; flex: 1; background: #06b6d4;"></div>
+    <div style="display: flex; gap: 8px; margin-bottom: auto;">
+      <div style="flex: 1.2; background: #0f1b2d; padding: 10px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.2);">
+        <div style="font-size: 10px; color: #8aa4bf;">CPU USAGE</div>
+        <div style="font-size: 20px; font-weight: bold; color: #06b6d4; margin-top: 3px;">42.8%</div>
+        <div style="display: flex; gap: 3px; align-items: flex-end; height: 16px; margin-top: 6px;">
+          <div style="height: 6px; flex: 1; background: #06b6d4; opacity: 0.3;"></div>
+          <div style="height: 9px; flex: 1; background: #06b6d4; opacity: 0.5;"></div>
+          <div style="height: 7px; flex: 1; background: #06b6d4; opacity: 0.4;"></div>
+          <div style="height: 12px; flex: 1; background: #06b6d4; opacity: 0.8;"></div>
+          <div style="height: 14px; flex: 1; background: #06b6d4;"></div>
         </div>
       </div>
-      <div style="flex: 0.8; background: #0f1b2d; padding: 6px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.15); display: flex; flex-direction: column; justify-content: space-between;">
+      <div style="flex: 0.8; background: #0f1b2d; padding: 10px; border-radius: 4px; border: 1px solid rgba(6,182,212,0.2); display: flex; flex-direction: column; justify-content: space-between;">
         <div>
-          <div style="font-size: 8px; color: #8aa4bf;">TASKS</div>
-          <div style="font-size: 11px; font-weight: bold; color: #22c55e; margin-top: 2px;">1,248</div>
+          <div style="font-size: 10px; color: #8aa4bf;">TASKS</div>
+          <div style="font-size: 16px; font-weight: bold; color: #22c55e; margin-top: 3px;">1,248</div>
         </div>
-        <div style="font-size: 8px; color: #f97316;">ERRORS: 0</div>
+        <div style="font-size: 10px; color: #f97316;">ERRORS: 0</div>
       </div>
     </div>
-    <div style="font-size: 8px; color: rgba(229,242,255,0.4); border-top: 1px solid rgba(6,182,212,0.15); padding-top: 4px; display: flex; justify-content: space-between;">
+    <div style="font-size: 10px; color: rgba(229,242,255,0.5); border-top: 1px solid rgba(6,182,212,0.2); padding-top: 8px; display: flex; justify-content: space-between;">
       <span>LOAD: 0.42</span>
       <span>MEM: 12.4GB</span>
     </div>
@@ -99,32 +100,32 @@ export const dataStyles: RawDesignStyle[] = [
     },
   {
       id: "data-journalism",
-      previewHtml: `<div style="font-family: sans-serif; background: #fbfbf8; padding: 14px; height: 100%; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+      previewHtml: `<div style="font-family: sans-serif; background: #fbfbf8; padding: 16px; height: 100%; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
     <div>
-      <div style="font-size: 9px; font-weight: bold; color: #0f766e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">DATA FOCUS / 深度解读</div>
-      <div style="font-size: 14px; font-weight: 700; color: #1f2937; line-height: 1.3; margin-bottom: 6px;">主要前端渲染模式的耗时对比</div>
-      <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
+      <div style="font-size: 10px; font-weight: bold; color: #0f766e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">DATA FOCUS / 深度解读</div>
+      <div style="font-size: 15px; font-weight: 700; color: #1f2937; line-height: 1.3; margin-bottom: 10px;">主要前端渲染模式的耗时对比</div>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
         <div>
-          <div style="display: flex; justify-content: space-between; font-size: 8px; color: #4b5563; margin-bottom: 1px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #4b5563; margin-bottom: 3px;">
             <span>静态 SSR 导出 (M2V)</span>
             <strong>24ms</strong>
           </div>
-          <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-            <div style="width: 20%; height: 100%; background: #0f766e; border-radius: 3px;"></div>
+          <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="width: 20%; height: 100%; background: #0f766e; border-radius: 4px;"></div>
           </div>
         </div>
         <div>
-          <div style="display: flex; justify-content: space-between; font-size: 8px; color: #4b5563; margin-bottom: 1px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #4b5563; margin-bottom: 3px;">
             <span>传统 Headless 截图</span>
             <strong>1,480ms</strong>
           </div>
-          <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-            <div style="width: 90%; height: 100%; background: #d97706; border-radius: 3px;"></div>
+          <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+            <div style="width: 90%; height: 100%; background: #d97706; border-radius: 4px;"></div>
           </div>
         </div>
       </div>
     </div>
-    <div style="font-size: 8px; color: #6b7280; border-top: 1px solid #e2e8f0; padding-top: 6px; display: flex; justify-content: space-between;">
+    <div style="font-size: 10px; color: #6b7280; border-top: 1px solid #e2e8f0; padding-top: 8px; display: flex; justify-content: space-between;">
       <span>数据来源：W3C Performance API</span>
       <span style="color: #0f766e; font-weight: bold;">效率提升 60x+</span>
     </div>

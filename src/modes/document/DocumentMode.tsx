@@ -26,6 +26,7 @@ import { useBlockHeights } from '@/lib/useBlockHeights'
 import { useExportAction } from '@/lib/useExportAction'
 import { getFontFamilyCss } from '@/lib/fonts'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
+import { useStore } from '@/lib/store'
 
 
 interface DocumentModeProps {
@@ -49,6 +50,7 @@ export function DocumentMode({
   updateSettings,
   onToast,
 }: DocumentModeProps) {
+  const guideTrigger = useStore((s) => s.guideTrigger.document)
   const editorScrollerRef = useRef<HTMLElement | null>(null)
   const previewScrollRef = useRef<HTMLDivElement>(null)
   const [editorReady, setEditorReady] = useState(0)
@@ -350,6 +352,7 @@ export function DocumentMode({
       </section>
       <UserGuidePopover
         guideKey="m2v-document-guide-seen"
+        forceOpenTrigger={guideTrigger}
         title="A4 规范文档 快速开始"
         subtitle="利用 AI 智能排版指令，生成符合 A4 物理分页规范的专业报告/文档"
         steps={[

@@ -15,6 +15,7 @@ import { useImageUpload } from '@/lib/useImageUpload'
 import { exportHtmlSource } from '@/lib/exportSource'
 import { UI_LABELS } from '@/lib/uiLabels'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
+import { useStore } from '@/lib/store'
 import { useExportAction } from '@/lib/useExportAction'
 
 interface HtmlModeProps {
@@ -97,6 +98,7 @@ async function captureIframeElement(
 
 // HTML 可视化模式：左侧编辑 HTML，右侧 iframe 沙箱实时渲染，支持 Prompt 指令库与导出 PNG。
 export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
+  const guideTrigger = useStore((s) => s.guideTrigger.html)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const editorScrollerRef = useRef<HTMLElement | null>(null)
   const previewPaneRef = useRef<HTMLElement | null>(null)
@@ -627,6 +629,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       />
       <UserGuidePopover
         guideKey="m2v-html-guide-seen"
+        forceOpenTrigger={guideTrigger}
         title="自由画布 快速开始"
         subtitle="利用 AI 提示词库快速生成精美的动态或静态 HTML 页面"
         steps={[

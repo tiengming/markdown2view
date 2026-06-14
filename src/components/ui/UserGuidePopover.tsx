@@ -12,6 +12,7 @@ export interface UserGuidePopoverProps {
   subtitle?: string
   steps: GuideStep[]
   delay?: number
+  forceOpenTrigger?: number
 }
 
 // 内存中记录在当前页面运行周期（刷新即重置）中已关闭的引导 Key
@@ -23,6 +24,7 @@ export function UserGuidePopover({
   subtitle,
   steps,
   delay = 800,
+  forceOpenTrigger,
 }: UserGuidePopoverProps) {
   const [visible, setVisible] = useState(false)
 
@@ -36,6 +38,12 @@ export function UserGuidePopover({
       return () => clearTimeout(t)
     }
   }, [guideKey, delay])
+
+  useEffect(() => {
+    if (forceOpenTrigger !== undefined && forceOpenTrigger > 0) {
+      setVisible(true)
+    }
+  }, [forceOpenTrigger])
 
   if (!visible) return null
 

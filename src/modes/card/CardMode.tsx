@@ -64,6 +64,7 @@ export function CardMode({
   const [exporting, runExport] = useExportAction(onToast);
   const cardFont = useStore((s) => s.cardFont);
   const setCardFont = useStore((s) => s.setCardFont);
+  const guideTrigger = useStore((s) => s.guideTrigger.card);
   const [authorName, setAuthorName] = useState("Pintley Tasia");
   const cardRefs = useRef<Record<string, HTMLElement | null>>({});
   const cardsContainerRef = useRef<HTMLDivElement>(null);
@@ -450,6 +451,7 @@ export function CardMode({
       </section>
       <UserGuidePopover
         guideKey="m2v-card-guide-seen"
+        forceOpenTrigger={guideTrigger}
         title="图文卡片 快速开始"
         subtitle="利用 AI 创作指令，轻松打造高颜值小红书等多页社交知识卡片"
         steps={[

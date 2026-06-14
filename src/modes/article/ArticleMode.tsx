@@ -6,6 +6,7 @@ import { renderMarkdown } from '@/lib/render/markdown'
 import { ArticlePreview } from './ArticlePreview'
 import { useEditorDocSync } from '@/lib/useEditorDocSync'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
+import { useStore } from '@/lib/store'
 
 interface ArticleModeProps {
   markdown: string
@@ -15,6 +16,7 @@ interface ArticleModeProps {
 }
 
 export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleModeProps) {
+  const guideTrigger = useStore((s) => s.guideTrigger.article)
   // store ↔ 编辑器双向同步（防抖回写 + 外部变更信号）
   const {
     localValue: localMarkdown,
@@ -53,6 +55,7 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
       </section>
       <UserGuidePopover
         guideKey="m2v-article-guide-seen"
+        forceOpenTrigger={guideTrigger}
         title="长图文排版 快速开始"
         subtitle="利用 AI 提示词与公众号排版引擎，轻松渲染出专业的内容设计"
         steps={[

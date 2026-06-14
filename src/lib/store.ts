@@ -112,6 +112,9 @@ interface AppState {
   addCustomInstruction: (inst: Omit<CustomInstruction, 'id' | 'createdAt' | 'updatedAt'>) => boolean
   updateCustomInstruction: (id: string, patch: Partial<Omit<CustomInstruction, 'id' | 'createdAt'>>) => void
   removeCustomInstruction: (id: string) => void
+  // 引导弹窗强行打开触发器，每种模式独立计数
+  guideTrigger: { [key in RenderMode]?: number }
+  triggerGuide: (mode: RenderMode) => void
 }
 
 function applyCssVars(accent: string, dark: string) {
@@ -290,9 +293,22 @@ export const useStore = create<AppState>()(
         set((state) => ({
           customInstructions: state.customInstructions.filter((inst) => inst.id !== id),
         })),
+      // 初始化引导触发器状态
+      guideTrigger: {},
+      triggerGuide: (mode) =>
+        set((state) => ({
+          guideTrigger: {
+            ...state.guideTrigger,
+            [mode]: (state.guideTrigger[mode] || 0) + 1,
+          },
+        })),
     }),
     {
       name: 'm2v-store',
+      partialize: (state) => {
+        const { guideTrigger, ...rest } = state
+        return rest
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
           applyCssVars(state.accent, state.accentDark)

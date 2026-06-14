@@ -164,7 +164,7 @@ export function DocumentMode({
         />
       </label>
       <FontSelect
-        value={settings.fontFamily as 'songti' | 'fangsong' | 'heiti' | 'lxgwwenkai'}
+        value={settings.fontFamily as 'songti' | 'fangsong' | 'heiti'}
         onChange={(v) => updateSettings({ fontFamily: v })}
       />
       <div className="flex items-center gap-0.5 border border-slate-200 rounded-md p-0.5 bg-slate-50 mr-1 shrink-0">

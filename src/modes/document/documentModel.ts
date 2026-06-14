@@ -42,7 +42,7 @@ export interface DocumentSettings {
   headerRight: string
   footerText: string
   theme: 'formal' | 'business'
-  fontFamily: 'songti' | 'fangsong' | 'heiti' | 'lxgwwenkai'
+  fontFamily: 'songti' | 'fangsong' | 'heiti'
   fontScale: 'small' | 'normal' | 'large'
   centerTitle: boolean
   indentParagraph: boolean

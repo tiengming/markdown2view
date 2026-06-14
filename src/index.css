@@ -354,6 +354,66 @@ body {
   50% { opacity: 0.5; }
 }
 
+/* 自由画布模式加载遮罩：网页骨架屏 + 光泽扫过动画（区别于 A4 的呼吸动画） */
+.canvas-skeleton {
+  width: 280px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0 0 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 28px rgba(15, 23, 42, 0.1), 0 1px 3px rgba(15, 23, 42, 0.05);
+  border: 1px solid #eef2f7;
+}
+/* 模拟浏览器窗口的标题栏 + 红黄绿三色圆点 */
+.canvas-skeleton-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  background: #f1f5f9; /* slate-100 */
+  border-bottom: 1px solid #e2e8f0;
+}
+.canvas-skeleton-bar span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.canvas-skeleton-bar span:nth-child(1) { background: #f87171; }
+.canvas-skeleton-bar span:nth-child(2) { background: #fbbf24; }
+.canvas-skeleton-bar span:nth-child(3) { background: #34d399; }
+/* 内容区：大图块 + 文本行，统一光泽扫过动画 */
+.canvas-skeleton-hero,
+.canvas-skeleton-line {
+  position: relative;
+  overflow: hidden;
+  background: #e2e8f0; /* slate-200 */
+  border-radius: 5px;
+}
+.canvas-skeleton-hero {
+  height: 96px;
+  margin: 16px 16px 14px;
+  border-radius: 8px;
+}
+.canvas-skeleton-line {
+  height: 9px;
+  margin: 0 16px 9px;
+}
+.canvas-skeleton-line:last-child { margin-bottom: 0; }
+/* 光泽扫过：一条半透明高光从左到右循环划过整张骨架 */
+.canvas-skeleton-hero::after,
+.canvas-skeleton-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: canvas-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes canvas-shimmer {
+  100% { transform: translateX(100%); }
+}
+
 /* 移动端侧边菜单的滑入及渐变动画 */
 @keyframes fadeIn {
   from { opacity: 0; }

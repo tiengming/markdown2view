@@ -150,12 +150,12 @@ function getInitialStateFromLegacyKeys(): Partial<AppState> {
   }
 
   const articleFont = localStorage.getItem(ARTICLE_FONT_KEY)
-  if (articleFont && ['songti', 'fangsong', 'heiti', 'lxgwwenkai'].includes(articleFont)) {
+  if (articleFont && ['songti', 'fangsong', 'heiti'].includes(articleFont)) {
     state.articleFont = articleFont as FontFamilyOption
   }
 
   const cardFont = localStorage.getItem(CARD_FONT_KEY)
-  if (cardFont && ['songti', 'fangsong', 'heiti', 'lxgwwenkai'].includes(cardFont)) {
+  if (cardFont && ['songti', 'fangsong', 'heiti'].includes(cardFont)) {
     state.cardFont = cardFont as FontFamilyOption
   }
 
@@ -197,7 +197,7 @@ export const useStore = create<AppState>()(
       inputType: legacyState.inputType ?? 'markdown',
       platform: legacyState.platform ?? 'longform',
       documentSettings: legacyState.documentSettings ?? DEFAULT_DOCUMENT_SETTINGS,
-      articleFont: legacyState.articleFont ?? 'lxgwwenkai',
+      articleFont: legacyState.articleFont ?? 'songti',
       cardFont: legacyState.cardFont ?? 'heiti',
       accent: initAccent,
       accentDark: initDark,

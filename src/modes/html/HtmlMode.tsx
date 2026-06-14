@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
 import { HtmlSandbox } from '@/components/preview/HtmlSandbox'
+import { previewHtml } from '@/lib/extractHtml'
 import { downloadBlob, resolveBackground, captureElementInIframeToBlob } from '@/lib/exportImage'
 import { downloadAsZip, type ZipEntry } from '@/lib/export/zipDownload'
 import { copyText } from '@/lib/clipboard'
@@ -152,6 +153,15 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
 
   const [pages, setPages] = useState<PageInfo[]>([])
   const [currentPage, setCurrentPage] = useState(0)
+  const [previewLoading, setPreviewLoading] = useState(false)
+
+  // 是否存在可渲染内容（空内容时由沙箱显示占位提示，无需加载动画）
+  const hasContent = useMemo(() => Boolean(previewHtml(debouncedHtml)), [debouncedHtml])
+
+  // 内容或刷新键变化 → 进入加载态；空内容则直接结束
+  useEffect(() => {
+    setPreviewLoading(hasContent)
+  }, [debouncedHtml, refreshKey, hasContent])
 
   useEffect(() => {
     currentPageRef.current = currentPage
@@ -637,6 +647,22 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         <section ref={previewPaneRef} className={`min-h-0 overflow-hidden bg-white flex flex-col relative ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}>
           {!isFullscreen && <PreviewToolbar actions={toolbarActions} className="shrink-0" />}
           <div className="flex-1 min-h-0 relative">
+            {previewLoading && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-100/70 animate-fade-in">
+                <div className="canvas-skeleton" aria-hidden="true">
+                  <div className="canvas-skeleton-bar">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <div className="canvas-skeleton-hero" />
+                  <div className="canvas-skeleton-line w-[85%]" />
+                  <div className="canvas-skeleton-line w-full" />
+                  <div className="canvas-skeleton-line w-[60%]" />
+                </div>
+                <span className="text-sm text-slate-500 mt-6">正在渲染画布，请稍候…</span>
+              </div>
+            )}
             <HtmlSandbox 
               ref={iframeRef} 
               html={debouncedHtml} 
@@ -644,11 +670,15 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
               allowScripts={allowScripts}
               onLoad={() => {
                 const iframe = iframeRef.current
-                if (!iframe?.contentDocument) return
+                if (!iframe?.contentDocument) {
+                  setPreviewLoading(false)
+                  return
+                }
                 setTimeout(() => {
                   const detected = detectPages(iframe.contentDocument!)
                   setPages(detected)
                   setCurrentPage(0)
+                  setPreviewLoading(false)
                 }, 500)
               }}
             />

@@ -5,7 +5,6 @@ const FONT_OPTIONS: { value: FontFamilyOption; label: string }[] = [
   { value: 'songti', label: '宋体' },
   { value: 'fangsong', label: '仿宋' },
   { value: 'heiti', label: '黑体' },
-  { value: 'lxgwwenkai', label: '霞鹜文楷' },
 ]
 
 interface FontSelectProps extends Omit<SelectProps, 'children' | 'value' | 'onChange'> {
@@ -14,7 +13,7 @@ interface FontSelectProps extends Omit<SelectProps, 'children' | 'value' | 'onCh
 }
 
 /**
- * 字体族选择下拉框：宋体 / 仿宋 / 黑体 / 霞鹜文楷。
+ * 字体族选择下拉框：宋体 / 仿宋 / 黑体。
  * 供 ArticleMode、DocumentMode、CardMode 共用。
  */
 export function FontSelect({ value, onChange, ...rest }: FontSelectProps) {

@@ -294,53 +294,77 @@ interface SplitTableResult {
   }>
 }
 
+/**
+ * 按真实/估算行高拆分表格到多个页面片段。
+ *
+ * @param tableMarkdown  完整表格的 Markdown 原文
+ * @param availableHeight 当前页剩余可用高度（数据行开始前）
+ * @param effectiveHeight 整页有效高度
+ * @param settings        页面设置（marginTop / marginBottom）
+ * @param actualTableHeight 整表实测高度（用于降级估算时的全局校正）
+ * @param tableRowHeights  实测逐行高度 [headerHeight, row0Height, row1Height, ...]
+ *                          若提供则直接使用，否则降级到估算 × heightRatio
+ */
 function splitTableByHeight(
   tableMarkdown: string,
   availableHeight: number,
   effectiveHeight: number,
   settings: { marginTop: number; marginBottom: number },
-  actualTableHeight?: number
+  actualTableHeight?: number,
+  tableRowHeights?: number[]
 ): SplitTableResult | null {
   const tableData = parseTableMarkdown(tableMarkdown)
   if (!tableData) return null
-  
+
+  const useActual = tableRowHeights && tableRowHeights.length >= tableData.rows.length + 1
+
   let heightRatio = 1.0
   let baseCaptionHeight = 0
   if (tableData.caption) {
     // text height + bottom margin 8px
     baseCaptionHeight = Math.ceil(tableData.caption.length / 30) * 18 + 8
   }
-  
-  if (actualTableHeight) {
+
+  if (!useActual && actualTableHeight) {
+    // 降级路径：使用估算 + 全局校正系数
     // actualTableHeight (offsetHeight) does NOT include collapsed margins (top 16px, bottom 30px).
     // It only includes the physical text height of caption and table.
     const estimatedTotal = estimateTableHeight(tableData) + baseCaptionHeight
     heightRatio = actualTableHeight / estimatedTotal
   }
-  
+
   const pages: SplitTableResult['pages'] = []
   let currentPageRows: string[][] = []
   let currentHeight = 0
-  const headerHeight = estimateTableRowHeight(tableData.headers, true, tableData.colChars) * heightRatio
+
+  // 表头高度：实测优先，否则估算
+  const headerHeight = useActual
+    ? tableRowHeights![0]
+    : estimateTableRowHeight(tableData.headers, true, tableData.colChars) * heightRatio
+
   const containerPadding = 46 // 顶部 16px 底部 30px 外边距
-  const safetyBuffer = 30 // 安全缓冲
-  
-  const captionHeight = tableData.caption ? baseCaptionHeight * heightRatio : 0
-  const continuationCaptionHeight = tableData.caption ? captionHeight : 30 * heightRatio
-  
+  // 实测行高时安全缓冲可减小（误差极小）；估算时保留较大缓冲
+  const safetyBuffer = useActual ? 10 : 30
+
+  const captionHeight = tableData.caption ? baseCaptionHeight * (useActual ? 1 : heightRatio) : 0
+  const continuationCaptionHeight = tableData.caption ? captionHeight : 30 * (useActual ? 1 : heightRatio)
+
   // 计算第一页可用高度
   const firstPageAvailable = availableHeight - containerPadding - headerHeight - captionHeight - safetyBuffer
-  
+
   // 计算后续页可用高度
   const continuationPageAvailable = effectiveHeight - containerPadding - headerHeight - continuationCaptionHeight - safetyBuffer
-  
+
   for (let i = 0; i < tableData.rows.length; i++) {
     const row = tableData.rows[i]
-    const rowHeight = estimateTableRowHeight(row, false, tableData.colChars) * heightRatio
-    
+    // 实测行高：tableRowHeights[0] 是表头，数据行从 index 1 开始
+    const rowHeight = useActual
+      ? tableRowHeights![i + 1]
+      : estimateTableRowHeight(row, false, tableData.colChars) * heightRatio
+
     const isFirstPage = pages.length === 0
     const currentAvailable = isFirstPage ? firstPageAvailable : continuationPageAvailable
-    
+
     if (currentHeight + rowHeight > currentAvailable && currentPageRows.length > 0) {
       // 当前页已满，生成页面
       const caption = tableData.caption
@@ -352,7 +376,7 @@ function splitTableByHeight(
         isContinuation: isCont,
         height: currentHeight + containerPadding + headerHeight + currentCapHeight
       })
-      
+
       // 开始新页
       currentPageRows = [row]
       currentHeight = rowHeight
@@ -362,7 +386,7 @@ function splitTableByHeight(
       currentHeight += rowHeight
     }
   }
-  
+
   // 处理最后一页
   if (currentPageRows.length > 0) {
     const caption = tableData.caption
@@ -375,7 +399,7 @@ function splitTableByHeight(
       height: currentHeight + containerPadding + headerHeight + currentCapHeight
     })
   }
-  
+
   return { pages }
 }
 
@@ -408,7 +432,8 @@ function buildTableMarkdown(headers: string[], rows: string[][], isContinuation:
 export function paginateDocumentBlocks(
   blocks: DocumentBlock[],
   settings: Pick<DocumentSettings, 'pageHeight' | 'marginTop' | 'marginBottom' | 'fontScale'>,
-  actualHeights?: Record<string, number>
+  actualHeights?: Record<string, number>,
+  tableRowHeights?: Record<string, number[]>
 ): DocumentPage[] {
   const scale = fontScaleFactor(settings.fontScale ?? 'normal')
   const contentHeight = settings.pageHeight - settings.marginTop - settings.marginBottom
@@ -470,7 +495,8 @@ export function paginateDocumentBlocks(
         }
         
         const actualTableHeight = actualHeights?.[block.id]
-        const splitResult = splitTableByHeight(block.markdown, availableHeight, effectiveHeight, settings, actualTableHeight)
+        const blockRowHeights = tableRowHeights?.[block.id]
+        const splitResult = splitTableByHeight(block.markdown, availableHeight, effectiveHeight, settings, actualTableHeight, blockRowHeights)
         
         if (splitResult && splitResult.pages.length > 1) {
           // 表格需要跨页

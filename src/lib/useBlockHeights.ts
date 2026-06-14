@@ -1,15 +1,21 @@
 import { useLayoutEffect, useState } from 'react'
 
 /**
- * 测量隐藏 DOM 容器内部所有块级元素的真实物理高度，支持 ResizeObserver 和图片加载监听
+ * 测量隐藏 DOM 容器内部所有块级元素的真实物理高度，以及表格每行的实际高度。
+ * 支持 ResizeObserver 和图片加载监听。
+ *
  * @param measuringRef 隐藏测量容器的 Ref
  * @param deps 重新测量高度所依赖的外部属性（如宽度、缩放比例、字体、主题等）
+ * @returns [actualHeights, tableRowHeights]
+ *   - actualHeights: 每个 block 的总高度映射 { blockId: height }
+ *   - tableRowHeights: 每个表格块的逐行高度映射 { blockId: [headerHeight, row0Height, row1Height, ...] }
  */
 export function useBlockHeights(
   measuringRef: React.RefObject<HTMLElement | null>,
   deps: React.DependencyList
-) {
+): [Record<string, number>, Record<string, number[]>] {
   const [actualHeights, setActualHeights] = useState<Record<string, number>>({})
+  const [tableRowHeights, setTableRowHeights] = useState<Record<string, number[]>>({})
 
   useLayoutEffect(() => {
     const container = measuringRef.current
@@ -17,8 +23,9 @@ export function useBlockHeights(
 
     const measure = () => {
       const newHeights: Record<string, number> = {}
+      const newRowHeights: Record<string, number[]> = {}
       const elements = container.children
-      
+
       let lastBottom = 0
       let isFirst = true
 
@@ -30,12 +37,28 @@ export function useBlockHeights(
             lastBottom = el.offsetTop
             isFirst = false
           }
-          
+
           const bottom = el.offsetTop + el.offsetHeight
           const h = bottom - lastBottom
           lastBottom = bottom
 
           newHeights[id] = h
+
+          // 表格块：逐行测量真实高度（thead 首行 + tbody 各数据行）
+          if (el.getAttribute('data-kind') === 'table') {
+            const rowHeights: number[] = []
+            const theadTr = el.querySelector('thead > tr') as HTMLElement | null
+            if (theadTr) {
+              rowHeights.push(theadTr.offsetHeight)
+            }
+            const tbodyTrs = el.querySelectorAll('tbody > tr')
+            for (let j = 0; j < tbodyTrs.length; j++) {
+              rowHeights.push((tbodyTrs[j] as HTMLElement).offsetHeight)
+            }
+            if (rowHeights.length > 0) {
+              newRowHeights[id] = rowHeights
+            }
+          }
         }
       }
 
@@ -51,6 +74,21 @@ export function useBlockHeights(
         }
         return hasChange ? newHeights : prev
       })
+
+      setTableRowHeights(prev => {
+        const newKeys = Object.keys(newRowHeights)
+        const prevKeys = Object.keys(prev)
+        if (newKeys.length !== prevKeys.length) return newRowHeights
+        for (const key of newKeys) {
+          const newArr = newRowHeights[key]
+          const prevArr = prev[key]
+          if (!prevArr || newArr.length !== prevArr.length) return newRowHeights
+          for (let k = 0; k < newArr.length; k++) {
+            if (newArr[k] !== prevArr[k]) return newRowHeights
+          }
+        }
+        return prev
+      })
     }
 
     measure()
@@ -62,9 +100,14 @@ export function useBlockHeights(
       }
     }
     container.addEventListener('load', handleLoad, true)
-    
+
     const elements = Array.from(container.children)
-    elements.forEach(el => resizeObserver.observe(el))
+    elements.forEach(el => {
+      resizeObserver.observe(el)
+      // 对表格块：额外观察 <table> 元素，捕获列宽重排引起的行高变化
+      const table = el.querySelector('table')
+      if (table) resizeObserver.observe(table)
+    })
 
     return () => {
       resizeObserver.disconnect()
@@ -73,5 +116,5 @@ export function useBlockHeights(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
-  return [actualHeights, setActualHeights] as const
+  return [actualHeights, tableRowHeights] as const
 }

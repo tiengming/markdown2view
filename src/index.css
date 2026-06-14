@@ -91,6 +91,26 @@ body {
   white-space: pre-wrap !important;
 }
 
+/* 段落块间距：真实间距由引擎渲染的内层 <section style="margin:0 0 24px"> 控制，
+   需用 !important 覆盖该内联底边距；外层块与内层 p 一并统一，
+   保证「块间」与「块内多段」间距一致。不影响表格/标题/引用等其他块。 */
+.document-block[data-kind='paragraph'] {
+  margin-bottom: 12px;
+}
+
+.document-block[data-kind='paragraph'] > section {
+  margin-bottom: 12px !important;
+}
+
+.document-block[data-kind='paragraph'] p {
+  margin: 0 !important;
+}
+
+/* 列表块与段落块保持一致的块间距 */
+.document-block[data-kind='list'] {
+  margin-bottom: 12px;
+}
+
 .document-block h1 {
   color: #111827 !important;
   letter-spacing: 0 !important;

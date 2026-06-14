@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState, useRef } from "react";
 import { useStore, type DemoContents } from "@/lib/store";
 import { Toast, type ToastState } from "@/components/ui/Toast";
 import { ModeTabs } from "@/components/layout/ModeTabs";
@@ -79,6 +79,23 @@ export default function App() {
   const [toast, setToast] = useState<ToastState | null>(null);
   const showToast = (message: string) => setToast({ message, key: Date.now() });
 
+  // 导航栏宽度动态自适应测量
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerWidth, setHeaderWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1200,
+  );
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      setHeaderWidth(rect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // 挂载时按版本号同步示例：仅当 DEMO_VERSION 变化时，刷新用户未编辑过的字段为最新示例。
   useEffect(() => {
     syncDemoContent(DEMOS);
@@ -97,8 +114,10 @@ export default function App() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* 顶部导航栏 */}
-      <header className="app-header relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 shadow-sm">
+      <header
+        ref={headerRef}
+        className="app-header relative z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 shadow-sm"
+      >
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="app-logo-bg flex h-7 w-7 items-center justify-center rounded-md text-white shadow-sm">
@@ -119,149 +138,164 @@ export default function App() {
                 <circle cx="11" cy="11" r="2"></circle>
               </svg>
             </div>
-            <h1 className="text-[17px] font-bold tracking-tight text-slate-800 hidden lg:block">
-              markdown<span className="app-title-accent">2</span>view
-            </h1>
-            <h1 className="text-[17px] font-bold tracking-tight text-slate-800 lg:hidden">
-              m2v
-            </h1>
+            {headerWidth >= 1024 ? (
+              <h1 className="text-[17px] font-bold tracking-tight text-slate-800">
+                markdown<span className="app-title-accent">2</span>view
+              </h1>
+            ) : (
+              <h1 className="text-[17px] font-bold tracking-tight text-slate-800">
+                m2v
+              </h1>
+            )}
           </div>
           {/* 多模式切换：仅在桌面端显示 */}
-          <div className="hidden md:block">
-            <ModeTabs mode={mode} onChange={setMode} />
-          </div>
+          {headerWidth >= 768 && (
+            <div className="hidden md:block">
+              <ModeTabs mode={mode} onChange={setMode} />
+            </div>
+          )}
         </div>
 
         {/* 桌面与平板端功能按钮区 (>=768px) */}
-        <div className="hidden md:flex items-center gap-4">
-          {/* BeeEffy: 仅在 lg (1024px) 以上展示；在 xl (1280px) 以上展示文字，lg 隐藏文字 */}
-          <a
-            href="https://www.beeeffy.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden lg:flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="作者的另一个项目：BeeEffy——个人AI待办与复盘成长系统"
-          >
-            <svg width="48" height="14" viewBox="0 0 77.63 21.69" fill="none" stroke="currentColor" className="shrink-0">
-              <circle cx="10.84" cy="10.84" r="10.84" fill="currentColor" stroke="none" />
-              <circle cx="35.1" cy="10.84" r="10.84" fill="currentColor" stroke="none" opacity="0.45" />
-              <circle cx="66.79" cy="10.84" r="10.84" fill="currentColor" stroke="none" opacity="0.45" />
-              <path d="M50.74 1.97 L62.55 10.84 L50.74 19.72" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M64.32 1.97 L76.13 10.84 L64.32 19.72" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
-            </svg>
-            <span className="hidden xl:inline">BeeEffy</span>
-          </a>
+        {headerWidth >= 768 ? (
+          <div className="hidden md:flex items-center gap-4">
+            {/* BeeEffy: 仅在 1024px 以上展示；在 1280px 以上展示文字 */}
+            {headerWidth >= 1024 && (
+              <a
+                href="https://www.beeeffy.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+                title="作者的另一个项目：BeeEffy——个人AI待办与复盘成长系统"
+              >
+                <svg width="48" height="14" viewBox="0 0 77.63 21.69" fill="none" stroke="currentColor" className="shrink-0">
+                  <circle cx="10.84" cy="10.84" r="10.84" fill="currentColor" stroke="none" />
+                  <circle cx="35.1" cy="10.84" r="10.84" fill="currentColor" stroke="none" opacity="0.45" />
+                  <circle cx="66.79" cy="10.84" r="10.84" fill="currentColor" stroke="none" opacity="0.45" />
+                  <path d="M50.74 1.97 L62.55 10.84 L50.74 19.72" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M64.32 1.97 L76.13 10.84 L64.32 19.72" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
+                </svg>
+                {headerWidth >= 1280 && <span>BeeEffy</span>}
+              </a>
+            )}
 
-          <div className="hidden lg:block w-px h-4 bg-slate-200" />
+            {headerWidth >= 1024 && <div className="w-px h-4 bg-slate-200" />}
 
-          {/* GitHub: 始终直观展示 */}
-          <a
-            href="https://github.com/ZhongXiandou/markdown2view"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="完全开源的纯前端项目，数据不传输至服务器。访问 GitHub 源码仓库"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-            </svg>
-          </a>
+            {/* GitHub: 始终直观展示 */}
+            <a
+              href="https://github.com/ZhongXiandou/markdown2view"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              title="完全开源的纯前端项目，数据不传输至服务器。访问 GitHub 源码仓库"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+            </a>
 
-          {/* 使用帮助: 始终直观展示 */}
-          <button
-            onClick={() => triggerGuide(mode)}
-            className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="查看使用帮助"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <path d="M12 17h.01" />
-            </svg>
-          </button>
+            {/* 使用帮助: 始终直观展示 */}
+            <button
+              onClick={() => triggerGuide(mode)}
+              className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              title="查看使用帮助"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
+            </button>
 
-          <div className="w-px h-4 bg-slate-200" />
+            <div className="w-px h-4 bg-slate-200" />
 
-          {/* 图床设置: 仅在 lg (1024px) 以上展示；在 xl (1280px) 以上展示文字，lg 隐藏文字 */}
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="hidden lg:flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="图床设置 (配置图片上传与云存储参数)"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-            <span className="hidden xl:inline">图床设置</span>
-          </button>
-
-          <div className="hidden lg:block w-px h-4 bg-slate-200" />
-
-          {/* 恢复示例: 仅在 lg (1024px) 以上展示；在 xl (1280px) 以上展示文字，lg 隐藏文字 */}
-          <button
-            onClick={handleRestoreDemo}
-            className="hidden lg:flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="恢复当前模块的示例内容"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-              <path d="M3 3v5h5"></path>
-            </svg>
-            <span className="hidden xl:inline">恢复示例</span>
-          </button>
-
-          <div className="hidden lg:block w-px h-4 bg-slate-200" />
-
-          {/* 主题色 */}
-          <div className="flex items-center gap-1.5">
-            {THEMES.map((t) => (
+            {/* 图床设置: 仅在 1024px 以上展示；在 1280px 以上展示文字 */}
+            {headerWidth >= 1024 && (
               <button
-                key={t.accent}
-                title={t.accent}
-                onClick={() => setTheme(t.accent, t.dark)}
-                className="h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer"
-                style={{
-                  background: t.accent,
-                  borderColor: accent === t.accent ? "#111" : "transparent",
-                  outline: accent === t.accent ? "2px solid #1118" : "none",
-                }}
+                onClick={() => setIsSettingsOpen(true)}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+                title="图床设置 (配置图片上传与云存储参数)"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                {headerWidth >= 1280 && <span>图床设置</span>}
+              </button>
+            )}
+
+            {headerWidth >= 1024 && <div className="w-px h-4 bg-slate-200" />}
+
+            {/* 恢复示例: 仅在 1024px 以上展示；在 1280px 以上展示文字 */}
+            {headerWidth >= 1024 && (
+              <button
+                onClick={handleRestoreDemo}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+                title="恢复当前模块的示例内容"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                {headerWidth >= 1280 && <span>恢复示例</span>}
+              </button>
+            )}
+
+            {headerWidth >= 1024 && <div className="w-px h-4 bg-slate-200" />}
+
+            {/* 主题色 */}
+            <div className="flex items-center gap-1.5">
+              {THEMES.map((t) => (
+                <button
+                  key={t.accent}
+                  title={t.accent}
+                  onClick={() => setTheme(t.accent, t.dark)}
+                  className="h-5 w-5 rounded-full border transition-transform hover:scale-110 cursor-pointer"
+                  style={{
+                    background: t.accent,
+                    borderColor: accent === t.accent ? "#111" : "transparent",
+                    outline: accent === t.accent ? "2px solid #1118" : "none",
+                  }}
+                />
+              ))}
+            </div>
+
+            {headerWidth < 1024 && <div className="w-px h-4 bg-slate-200" />}
+
+            {/* 更多菜单 (•••): 仅在 768px - 1024px 下展示 */}
+            {headerWidth < 1024 && (
+              <HeaderMoreMenu
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                onRestoreDemo={handleRestoreDemo}
               />
-            ))}
+            )}
           </div>
+        ) : null}
 
-          <div className="hidden md:block lg:hidden w-px h-4 bg-slate-200" />
-
-          {/* 更多菜单 (•••): 仅在 md (768px - 1024px) 下展示 */}
-          <div className="hidden md:block lg:hidden">
-            <HeaderMoreMenu
-              onOpenSettings={() => setIsSettingsOpen(true)}
-              onRestoreDemo={handleRestoreDemo}
-            />
-          </div>
-        </div>
-
-        {/* 移动端汉堡菜单按钮 */}
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors md:hidden cursor-pointer"
-          title="更多菜单"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {/* 移动端汉堡菜单按钮 (宽度 < 768px) */}
+        {headerWidth < 768 && (
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors md:hidden cursor-pointer"
+            title="更多菜单"
           >
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        )}
       </header>
 
       {/* 主体：按模式渲染 */}

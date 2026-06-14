@@ -36,7 +36,7 @@ export function PreviewToolbar({ leftContent, actions, className = '' }: Preview
       {leftContent && actions.length > 0 && (
         <div className="w-px h-4 bg-slate-200 shrink-0" />
       )}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex flex-nowrap md:flex-wrap items-center gap-1.5 shrink-0 md:shrink">
         {actions.map((action, idx) => {
           if (action === 'separator') {
             return <div key={`sep-${idx}`} className="w-px h-5 bg-slate-200 mx-0.5" />

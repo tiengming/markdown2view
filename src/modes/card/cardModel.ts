@@ -59,6 +59,13 @@ function splitMarkdownBlocks(markdown: string): string[] {
       }
     }
 
+    if (!inFence && /^<page-break\s*\/?>/i.test(trimmed)) {
+      flush()
+      current.push(trimmed)
+      flush()
+      continue
+    }
+
     if (!inFence && !openTag && !trimmed) {
       flush()
       continue
@@ -74,6 +81,7 @@ function splitMarkdownBlocks(markdown: string): string[] {
 
 function classify(block: string) {
   const text = block.trim()
+  if (/^<page-break\s*\/?>/i.test(text)) return 'pagebreak'
   if (/^#{1,6}\s/.test(text) || /^<title\b/.test(text) || /^<p-title\b/.test(text)) return 'heading'
   if (/^```/.test(text)) return 'code'
   if (/^!\[/.test(text)) return 'image'
@@ -86,6 +94,7 @@ function classify(block: string) {
 
 function estimateBlockUnits(block: string): number {
   const kind = classify(block)
+  if (kind === 'pagebreak') return 0
   const chars = stripInline(block).length
   const lines = block.split('\n').length
 
@@ -132,7 +141,13 @@ function paginateBlocks(
   }
 
   blocks.forEach((block, index) => {
-    const isHeading = classify(block) === 'heading'
+    const kind = classify(block)
+    if (kind === 'pagebreak') {
+      push()
+      return
+    }
+
+    const isHeading = kind === 'heading'
     // actualHeights 存在时使用像素高度；否则使用粗略内容单位估算。
     const height = actualHeights ? (actualHeights[`block-${index}`] || 0) : estimateBlockUnits(block)
     const headingNearBottom = isHeading && (actualHeights ? used > budget * 0.75 : used > budget * 0.72)

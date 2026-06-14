@@ -357,6 +357,7 @@ export function CardMode({
             value={localMarkdown}
             onChange={setLocalMarkdown}
             externalVersion={externalVersion}
+            mode="card"
             onScrollerReady={(el) => {
               editorScrollerRef.current = el;
               setEditorReady((n) => n + 1);
@@ -365,8 +366,7 @@ export function CardMode({
         </section>
 
         <section
-          ref={previewScrollRef}
-          className={`min-h-0 overflow-y-auto bg-slate-100 flex flex-col ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}
+          className={`min-h-0 overflow-hidden bg-slate-100 flex flex-col ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}
         >
           <PreviewToolbar
             leftContent={toolbarLeftContent}
@@ -374,7 +374,10 @@ export function CardMode({
             className="shrink-0"
           />
 
-        <div className="flex flex-col gap-4 px-5 py-5">
+          <div
+            ref={previewScrollRef}
+            className="flex-1 overflow-auto flex flex-col gap-4 px-5 py-5"
+          >
           <aside className="mx-auto w-full max-w-[480px] rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-[13px] leading-6 text-blue-800">
             当前分页图文适合快速生成清晰、统一的多页卡片；如果需要更强的品牌风格、复杂版式或活动海报，可以切换到自由画布使用“小红书多页图文”风格深度生成。
           </aside>

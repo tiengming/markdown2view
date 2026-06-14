@@ -54,4 +54,26 @@ ${Array.from({ length: 12 }, (_, i) => `第 ${i + 1} 段内容，包含较长的
 
     expect(tall.pages.length).toBeLessThanOrEqual(short.pages.length)
   })
+
+  it('supports explicit <page-break/> to split pages', () => {
+    const model = createCardModel(
+      `---
+title: 物理分页测试
+---
+
+第一页内容。
+
+<page-break/>
+
+第二页内容。`,
+      '3:4',
+      'xiaohongshu',
+    )
+
+    expect(model.pages.length).toBe(2)
+    expect(model.pages[0].markdown).toBe('第一页内容。')
+    expect(model.pages[1].markdown).toBe('第二页内容。')
+    expect(model.pages[0].markdown).not.toContain('<page-break/>')
+    expect(model.pages[1].markdown).not.toContain('<page-break/>')
+  })
 })

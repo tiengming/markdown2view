@@ -122,12 +122,6 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
   }, [])
   
-  // 提前通过 DOMParser 检测预期的页面数量，避免 iframe 加载完成前后工具栏发生抖动闪烁（即所谓的"加载两次"视觉效果）
-  const expectedPageCount = useMemo(() => {
-    const doc = new DOMParser().parseFromString(html, 'text/html')
-    return doc.querySelectorAll('.page, .slide, .card').length
-  }, [html])
-
   // store ↔ 编辑器双向同步（防抖回写 + 外部变更信号）
   const {
     localValue: localHtml,
@@ -136,17 +130,20 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     externalVersion,
   } = useEditorDocSync(html, setHtml)
 
-  const htmlTitle = useMemo(() => {
+  // 合并 DOMParser 调用：一次解析同时获取页面数量和标题，避免重复解析
+  const { expectedPageCount, htmlTitle } = useMemo(() => {
     try {
-      const doc = new DOMParser().parseFromString(localHtml, 'text/html')
+      const doc = new DOMParser().parseFromString(localHtml || html, 'text/html')
+      const pageCount = doc.querySelectorAll('.page, .slide, .card').length
       const titleText = doc.querySelector('title')?.textContent?.trim()
         || doc.querySelector('h1')?.textContent?.trim()
         || ''
-      return titleText ? titleText.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 40) : ''
+      const title = titleText ? titleText.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 40) : ''
+      return { expectedPageCount: pageCount, htmlTitle: title }
     } catch {
-      return ''
+      return { expectedPageCount: 0, htmlTitle: '' }
     }
-  }, [localHtml])
+  }, [html, localHtml])
 
   // 图片上传
   const { fileInputRef, uploading, triggerUpload, handleFileChange } = useImageUpload(onToast)
@@ -674,12 +671,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
                   setPreviewLoading(false)
                   return
                 }
-                setTimeout(() => {
-                  const detected = detectPages(iframe.contentDocument!)
-                  setPages(detected)
-                  setCurrentPage(0)
-                  setPreviewLoading(false)
-                }, 500)
+                // 直接检测页面，无需延迟等待
+                const detected = detectPages(iframe.contentDocument!)
+                setPages(detected)
+                setCurrentPage(0)
+                setPreviewLoading(false)
               }}
             />
           </div>

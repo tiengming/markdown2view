@@ -44,16 +44,16 @@ async function waitForStability(element: HTMLElement | Document, win: Window = w
 
     const observer = new MutationObserver(() => {
       clearTimeout(stableTimer)
-      stableTimer = setTimeout(finish, 150) // 150ms 无变化视为稳定
+      stableTimer = setTimeout(finish, 100)  // 从 150ms 减少到 100ms
     })
 
     observer.observe(target, { childList: true, subtree: true, attributes: true, characterData: true })
     
-    stableTimer = setTimeout(finish, 150)
+    stableTimer = setTimeout(finish, 100)  // 从 150ms 减少到 100ms
     timeout = setTimeout(finish, maxWaitMs)
   })
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {  // 从 3 帧减少到 2 帧
     await new Promise<void>((r) => win.requestAnimationFrame(() => r()))
   }
 }
@@ -66,12 +66,13 @@ async function waitForDocumentReady(doc: Document, win: Window): Promise<void> {
         if (doc.readyState === 'complete') done()
       })
       win.addEventListener?.('load', done, { once: true })
-      setTimeout(done, 8000)
+      setTimeout(done, 3000)  // 从 8s 减少到 3s
     })
   }
 
+  // 并行等待样式表、字体和图片，而不是串行等待
   const sheets = Array.from(doc.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'))
-  await Promise.all(
+  const sheetsPromise = Promise.all(
     sheets.map(
       (link) =>
         new Promise<void>((res) => {
@@ -79,20 +80,22 @@ async function waitForDocumentReady(doc: Document, win: Window): Promise<void> {
           const done = () => res()
           link.addEventListener('load', done, { once: true })
           link.addEventListener('error', done, { once: true })
-          setTimeout(done, 6000)
+          setTimeout(done, 3000)  // 从 6s 减少到 3s
         }),
     ),
   )
 
-  try {
-    const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts
-    if (fonts?.ready) await fonts.ready
-  } catch {
-    /* noop */
-  }
+  const fontsPromise = (async () => {
+    try {
+      const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts
+      if (fonts?.ready) await fonts.ready
+    } catch {
+      /* noop */
+    }
+  })()
 
   const imgs = Array.from(doc.images)
-  await Promise.all(
+  const imgsPromise = Promise.all(
     imgs.map(
       (img) =>
         new Promise<void>((res) => {
@@ -101,19 +104,22 @@ async function waitForDocumentReady(doc: Document, win: Window): Promise<void> {
           img.addEventListener('load', done, { once: true })
           img.addEventListener('error', done, { once: true })
           if ('decode' in img) img.decode().then(done, done)
-          setTimeout(done, 6000)
+          setTimeout(done, 3000)  // 从 6s 减少到 3s
         }),
     ),
   )
 
+  // 并行等待所有资源
+  await Promise.all([sheetsPromise, fontsPromise, imgsPromise])
+
   try {
-    await waitUntilLoad(doc.documentElement, { timeout: 6000 })
+    await waitUntilLoad(doc.documentElement, { timeout: 3000 })  // 从 6s 减少到 3s
   } catch {
     /* noop */
   }
 
   // Tailwind Play CDN 异步注入样式，等待 DOM 变动停止和帧渲染
-  await waitForStability(doc, win, 2000)
+  await waitForStability(doc, win, 1000)  // 从 2000ms 减少到 1000ms
 }
 
 export function resolveBackground(doc: Document, win: Window, override?: string): string {
@@ -272,7 +278,7 @@ export async function captureElementInIframeToBlob(
     setTempStyle(element, 'height', `${h}px`)
 
     // 等待让新布局完全渲染且 DOM 稳定
-    await waitForStability(doc, win, 1000)
+    await waitForStability(doc, win, 500)  // 从 1000ms 减少到 500ms
 
     const scale = opts.scale ?? 2
     const backgroundColor = resolveBackground(doc, win, opts.backgroundColor)

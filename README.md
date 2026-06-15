@@ -133,6 +133,7 @@ feat(article): 增加长图文模式的一键去重功能
 - **简单优先**：不做过度抽象，不为"可能的未来"写代码
 - **手术刀修改**：只触碰必须改动的部分，不顺手重构未坏掉的代码
 - **构建体积保护**：大型 SDK 必须 `await import()` 按需加载，禁止顶部静态导入
+- **命名规范**：组件文件用 PascalCase（如 `PreviewToolbar.tsx`），工具函数用 camelCase（如 `useDebounce.ts`）
 
 ---
 
@@ -168,42 +169,6 @@ src/
 | [r-markdown](https://github.com/RobocopMao/r-markdown) | MIT（声明） | 移植了微信公众号渲染引擎的核心解析逻辑、多款排版组件以及主题配色方案。 |
 | [html-anything](https://github.com/nexu-io/html-anything) | Apache-2.0 | 启发了 HTML 可视化画布中基于 `iframe` 容器的安全隔离设计与导出层架构。 |
 | [guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | AGPL-3.0 | 自由画布中「电子杂志」「瑞士国际主义」的风格参考，以及网页 PPT 主题节奏、标准图片比例、版式校验等经验启发。本项目仅做设计经验与提示词层面的转译吸收，未并入其模板源码。 |
-
----
-
-## 🧑‍💻 开发与提交规范
-
-详细规范请参阅 [`docs/代码与提交规范.md`](./docs/代码与提交规范.md)，以下为核心要点：
-
-### 命名与注释
-- 组件文件用 PascalCase（如 `PreviewToolbar.tsx`），工具函数用 camelCase（如 `useDebounce.ts`）
-- 注释使用中文，只写"为什么"（Why），不写"是什么"（What）
-
-### Git 提交规范（Angular 规范）
-```
-<type>(<scope>): <subject>
-
-<body>
-```
-
-| Type | 说明 |
-| :--- | :--- |
-| `feat` | 新增功能 |
-| `fix` | 修复 bug |
-| `docs` | 文档变更 |
-| `style` | 代码格式（不影响运行） |
-| `refactor` | 重构 |
-| `perf` | 性能优化 |
-| `test` | 测试相关 |
-| `build` | 构建系统或依赖变更 |
-| `chore` | 辅助工具/库的更改 |
-
-### 提交前检查清单
-1. `pnpm typecheck` — TypeScript 类型检查通过
-2. `pnpm test` — 全部 Vitest 单元测试通过
-3. `pnpm build` — 构建无报错，核心 chunk 无异常膨胀
-
-> 💡 更多开发经验与踩坑记录请参阅 [`docs/开发经验与偏好记录.md`](./docs/开发经验与偏好记录.md)。
 
 ---
 

@@ -1370,7 +1370,7 @@ body {
         <div class="s7-eyebrow">🎨 MODE 04 — HTML 可视化自由画布</div>
         <div class="s7-title" style="color:#f5f0e4;">沙箱隔离渲染<br>网页 PPT 专属呈现</div>
         <div class="s7-body">
-          内置基于 iframe 容器的隔离机制，防止样式污染，支持导入 Tailwind Play CDN 等外部样式。生成带有极致字号对比的「电子杂志风格」横向翻页网页 PPT。
+          内置基于 iframe 容器的隔离机制，防止样式污染，预加载本地化 Tailwind 运行时。生成带有极致字号对比的「电子杂志风格」横向翻页网页 PPT。
         </div>
         <div class="capability-list" style="margin-top:20px;">
           <div class="cap-item"><span class="cap-dot"></span>键盘 / 手势切换幻灯片</div>

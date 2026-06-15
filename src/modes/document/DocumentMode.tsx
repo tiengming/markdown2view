@@ -282,19 +282,19 @@ export function DocumentMode({
         subtitle="利用 AI 智能排版指令，生成符合 A4 物理分页规范的专业报告/文档"
         steps={[
           {
-            icon: '📚',
+            icon: 'copy',
             title: '复制排版指令',
-            desc: '点击右上角「复制排版指令」，获取包含智能跨页、防孤立标题、封面表格等排版规范的 AI 提示词。',
+            shortDesc: '点击「复制排版指令」，获取包含智能跨页、防孤立标题等规范的 AI 提示词。',
           },
           {
-            icon: '🤖',
+            icon: 'ai',
             title: '发给 AI 优化文档结构',
-            desc: '将复制的指令与你的报告大纲或草稿内容发给 AI，让其按物理分页与严谨格式输出 Markdown 结构。',
+            shortDesc: '将指令与报告大纲发给 AI，让其按物理分页与严谨格式输出 Markdown。',
           },
           {
-            icon: '🖨️',
+            icon: 'export',
             title: '粘贴并无损导出 PDF',
-            desc: '将 AI 输出的 Markdown 粘贴到左侧，右侧将呈现完美分页预览，在顶部栏微调字体页眉后，点击「导出 PDF」保存即可。',
+            shortDesc: '粘贴 Markdown 到编辑器，预览分页效果后点击「导出 PDF」保存。',
           },
         ]}
       />

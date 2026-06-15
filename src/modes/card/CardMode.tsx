@@ -317,6 +317,8 @@ export function CardMode({
       <Select
         value={aspect}
         onChange={(e) => setAspect(e.target.value as XhsAspect)}
+        aria-label="选择卡片比例"
+        title="选择卡片比例"
       >
         <option value="3:4">3:4比例</option>
         <option value="9:16">9:16比例</option>
@@ -487,19 +489,19 @@ export function CardMode({
         subtitle="利用 AI 创作指令，轻松打造高颜值小红书等多页社交知识卡片"
         steps={[
           {
-            icon: '📚',
+            icon: 'copy',
             title: '复制排版指令',
-            desc: '点击上方工具栏「复制排版指令」，获取包含多页卡片分隔语法（---）与爆款小红书文案框架的 AI 提示词。',
+            shortDesc: '点击「复制排版指令」，获取包含多页卡片分隔语法与爆款文案框架的 AI 提示词。',
           },
           {
-            icon: '🤖',
+            icon: 'ai',
             title: '发给 AI 创作/精简内容',
-            desc: '将复制的指令连同你的内容想法发给 AI，让其将文字精炼、提炼金句，并输出适合多卡片分割的 Markdown 及发布文案。',
+            shortDesc: '将指令与内容想法发给 AI，让其精炼文字并输出适合多卡片分割的 Markdown。',
           },
           {
-            icon: '📥',
+            icon: 'export',
             title: '回填内容并打包下载',
-            desc: '将 AI 输出的 Markdown 粘贴到左侧，右侧将自动切割呈现精美卡片。可一键复制右侧的发布文案，并将卡片批量打包下载为 PNG 压缩包。',
+            shortDesc: '粘贴 Markdown 到编辑器，自动切割卡片后可复制文案并打包下载 PNG。',
           },
         ]}
       />

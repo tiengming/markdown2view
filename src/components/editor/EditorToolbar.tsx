@@ -141,6 +141,7 @@ export function EditorToolbar({ view, mode }: EditorToolbarProps) {
           onChange={handleImageUpload}
           accept="image/*"
           className="hidden"
+          aria-label="上传图片"
         />
       </div>
     </div>

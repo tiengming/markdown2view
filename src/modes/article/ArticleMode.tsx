@@ -87,19 +87,19 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
         subtitle="利用 AI 提示词与公众号排版引擎，轻松渲染出专业的内容设计"
         steps={[
           {
-            icon: '📚',
+            icon: 'copy',
             title: '复制排版指令',
-            desc: '点击上方预览区「复制排版指令」按钮，将专为本公众号排版引擎设计的 AI 提示词复制到剪贴板。',
+            shortDesc: '点击预览区「复制排版指令」按钮，获取公众号排版引擎专用的 AI 提示词。',
           },
           {
-            icon: '🤖',
+            icon: 'ai',
             title: '发给 AI 优化文章内容',
-            desc: '将复制的指令连同你的文章草稿一起发给 AI，让其输出符合特定组件排版规则（如 steps 步骤条、compare 对比卡等）的 Markdown。',
+            shortDesc: '将指令与文章草稿发给 AI，让其输出符合排版规则的 Markdown。',
           },
           {
-            icon: '📋',
+            icon: 'export',
             title: '回填内容并一键复制',
-            desc: '将 AI 输出的 Markdown 粘贴到左侧编辑器，右侧将实时渲染排版；确认无误后点击「复制富文本」即可无损粘贴到微信公众号后台。',
+            shortDesc: '粘贴 Markdown 到编辑器，实时预览后点击「复制富文本」即可发布。',
           },
         ]}
       />

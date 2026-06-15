@@ -87,12 +87,14 @@ export function CustomInstructionEditor({ mode, editingId, cloneFromStyle, onClo
               type="color"
               value={isValidHex ? accent : '#6366f1'}
               onChange={(e) => setAccent(e.target.value)}
+              aria-label="强调色选择器"
               className="h-9 w-9 cursor-pointer rounded border border-slate-200"
             />
             <input
               type="text"
               value={accent}
               onChange={(e) => setAccent(e.target.value)}
+              aria-label="强调色十六进制值"
               className="flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[13px] font-mono text-slate-700 focus:border-blue-400 focus:outline-none"
             />
           </div>
@@ -102,6 +104,7 @@ export function CustomInstructionEditor({ mode, editingId, cloneFromStyle, onClo
           <select
             value={outputType}
             onChange={(e) => setOutputType(e.target.value as OutputType)}
+            aria-label="输出类型"
             className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-[13px] text-slate-700 focus:border-blue-400 focus:outline-none"
           >
             {OUTPUT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -112,6 +115,7 @@ export function CustomInstructionEditor({ mode, editingId, cloneFromStyle, onClo
           <select
             value={visualTone}
             onChange={(e) => setVisualTone(e.target.value as VisualTone)}
+            aria-label="视觉气质"
             className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-[13px] text-slate-700 focus:border-blue-400 focus:outline-none"
           >
             {VISUAL_TONES.map((t) => <option key={t} value={t}>{t}</option>)}

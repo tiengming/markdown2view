@@ -20,6 +20,8 @@ export function FontSelect({ value, onChange, ...rest }: FontSelectProps) {
   return (
     <Select
       {...rest}
+      aria-label="字体选择"
+      title="字体选择"
       value={value}
       onChange={(e) => onChange(e.target.value as FontFamilyOption)}
     >

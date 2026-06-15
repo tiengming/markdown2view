@@ -81,7 +81,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             图片上传与图床配置
           </h2>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="关闭"
             className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -132,7 +134,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div className="flex flex-col gap-3">
                 <div className="text-[13px] leading-relaxed text-slate-500 mb-1">
                   <p className="font-semibold text-slate-700">☁️ Sm.ms 免费图床</p>
-                  <p>请先在 <a href="https://sm.ms/" target="_blank" rel="noreferrer" className="text-[var(--accent)] underline font-medium">Sm.ms 官网</a> 注册并获取 API Token 填入下方。</p>
+                  <p>请先在 <a href="https://sm.ms/" target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] underline font-medium">Sm.ms 官网</a> 注册并获取 API Token 填入下方。</p>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[12px] font-medium text-slate-600">API Token</label>

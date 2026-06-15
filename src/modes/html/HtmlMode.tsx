@@ -647,7 +647,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         </button>
       </div>
 
-      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" aria-label="上传图片" className="hidden" />
 
       {/* 左右分栏 */}
       <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-2 gap-px bg-gray-200">
@@ -719,19 +719,19 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
         tip="为获得最佳体验，建议在电脑浏览器中使用本功能，并将浏览器窗口宽度调整至 1920 像素以上，以充分展现画布的宽屏排版效果。"
         steps={[
           {
-            icon: '📚',
+            icon: 'copy',
             title: '复制风格排版指令',
-            desc: '在上方工具栏打开「指令库」，选择心仪的组件风格，点击「复制提示词」复制对应的排版规则。',
+            shortDesc: '打开「指令库」，选择心仪风格并复制对应的 HTML 排版提示词。',
           },
           {
-            icon: '🤖',
+            icon: 'ai',
             title: '发给 AI 优化并生成 HTML',
-            desc: '将复制的指令与你的原始草稿内容一起发给 AI，让其输出符合特定风格排版的 HTML 源码。',
+            shortDesc: '将指令与草稿内容发给 AI，让其输出符合特定风格排版的 HTML 源码。',
           },
           {
-            icon: '📋',
+            icon: 'export',
             title: '粘贴 HTML 实时预览与导出',
-            desc: '将 AI 返回的 HTML 代码粘贴到左侧编辑器，右侧即可实时加载并渲染，支持一键打包下载。',
+            shortDesc: '粘贴 HTML 到编辑器，右侧实时渲染后可导出 PNG 或 PDF。',
           },
         ]}
       />

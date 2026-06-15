@@ -394,7 +394,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
       ro.disconnect()
       contentObserver?.disconnect()
     }
-  }, [debouncedHtml, refreshKey])
+  }, [debouncedHtml, refreshKey, pages])
 
   const handleExport = () => {
     if (!iframeRef.current) {

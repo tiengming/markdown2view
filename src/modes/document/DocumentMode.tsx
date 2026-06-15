@@ -278,7 +278,7 @@ export function DocumentMode({
       <UserGuidePopover
         guideKey="m2v-document-guide-seen"
         forceOpenTrigger={guideTrigger}
-        title="A4 规范文档 快速开始"
+        title="A4 规范文档 使用指引"
         subtitle="利用 AI 智能排版指令，生成符合 A4 物理分页规范的专业报告/文档"
         steps={[
           {

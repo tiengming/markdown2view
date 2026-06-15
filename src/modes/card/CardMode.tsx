@@ -485,7 +485,7 @@ export function CardMode({
       <UserGuidePopover
         guideKey="m2v-card-guide-seen"
         forceOpenTrigger={guideTrigger}
-        title="图文卡片 快速开始"
+        title="图文卡片 使用指引"
         subtitle="利用 AI 创作指令，轻松打造高颜值小红书等多页社交知识卡片"
         steps={[
           {

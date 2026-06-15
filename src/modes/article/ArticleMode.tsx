@@ -83,7 +83,7 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
       <UserGuidePopover
         guideKey="m2v-article-guide-seen"
         forceOpenTrigger={guideTrigger}
-        title="长图文排版 快速开始"
+        title="长图文排版 使用指引"
         subtitle="利用 AI 提示词与公众号排版引擎，轻松渲染出专业的内容设计"
         steps={[
           {

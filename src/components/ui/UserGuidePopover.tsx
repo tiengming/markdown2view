@@ -30,7 +30,7 @@ const iconMap = {
 
 export function UserGuidePopover({
   guideKey,
-  title = '快速开始',
+  title = '使用指引',
   subtitle,
   steps,
   delay = 800,

@@ -6,7 +6,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "极简黑白 · Vercel",
       category: "科技产品/极简工程",
       accent: "#000000",
-      description: "黑白精确主义，大留白，Geist 风格无衬线，锐利分割线",
+      description: "黑白精确主义，大留白，无衬线极简体，锐利分割线",
       previewHtml: `<div style="font-family: Geist, Inter, sans-serif; background: #fff; padding: 18px; height: 100%; border: 1px solid #eaeaea; display: flex; flex-direction: column; box-sizing: border-box;">
     <div style="font-size: 17px; font-weight: 700; color: #000; margin-bottom: 6px; letter-spacing: -0.3px;">Vercel Deploy</div>
     <div style="font-size: 12px; color: #666; margin-bottom: auto; line-height: 1.45;">Push your code and deploy instantly.</div>
@@ -34,7 +34,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "紫色渐变 · Stripe",
       category: "科技产品/金融科技",
       accent: "#635bff",
-      description: "标志性紫色渐变，weight-300 轻盈优雅，斜切色块",
+      description: "标志性紫色渐变，轻盈优雅的细字重，斜切色块",
       previewHtml: `<div style="font-family: sans-serif; background: #fff; padding: 18px; height: 100%; border-radius: 12px; box-shadow: 0 4px 16px rgba(99,91,255,0.12); display: flex; flex-direction: column; box-sizing: border-box;">
     <div style="font-size: 18px; font-weight: 400; color: #30313d; margin-bottom: 6px;">Payment</div>
     <div style="font-size: 12px; color: #425466; margin-bottom: auto; line-height: 1.45;">Secure processing with Stripe.</div>
@@ -58,7 +58,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "精密深色 · Linear",
       category: "科技产品/精密工具",
       accent: "#5e6ad2",
-      description: "超极简深色，精密网格，淡紫强调，克制动效",
+      description: "极简深色界面，精密网格，淡紫强调色，极致克制",
       previewHtml: `<div style="font-family: Inter, sans-serif; background: linear-gradient(180deg, #1c1c1f, #08090a); padding: 18px; height: 100%; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-sizing: border-box;">
     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 14px;">
       <div style="width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid #5e6ad2;"></div>
@@ -123,7 +123,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "克制温和 · Claude",
       category: "科技产品/AI 助手",
       accent: "#d97757",
-      description: "暖白底，衬线体标题搭配无衬线正文，阅读体验极佳的温和科技感",
+      description: "暖白底色，衬线标题搭配无衬线正文，温和克制的 AI 助手气质",
       previewHtml: `<div style="font-family: Georgia, serif; background: #faf9f8; padding: 16px; height: 100%; border: 1px solid #e5e5db; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
     <div style="display: flex; gap: 10px; align-items: flex-start; margin-bottom: auto;">
       <div style="width: 24px; height: 24px; border-radius: 5px; background: #d97757; color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; shrink: 0; font-family: sans-serif;">C</div>
@@ -187,7 +187,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "毛玻璃 · Raycast",
       category: "科技产品/系统工具",
       accent: "#ff6363",
-      description: "macOS 原生感，深色毛玻璃，悬浮搜索框，极致动效",
+      description: "深色悬浮窗，macOS 原生质感，搜索框驱动的命令面板",
       previewHtml: `<div style="font-family: sans-serif; background: #18181b; padding: 14px; height: 100%; border: 1px solid #27272a; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-start; gap: 8px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
     <div style="background: #27272a; border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;">
       <span style="color: #d4d4d8; font-size: 12px;">Search commands...</span>
@@ -224,7 +224,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "企业数据 · MongoDB",
       category: "科技产品/企业数据",
       accent: "#00ed64",
-      description: "深蓝色/乳白底，几何粗体，标志性亮绿，企业信任感",
+      description: "深蓝底色，几何粗体，标志性亮绿点缀，企业级数据平台质感",
       previewHtml: `<div style="font-family: sans-serif; background: #001e2b; padding: 16px; height: 100%; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; border: 1px solid rgba(0,237,100,0.2);">
     <div>
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
@@ -256,7 +256,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "开源协作 · GitHub",
       category: "科技产品/开源协作",
       accent: "#2f81f7",
-      description: "经典浅色/深灰，冷色边框，蓝色链接，代码原生感",
+      description: "经典浅色冷灰底，蓝色链接，代码原生的开源协作感",
       previewHtml: `<div style="font-family: sans-serif; background: #fff; padding: 16px; height: 100%; border: 1px solid #d0d7de; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
     <div>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
@@ -323,7 +323,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "现代实用 · Tailwind CSS",
       category: "科技产品/开发框架",
       accent: "#38bdf8",
-      description: "系统化字体，柔和阴影，蓝青主色，标准实用主义",
+      description: "系统级字体栈，柔和弥散阴影，蓝青主色，标准实用主义",
       previewHtml: `<div style="font-family: ui-sans-serif, system-ui; background: #f9fafb; padding: 18px; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;">
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
       <div style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 6px;">Beautiful UI</div>
@@ -391,7 +391,7 @@ export const techStyles: RawDesignStyle[] = [
       name: "蓝图科技",
       category: "科技产品/蓝图架构",
       accent: "#2563eb",
-      description: "工程蓝图风，细网格、结构线、系统架构 and 模块说明特别清晰",
+      description: "工程蓝图风，细网格、结构线，系统架构与模块说明清晰直观",
       previewHtml: `<div style="font-family: sans-serif; background: #08111f; color: #22d3ee; padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; border: 1px solid #112640; border-radius: 8px; position: relative; background-image: radial-gradient(rgba(37,99,235,0.18) 1px, transparent 1px); background-size: 12px 12px;">
     <div>
       <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(34,211,238,0.25); padding-bottom: 6px; margin-bottom: 12px;">

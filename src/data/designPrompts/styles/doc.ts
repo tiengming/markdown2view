@@ -6,7 +6,7 @@ export const docStyles: RawDesignStyle[] = [
       name: "暖色极简 · Notion",
       category: "文档知识/知识文档",
       accent: "#0f0f0f",
-      description: "暖白底，衬线标题，柔和表面，文档阅读优化",
+      description: "暖白底色，衬线标题，柔和灰色区块，专注文档阅读体验",
       previewHtml: `<div style="font-family: -apple-system, sans-serif; background: #ffffff; padding: 18px 20px; height: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
     <div style="font-family: Lyon-Text, Georgia, serif; font-size: 20px; font-weight: 700; color: #37352f; margin-bottom: 14px;">Project Spec</div>
     <div style="background: #f1f1ef; padding: 10px; border-radius: 4px; display: flex; gap: 8px; margin-bottom: 14px;">
@@ -84,7 +84,7 @@ export const docStyles: RawDesignStyle[] = [
       name: "年度报告",
       category: "文档知识/年度报告",
       accent: "#2f4f4f",
-      description: "现代数字报告，适合数据叙事，暖白底自然色调，混搭字体",
+      description: "现代数字年度报告，暖白底自然色调，衬线与无衬线混搭，适合数据叙事",
       previewHtml: `<div style="font-family: Georgia, serif; background: #fffaf5; padding: 18px; height: 100%; border: 1px solid #ebdcc5; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
     <div>
       <div style="font-size: 10px; font-weight: 800; color: #2f4f4f; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">Annual Report 2026</div>

@@ -269,7 +269,7 @@ export const presentationStyles: RawDesignStyle[] = [
       name: "项目路线图",
       category: "演示汇报/项目规划",
       accent: "#6366f1",
-      description: "规划路线图风，阶段目标、依赖关系、优先级 and 资源安排清晰",
+      description: "规划路线图风，阶段目标、依赖关系、优先级与资源安排清晰",
       previewHtml: `<div style="font-family: sans-serif; background: #f8fafc; padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; border: 1px solid #e2e8f0; border-radius: 8px;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
       <span style="font-size: 13px; font-weight: bold; color: #0f172a;">Project Roadmap</span>

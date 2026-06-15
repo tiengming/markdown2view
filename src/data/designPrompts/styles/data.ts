@@ -6,7 +6,7 @@ export const dataStyles: RawDesignStyle[] = [
       name: "现代仪表盘",
       category: "数据分析/仪表盘",
       accent: "#3b82f6",
-      description: "B端现代数据面板，Bento网格布局，清晰的信息层级与微交互",
+      description: "B 端现代数据面板，Bento 网格布局，清晰的信息层级与微交互",
       previewHtml: `<div style="font-family: sans-serif; background: #f8fafc; padding: 14px; height: 100%; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <span style="font-size: 13px; font-weight: bold; color: #0f172a;">Business Panel</span>
@@ -84,7 +84,7 @@ export const dataStyles: RawDesignStyle[] = [
       name: "数据指挥舱",
       category: "数据分析/实时监控",
       accent: "#06b6d4",
-      description: "深色实时数据大屏，指标、地图感网格、告警和趋势模块清晰",
+      description: "深色实时数据大屏，指标卡片、网格背景、告警与趋势模块清晰分区",
       style: `【视觉主题】实时数据指挥舱，冷静、精密、态势感强
   【色彩系统】
    - 基础底色：深蓝黑 #06111f，面板 #0f1b2d。

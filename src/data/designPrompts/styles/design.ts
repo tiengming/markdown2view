@@ -99,7 +99,7 @@ export const designStyles: RawDesignStyle[] = [
       name: "丝滑动效 · Framer",
       category: "设计创意/建站动效",
       accent: "#0055ff",
-      description: "高对比度，柔和发光，精美卡片悬浮，顶级建站审美",
+      description: "高对比度，柔和发光效果，精美卡片悬浮，现代建站工具审美",
       previewHtml: `<div style="font-family: sans-serif; background: #000; color: #fff; padding: 16px; height: 100%; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; position: relative; overflow: hidden; border: 1px solid #111;">
     <div style="position: absolute; top: -35px; left: -35px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(0,85,255,0.45) 0%, rgba(0,0,0,0) 70%); pointer-events: none;"></div>
     <div style="display: flex; justify-content: space-between; align-items: center; z-index: 1;">
@@ -130,7 +130,7 @@ export const designStyles: RawDesignStyle[] = [
       name: "多彩卡片 · Arc Browser",
       category: "设计创意/系统体验",
       accent: "#ff8a8a",
-      description: "侧边栏布局，柔和多彩粉彩，极大圆角，拟物玻璃",
+      description: "侧边栏布局，柔和粉彩色调，极大圆角，半透明玻璃质感",
       previewHtml: `<div style="font-family: sans-serif; background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%); padding: 12px; height: 100%; border-radius: 12px; display: flex; gap: 10px; box-sizing: border-box;">
     <div style="width: 30%; background: rgba(255,255,255,0.28); backdrop-filter: blur(10px); border-radius: 8px; padding: 10px 6px; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255,255,255,0.25);">
       <div style="width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.5); margin-bottom: 6px;"></div>
@@ -158,7 +158,7 @@ export const designStyles: RawDesignStyle[] = [
       name: "平面海报",
       category: "设计创意/平面海报",
       accent: "#ff3366",
-      description: "硬核平面海报美学，Bento网格，超大标题展示，视觉冲击力极强",
+      description: "硬核平面海报美学，Bento 网格布局，超大标题，视觉冲击力极强",
       previewHtml: `<div style="font-family: 'Arial Black', sans-serif; background: #ff3366; color: #000; padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; border: 1px solid #d61845; position: relative;">
     <div style="position: absolute; bottom: 10px; right: 10px; width: 68px; height: 68px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ff3366; font-size: 13px; font-weight: 900; transform: rotate(-15deg); box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; line-height: 1;">
       NEW<br>ART
@@ -206,7 +206,7 @@ export const designStyles: RawDesignStyle[] = [
       name: "瑞士网格",
       category: "设计创意/网格排版",
       accent: "#e11d48",
-      description: "Swiss Style，非对称网格、强字号对比、红黑白秩序感",
+      description: "瑞士国际主义平面设计，非对称网格、强字号对比、红黑白秩序感",
       style: `【视觉主题】瑞士国际主义平面设计，冷静、秩序、强网格
   【色彩系统】
    - 基础底色：纯白 #ffffff 或极浅灰 #f5f5f5。

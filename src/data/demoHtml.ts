@@ -5,8 +5,6 @@ export const DEMO_HTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>markdown2view — 纯前端排版与导出工作台</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 :root {
   --paper: #f0e8db;
   --paper-light: #f5f0e8;
@@ -20,9 +18,9 @@ export const DEMO_HTML = `<!DOCTYPE html>
   --code-bg: #1e1c18;
   --code-fg: #d4c89a;
 
-  --serif: 'Noto Serif SC', Georgia, serif;
-  --sans: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --serif: Georgia, 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
+  --sans: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --mono: 'Courier New', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1201,7 +1199,7 @@ body {
       <div class="section-eyebrow" style="margin-bottom:20px;">🖨 MODE 01 — A4 规范文档模式</div>
       <div class="section-title" style="font-size:24px;margin-bottom:16px;">纯前端智能分页<br>完美还原印刷质感</div>
       <div class="section-body" style="margin-bottom:16px;">
-        内置高度实测机制，结合 ResizeObserver 及图片 load 监听，实时精确计算 A4 页面物理高度并进行平滑跨页分页，彻底解决图片被截断的痛点。
+        引入 W3C Paged Media 规范，在 iframe 沙箱中基于 Paged.js 进行真实物理分页计算，支持自动换页、跨页防孤立标题、长表格优雅切分与续表表头重复。
       </div>
       <div style="display:flex;gap:20px;align-items:flex-start;margin-top:8px;">
         <div class="a4-mockup">
@@ -1235,10 +1233,10 @@ body {
         </div>
       </div>
       <div class="tech-tag-row">
-        <span class="tech-tag">ResizeObserver</span>
-        <span class="tech-tag">img.load 监听</span>
+        <span class="tech-tag">Paged.js</span>
+        <span class="tech-tag">W3C Paged Media</span>
         <span class="tech-tag">@media print</span>
-        <span class="tech-tag">高度实测分页算法</span>
+        <span class="tech-tag">续表 thead 重复</span>
       </div>
     </div>
     <div class="s4-right">
@@ -1349,7 +1347,7 @@ body {
       </div>
       <div style="margin-top:16px;padding:14px 16px;background:rgba(212,84,126,0.05);border:1px solid rgba(212,84,126,0.12);border-radius:2px;">
         <div style="font-family:var(--mono);font-size:9px;color:#d4547e;letter-spacing:0.1em;margin-bottom:6px;">EXPORT OPTIONS</div>
-        <div style="font-size:11px;color:var(--ink-muted);line-height:1.7;">html2canvas 高清截图 → PNG · 批量 ZIP 打包 · 逐张下载<br>完全运行在浏览器端，零网络传输，隐私安全</div>
+        <div style="font-size:11px;color:var(--ink-muted);line-height:1.7;">modern-screenshot 高清截图 → PNG · 批量 ZIP 打包（fflate 异步压缩）· 逐张下载<br>完全运行在浏览器端，零网络传输，隐私安全</div>
       </div>
     </div>
   </div>
@@ -1438,8 +1436,8 @@ body {
       </div>
       <div class="stack-item">
         <div class="stack-item-label">导出技术</div>
-        <div class="stack-item-name">html2canvas</div>
-        <div class="stack-item-detail">+ jsPDF，纯浏览器端 PNG / PDF 导出</div>
+        <div class="stack-item-name">modern-screenshot</div>
+        <div class="stack-item-detail">高清 PNG 截图 + jsPDF / Paged.js 多路 PDF 导出</div>
       </div>
       <div class="stack-item">
         <div class="stack-item-label">Markdown 解析</div>
@@ -1448,18 +1446,18 @@ body {
       </div>
       <div class="stack-item">
         <div class="stack-item-label">分页算法</div>
-        <div class="stack-item-name">ResizeObserver</div>
-        <div class="stack-item-detail">实时高度实测，平滑跨页无截断</div>
+        <div class="stack-item-name">Paged.js</div>
+        <div class="stack-item-detail">W3C Paged Media 物理分页 + ResizeObserver 卡片分页</div>
       </div>
       <div class="stack-item">
         <div class="stack-item-label">截图优化</div>
         <div class="stack-item-name">MutationObserver</div>
-        <div class="stack-item-detail">waitForStability 替代 sleep，稳定截帧</div>
+        <div class="stack-item-detail">DOM 稳定探测 + 资源并行等待，替代固定延迟</div>
       </div>
       <div class="stack-item">
         <div class="stack-item-label">沙箱隔离</div>
         <div class="stack-item-name">iframe 沙箱</div>
-        <div class="stack-item-detail">防止样式污染，支持外部 CDN 资源</div>
+        <div class="stack-item-detail">防止样式污染，支持本地化 Tailwind 运行时</div>
       </div>
       <div class="stack-item">
         <div class="stack-item-label">开源协议</div>

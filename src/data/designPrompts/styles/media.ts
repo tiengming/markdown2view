@@ -6,7 +6,7 @@ export const mediaStyles: RawDesignStyle[] = [
       name: "暗色霓虹 · Spotify",
       category: "媒体内容/音乐娱乐",
       accent: "#1db954",
-      description: "深黑底霓虹绿，超粗大标题，专辑封面式视觉",
+      description: "深黑底霓虹绿，超粗大标题，专辑封面式视觉，沉浸暗色",
       previewHtml: `<div style="font-family: Circular, sans-serif; background: linear-gradient(180deg, #333, #121212); padding: 16px; height: 100%; border-radius: 8px; display: flex; flex-direction: column; box-sizing: border-box;">
     <div style="width: 100%; aspect-ratio: 1; background: #282828; border-radius: 4px; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
       <span style="font-size: 26px;">🎵</span>
@@ -33,7 +33,7 @@ export const mediaStyles: RawDesignStyle[] = [
       name: "杂志编辑 · WIRED",
       category: "媒体内容/杂志编辑",
       accent: "#1a1aff",
-      description: "报刊密度排版，自定义衬线大标题，墨蓝链接",
+      description: "报刊高密度排版，粗衬线大标题，墨蓝强调色，印刷质感",
       previewHtml: `<div style="font-family: Georgia, serif; background: #fafafa; padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; border-top: 4px solid #111111;">
     <div>
       <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #111111; padding-bottom: 5px; margin-bottom: 10px;">
@@ -137,7 +137,7 @@ export const mediaStyles: RawDesignStyle[] = [
       name: "游戏连麦 · Discord",
       category: "媒体内容/社区聊天",
       accent: "#5865F2",
-      description: "深灰紫底色，标志性 Blurple，聊天对话流，年轻游戏感",
+      description: "深灰偏紫底色，标志性蓝紫 Blurple，对话流排版，年轻社群感",
       previewHtml: `<div style="font-family: sans-serif; background: #2f3136; color: #fff; padding: 14px; height: 100%; display: flex; gap: 10px; box-sizing: border-box;">
     <div style="width: 26px; display: flex; flex-direction: column; gap: 8px; align-items: center; border-right: 1px solid rgba(255,255,255,0.06); padding-right: 6px;">
       <div style="width: 18px; height: 18px; border-radius: 50%; background: #5865F2; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">D</div>

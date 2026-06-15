@@ -32,7 +32,7 @@ ${style}
 
 【技术与容器规范（兼容 html-anything 引擎）】
 1. 只输出完整 \`<!DOCTYPE html>\` 文档，必须包含 \`<html>\`、\`<head>\`、\`<meta charset="utf-8">\`、\`<meta name="viewport" content="width=device-width, initial-scale=1">\` 与 \`<body>\`。
-2. **样式必须内联在 \`<style>\` 中**。可以使用 Tailwind CSS 类名（系统会自动注入本地 Tailwind 运行时），但**禁止引入任何外部 CDN 资源**（包括 Google Fonts、其他外部 CSS/JS 文件），因为外部资源在中国大陆访问缓慢或不可用。字体使用系统内置字体栈。
+2. **样式必须内联在 \`<style>\` 中**。可以使用 Tailwind CSS 类名（系统会自动注入本地 Tailwind 运行时）。**外链资源原则**：如果源文本为中文，禁止引入任何海外 CDN 资源（包括 Google Fonts、其他外部 CSS/JS 文件），必须使用系统内置字体栈或国内可访问的 CDN；如果源文本为英文，可酌情考虑但非必要不推荐海外 CDN。
 3. **导出友好**：所有核心内容必须在初始状态可见，不要依赖 hover、点击、滚动触发动画后才出现；避免视频、音频、iframe、远程 canvas 作为关键信息载体。
 4. **资源约束**：图片优先使用稳定的 https URL，必须设置 \`max-width:100%\` 与明确尺寸或比例；不要使用跨域受限图片、登录后图片或会过期的私有链接。
 5. **响应式与流式输出**：移动端自适应，所有组件应当使用 Flex/Grid 弹性布局；正文不可横向溢出，长单词/代码需 \`overflow-wrap:anywhere\` 或横向滚动容器。

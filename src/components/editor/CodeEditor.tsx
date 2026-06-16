@@ -151,7 +151,8 @@ export function CodeEditor({
       view.focus()
     } catch (err) {
       console.error('Paste/Drop image error:', err)
-      alert(`图片导入失败: ${err instanceof Error ? err.message : '未知错误'}`)
+      const msg = `图片导入失败: ${err instanceof Error ? err.message : '未知错误'}`
+      onToast ? onToast(msg) : alert(msg)
     }
   }
 

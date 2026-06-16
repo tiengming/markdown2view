@@ -31,7 +31,7 @@ import { exportMarkdownSource } from '@/lib/exportSource'
 import { useBlockHeights } from '@/lib/useBlockHeights'
 import { useExportAction } from '@/lib/useExportAction'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
-import { Sparkles, Download, Clipboard, Image, Package } from '@/components/ui/Icon'
+import { Sparkles, Download, Clipboard, ImageIcon, Package } from '@/components/ui/Icon'
 
 interface CardModeProps {
   markdown: string;
@@ -287,7 +287,7 @@ export function CardMode({
     "separator",
     {
       id: "exportAll",
-      icon: <Image size={14} />,
+      icon: <ImageIcon size={14} />,
       label: "下载单图",
       tooltip: "逐张下载所有生成的图片",
       onClick: exportAll,

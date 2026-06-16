@@ -9,7 +9,7 @@ import { buildArticleAiGuide } from '@/lib/aiGuide'
 import { useStore } from '@/lib/store'
 import { UI_LABELS } from '@/lib/uiLabels'
 import { getFontFamilyCss } from '@/lib/fonts'
-import { Sparkles, Download, Clipboard, Image, Rocket } from '@/components/ui/Icon'
+import { Sparkles, Download, Clipboard, ImageIcon, Rocket } from '@/components/ui/Icon'
 
 /** 长图文模式固定使用黑体系统字体栈，确保复制到微信公众号时字体一致 */
 const ARTICLE_FONT = getFontFamilyCss('heiti')
@@ -103,7 +103,7 @@ export function ArticlePreview({ rendered, markdown, scrollRef, onToast }: Artic
     },
     {
       id: 'exportImage',
-      icon: <Image size={14} />,
+      icon: <ImageIcon size={14} />,
       label: UI_LABELS.toolbar.exportLongImage.label,
       tooltip: UI_LABELS.toolbar.exportLongImage.tooltip,
       onClick: handleExportLongImage,

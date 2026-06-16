@@ -28,7 +28,7 @@ export const HtmlSandbox = forwardRef<HTMLIFrameElement, HtmlSandboxProps>(funct
 
   if (!display) {
     return (
-      <div className="flex h-full items-center justify-center bg-white text-sm text-gray-400">
+      <div className="flex h-full items-center justify-center bg-white text-sm text-slate-400">
         粘贴 AI 生成的 HTML，这里会实时渲染
       </div>
     )

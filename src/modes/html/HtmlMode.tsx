@@ -18,7 +18,7 @@ import { UI_LABELS } from '@/lib/uiLabels'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
 import { useExportAction } from '@/lib/useExportAction'
-import { Play, RotateCcw, Book, Image, Package, Download, Printer } from '@/components/ui/Icon'
+import { Play, RotateCcw, Book, ImageIcon, Package, Download, Printer } from '@/components/ui/Icon'
 
 interface HtmlModeProps {
   html: string
@@ -542,7 +542,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     'separator',
     {
       id: 'uploadImage',
-      icon: <Image size={14} />,
+      icon: <ImageIcon size={14} />,
       label: uploading ? '上传中…' : UI_LABELS.toolbar.uploadImage.label,
       tooltip: UI_LABELS.toolbar.uploadImage.tooltip,
       onClick: triggerUpload,
@@ -573,7 +573,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   if (pages.length > 0 || expectedPageCount > 1) {
     toolbarActions.push({
       id: 'exportCurrentPage',
-      icon: <Image size={14} />,
+      icon: <ImageIcon size={14} />,
       label: UI_LABELS.toolbar.exportCurrentPage.label,
       tooltip: UI_LABELS.toolbar.exportCurrentPage.tooltip,
       onClick: handleExportCurrentPage,
@@ -603,7 +603,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   if (pages.length === 0 && expectedPageCount <= 1) {
     toolbarActions.push({
       id: 'exportPng',
-      icon: <Image size={14} />,
+      icon: <ImageIcon size={14} />,
       label: exporting ? '导出中…' : UI_LABELS.toolbar.exportPng.label,
       tooltip: UI_LABELS.toolbar.exportPng.tooltip,
       onClick: handleExport,

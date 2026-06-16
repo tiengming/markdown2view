@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import type { RenderMode } from '@/lib/store'
 import { THEMES } from '@engine/composables/useTheme'
-import { FileText, Book, Image, Palette, HelpCircle, Settings, RotateCcw, Shield } from '@/components/ui/Icon'
+import { FileText, Book, ImageIcon, Palette, HelpCircle, Settings, RotateCcw, Shield } from '@/components/ui/Icon'
 
 /** 抽屉内功能按钮统一样式 */
 function DrawerButton({
@@ -40,7 +40,7 @@ interface MobileDrawerProps {
 const MODES: { key: RenderMode; label: string; icon: ReactNode }[] = [
   { key: 'document', label: 'A4 规范文档', icon: <FileText size={20} /> },
   { key: 'article', label: '长图文排版', icon: <Book size={20} /> },
-  { key: 'card', label: '分页图文卡', icon: <Image size={20} /> },
+  { key: 'card', label: '分页图文卡', icon: <ImageIcon size={20} /> },
   { key: 'html', label: '自由画布', icon: <Palette size={20} /> },
 ]
 

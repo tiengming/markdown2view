@@ -13,6 +13,7 @@ const base = (size: number): SVGProps<SVGSVGElement> => ({
   strokeWidth: 2,
   strokeLinecap: 'round' as const,
   strokeLinejoin: 'round' as const,
+  'aria-hidden': 'true',
 })
 
 // 复制 / 排版指令（魔法棒，对应原 ✨）
@@ -47,7 +48,7 @@ export function Clipboard({ size = 16, ...p }: IconProps) {
 }
 
 // 图片（对应原 🖼️）
-export function Image({ size = 16, ...p }: IconProps) {
+export function ImageIcon({ size = 16, ...p }: IconProps) {
   return (
     <svg {...base(size)} {...p}>
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />

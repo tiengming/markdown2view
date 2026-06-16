@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AlertTriangle, Shield } from '@/components/ui/Icon'
 import { detectBrowserCompat, type BrowserCompatResult } from '@/lib/browserCompat'
+import { copyText } from '@/lib/clipboard'
 
 /**
  * 浏览器兼容性警告弹窗
@@ -13,6 +14,10 @@ const DISMISS_KEY = 'm2v-browser-compat-dismissed'
 export function BrowserCompatDialog() {
   const [result, setResult] = useState<BrowserCompatResult | null>(null)
   const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  // 组件卸载时清理定时器
+  useEffect(() => () => clearTimeout(timerRef.current), [])
 
   useEffect(() => {
     // 如果用户已在本会话中忽略过，不再弹出
@@ -24,25 +29,23 @@ export function BrowserCompatDialog() {
     }
   }, [])
 
+  // Escape 键关闭弹窗
+  useEffect(() => {
+    if (!result) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismiss()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [result])
+
   if (!result) return null
 
   const handleCopyUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href)
+    const ok = await copyText(window.location.href)
+    if (ok) {
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // 降级方案：选中并提示复制
-      const ta = document.createElement('textarea')
-      ta.value = window.location.href
-      ta.style.position = 'fixed'
-      ta.style.opacity = '0'
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -52,7 +55,7 @@ export function BrowserCompatDialog() {
   }
 
   return (
-    <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+    <div role="dialog" aria-modal="true" aria-label="浏览器兼容性提示" className="fixed inset-0 z-[55] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
       <div className="mx-4 w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
         {/* 顶部警告装饰条 */}
         <div className="h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-400" />

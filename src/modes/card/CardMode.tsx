@@ -175,7 +175,7 @@ export function CardMode({
         ),
       })),
     ];
-  }, [model, aspect, colors, cardFont]);
+  }, [model, aspect, colors, cardFont, mermaidMap]);
 
   const exportOne = (card: PreviewCard, index: number) => {
     const node = cardRefs.current[card.id];

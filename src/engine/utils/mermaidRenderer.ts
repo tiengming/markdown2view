@@ -21,7 +21,7 @@ export function ensureMermaid(): Promise<Mermaid> {
       startOnLoad: false,
       theme: 'neutral', // 中性主题，适配 A4 正式文档与卡片
       securityLevel: 'strict', // 安全：禁用源码中的 html 标签
-      flowchart: { useMaxWidth: false }, // 关闭：让 mermaid 输出自然尺寸 + viewBox，由外层 CSS 控制响应
+      flowchart: { useMaxWidth: true }, // 让 mermaid 自适应容器宽度
     })
     return mermaid
   })

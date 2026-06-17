@@ -150,7 +150,7 @@ export function buildPageCss(settings: DocumentSettings, docTitle: string): stri
   transform-origin: top center;
 }
 .document-content .document-block[data-kind='mermaid'] .m2v-mermaid-figure svg {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 `

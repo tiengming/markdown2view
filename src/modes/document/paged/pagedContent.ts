@@ -3,6 +3,8 @@ import { getFontFamilyCss } from '@/lib/fonts'
 import { DOCUMENT_TITLE_LINE_HEIGHT, DOCUMENT_TITLE_MARGIN } from '../documentStyles'
 import type { DocumentBlock, DocumentSettings } from '../documentModel'
 
+export type MermaidMap = Map<string, { svg: string; error?: string }>
+
 /** 代码块小于该行数时整体不拆（决策：<10 行原子，≥10 行可按行拆） */
 const CODE_ATOMIC_MAX_LINES = 10
 
@@ -62,6 +64,7 @@ export function buildPagedContentHtml(
   blocks: DocumentBlock[],
   colors: ThemeColors,
   settings: PagedContentSettings,
+  mermaidMap?: MermaidMap,
 ): string {
   const firstHeadingId = blocks.find((b) => b.kind === 'heading')?.id
 
@@ -70,7 +73,7 @@ export function buildPagedContentHtml(
   const hasCover = firstPagebreak !== -1 && isCoverBlocks(coverBlocks)
 
   const renderBlock = (block: DocumentBlock): string => {
-    let inner = parseMarkdown(block.markdown, colors)
+    let inner = parseMarkdown(block.markdown, colors, undefined, mermaidMap)
     if (block.kind === 'table') inner = normalizeTableHtml(inner)
 
     const classes = ['document-block']

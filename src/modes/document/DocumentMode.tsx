@@ -9,7 +9,8 @@ import {
   buildDocumentFilename,
   type DocumentSettings,
 } from './documentModel'
-import { buildPagedContentHtml } from './paged/pagedContent'
+import { buildPagedContentHtml, type MermaidMap } from './paged/pagedContent'
+import { collectMermaidDiagrams, preRenderMermaid } from '@engine'
 import { buildPageCss } from './paged/pagedPageCss'
 import { usePagedPreview } from './paged/usePagedPreview'
 import { buildDocumentAiGuide } from '@/lib/aiGuide'
@@ -84,6 +85,25 @@ export function DocumentMode({
     [rendered.meta.title, contentMarkdown],
   )
 
+  // mermaid 预渲染：collectMermaidDiagrams → preRenderMermaid → 存入 state
+  // contentHtml 依赖此 map，map 就绪后 mermaid 块才正确渲染（就绪前降级为代码块）
+  const [mermaidMap, setMermaidMap] = useState<MermaidMap | undefined>(undefined)
+  useEffect(() => {
+    const diagrams = collectMermaidDiagrams(contentMarkdown)
+    if (diagrams.length === 0) {
+      setMermaidMap(undefined)
+      return
+    }
+    const width = settings.pageWidth - settings.marginLeft - settings.marginRight
+    let cancelled = false
+    preRenderMermaid(diagrams, width).then((map) => {
+      if (!cancelled) setMermaidMap(map)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [contentMarkdown, settings.pageWidth, settings.marginLeft, settings.marginRight])
+
   // Paged.js 内容 HTML（段落/表格跨页由引擎完成；随内容与排版设置变化）
   const contentHtml = useMemo(
     () =>
@@ -92,8 +112,8 @@ export function DocumentMode({
         fontScale: settings.fontScale,
         centerTitle: settings.centerTitle,
         indentParagraph: settings.indentParagraph,
-      }),
-    [blocks, colors, settings.fontFamily, settings.fontScale, settings.centerTitle, settings.indentParagraph],
+      }, mermaidMap),
+    [blocks, colors, settings.fontFamily, settings.fontScale, settings.centerTitle, settings.indentParagraph, mermaidMap],
   )
 
   // @page 分页样式（随页面/页边距/页眉页脚/页码设置变化）

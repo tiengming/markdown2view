@@ -128,6 +128,7 @@ export function DocumentMode({
     pageCss,
     title: filename.replace(/\.pdf$/, ''),
     fitScale,
+    availableHeight: settings.pageHeight - settings.marginTop - settings.marginBottom,
   })
 
   const handleCopyGuide = async () => {

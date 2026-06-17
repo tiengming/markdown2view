@@ -15,6 +15,8 @@ interface UsePagedPreviewParams {
   fitScale: number
   /** 重排防抖毫秒 */
   debounceMs?: number
+  /** 单页可用内容高（px）= pageHeight - marginTop - marginBottom，用于 mermaid 超高缩放兜底 */
+  availableHeight?: number
 }
 
 interface UsePagedPreviewResult {
@@ -31,6 +33,7 @@ export function usePagedPreview({
   title,
   fitScale,
   debounceMs = 350,
+  availableHeight,
 }: UsePagedPreviewParams): UsePagedPreviewResult {
   const [status, setStatus] = useState<PagedStatus>('init')
   const [pageCount, setPageCount] = useState(0)
@@ -58,6 +61,31 @@ export function usePagedPreview({
     if (h > 0) iframe.style.height = `${Math.ceil(h) + 4}px`
   }, [iframeRef])
 
+  // mermaid 超高缩放兜底：渲染完成后遍历 iframe 内 mermaid 块，若超高则设 CSS 变量缩放。
+  // 说明文字（caption）行高约 36px，预留后才是图的实际可用高。
+  const scaleMermaidBlocks = useCallback(() => {
+    if (!availableHeight) return
+    const doc = iframeRef.current?.contentDocument
+    if (!doc) return
+    const CAPTION_LINE = 36
+    const maxH = availableHeight - CAPTION_LINE
+    const figures = doc.querySelectorAll<HTMLElement>(
+      '.document-block[data-kind="mermaid"] .m2v-mermaid-figure',
+    )
+    figures.forEach((fig) => {
+      const block = fig.closest('.document-block') as HTMLElement | null
+      const blockH = block ? block.offsetHeight : fig.offsetHeight
+      if (blockH > availableHeight) {
+        const scale = Math.max(0.3, Math.min(1, maxH / fig.offsetHeight))
+        fig.style.setProperty('--m2v-mermaid-scale', String(scale))
+        fig.style.setProperty('--m2v-mermaid-max-height', `${maxH}px`)
+      } else {
+        fig.style.removeProperty('--m2v-mermaid-scale')
+        fig.style.removeProperty('--m2v-mermaid-max-height')
+      }
+    })
+  }, [iframeRef, availableHeight])
+
   const renderNow = useCallback(() => {
     const win = iframeRef.current?.contentWindow as
       | (Window & { __m2vRender?: (html: string, css: string) => Promise<number> })
@@ -76,11 +104,12 @@ export function usePagedPreview({
         setStatus('done')
         requestAnimationFrame(() => {
           applyFit()
+          scaleMermaidBlocks()
           resizeToContent()
         })
       })
       .catch(() => setStatus('error'))
-  }, [iframeRef, applyFit, resizeToContent])
+  }, [iframeRef, applyFit, scaleMermaidBlocks, resizeToContent])
 
   // 初始化 iframe（仅一次）：写入外壳 → 轮询等待 bootstrap 就绪 → 首次渲染。
   // 采用轮询而非依赖 load 事件：兼容 React 严格模式重挂载与相同 srcdoc 不重载的情况。

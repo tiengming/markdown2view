@@ -139,5 +139,15 @@ export function buildPageCss(settings: DocumentSettings, docTitle: string): stri
 .document-content .document-block th {
   vertical-align: middle !important;
 }
+
+/* ===== mermaid 图：原子块 + 超高缩放兜底 ===== */
+.document-content .document-block[data-kind='mermaid'] {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+.document-content .document-block[data-kind='mermaid'] .m2v-mermaid-figure {
+  transform: scale(var(--m2v-mermaid-scale, 1));
+  transform-origin: top center;
+}
 `
 }

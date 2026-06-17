@@ -50,7 +50,7 @@ export const Steps_DA02 = {
     if (attrs.hint)
       html += `<p style="margin:0px 0px 16px;font-size:12px;color:rgb(153,153,153)">${leaf(attrs.hint)}</p>`
 
-    // 竖向布局（用 table 模拟 flex column，兼容 html2canvas）
+    // 竖向布局（inline-block，兼容 html2canvas，避免 table 标签污染剪贴板）
     steps.forEach((s, idx) => {
       const isActive = idx + 1 === active
       const borderWidth = isActive ? '2px' : '1px'
@@ -58,13 +58,11 @@ export const Steps_DA02 = {
       const bgColor = isActive ? withAlpha(color) : 'rgb(255,255,255)'
       const mb = idx < steps.length - 1 ? 'margin-bottom:12px;' : ''
       html += `<section style="${mb}padding:16px;background:${bgColor};border-radius:10px;border:${borderWidth} solid ${borderColor}">`
-      html += `<table border="0" cellpadding="0" cellspacing="0" style="margin:0;border-collapse:collapse;border-spacing:0;border:none;width:100%"><tr>`
-      html += `<td style="width:32px;vertical-align:top;padding-right:12px"><section style="width:32px;height:32px;border-radius:50%;background:${isActive ? color : 'rgb(238,238,238)'};text-align:center;line-height:32px"><span style="font-size:14px;font-weight:900;color:${isActive ? '#fff' : 'rgb(153,153,153)'}">${leaf(idx + 1)}</span></section></td>`
-      html += `<td style="vertical-align:top;padding-top:4px">`
+      html += `<section style="display:inline-block;vertical-align:top;width:32px;margin-right:12px"><section style="width:32px;height:32px;border-radius:50%;background:${isActive ? color : 'rgb(238,238,238)'};text-align:center;line-height:32px"><span style="font-size:14px;font-weight:900;color:${isActive ? '#fff' : 'rgb(153,153,153)'}">${leaf(idx + 1)}</span></section></section>`
+      html += `<section style="display:inline-block;vertical-align:top;padding-top:4px">`
       html += `<p style="margin:0px 0px 2px;font-size:14px;font-weight:700;color:rgb(51,65,85)">${leaf(s.name)}</p>`
       html += `<p style="margin:0px;font-size:12px;color:rgb(153,153,153)">${leaf(s.desc)}</p>`
-      html += `</td>`
-      html += `</tr></table>`
+      html += `</section>`
       html += `</section>`
     })
 

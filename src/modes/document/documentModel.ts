@@ -1,25 +1,14 @@
 import type { ContentMeta } from '@/lib/render/metadata'
 import { parseTableMarkdown, estimateTableRowHeight, estimateTableHeight, type TableData } from '@/engine/utils/markdownParser'
 
-export type DocumentBlockKind =
-  | 'heading'
-  | 'paragraph'
-  | 'image'
-  | 'table'
-  | 'code'
-  | 'quote'
-  | 'list'
-  | 'component'
-  | 'rule'
-  | 'pagebreak'
-
-export interface DocumentBlock {
-  id: string
-  kind: DocumentBlockKind
-  markdown: string
-  estimatedHeight: number
-  avoidBreak: boolean
-}
+// === 从 blockParser 导入的公共逻辑 ===
+import {
+  classifyBlock,
+  mergeCaptionBlocks,
+  splitMarkdownBlocks as splitRawBlocks,
+} from '@/engine/blockParser'
+export type { DocumentBlockKind, DocumentBlock } from '@/engine/blockParser'
+import type { DocumentBlockKind, DocumentBlock } from '@/engine/blockParser'
 
 export interface DocumentPage {
   pageNumber: number
@@ -99,63 +88,6 @@ function estimateTextHeight(text: string, base: number, charsPerLine: number, li
   return base + lines * lineHeight
 }
 
-function classifyBlock(markdown: string): DocumentBlockKind {
-  const text = markdown.trim()
-  if (/^#{1,6}\s/.test(text) || /^<title\b/.test(text) || /^<p-title\b/.test(text)) return 'heading'
-  if (/^(<\s*!\[|!\[)/.test(text)) return 'image'
-  if (/^```/.test(text)) return 'code'
-  if (/^>/.test(text)) return 'quote'
-  if (/^([-*+]\s|\d+\.\s)/.test(text)) return 'list'
-  if (/^---+$/.test(text)) return 'rule'
-  if (/^<page-break\s*\/?>/.test(text)) return 'pagebreak'
-  if (text.includes('|') && /\n\|?[\s:-]+\|/.test(text)) return 'table'
-  if (/^<\w[\s\S]*<\/\w/.test(text)) return 'component'
-  return 'paragraph'
-}
-
-function stripCaptionMarkup(text: string): string {
-  return text
-    .trim()
-    .replace(/^(\*\*|__|\*|_)+/, '')
-    .replace(/(\*\*|__|\*|_)+$/, '')
-    .trim()
-}
-
-function isTableCaptionBlock(markdown: string): boolean {
-  const line = stripCaptionMarkup(markdown)
-  return /^(表|Table)\.?\s*(\d+|[一二三四五六七八九十百]+)([:：.\-\—\s]+)/i.test(line)
-}
-
-function isImageCaptionBlock(markdown: string): boolean {
-  const line = stripCaptionMarkup(markdown)
-  return /^(图|Fig|Figure)\.?\s*(\d+|[一二三四五六七八九十百]+)([:：.\-\—\s]+)/i.test(line)
-}
-
-function mergeCaptionBlocks(blocks: string[]): string[] {
-  const merged: string[] = []
-
-  for (let i = 0; i < blocks.length; i++) {
-    const current = blocks[i]
-    const next = blocks[i + 1]
-
-    if (next && isTableCaptionBlock(current) && classifyBlock(next) === 'table') {
-      merged.push(`${current}\n\n${next}`)
-      i++
-      continue
-    }
-
-    if (next && classifyBlock(current) === 'image' && isImageCaptionBlock(next)) {
-      merged.push(`${current}\n\n${next}`)
-      i++
-      continue
-    }
-
-    merged.push(current)
-  }
-
-  return merged
-}
-
 function estimateBlockHeight(markdown: string, kind: DocumentBlockKind): number {
   switch (kind) {
     case 'heading':
@@ -189,66 +121,7 @@ function estimateBlockHeight(markdown: string, kind: DocumentBlockKind): number 
 }
 
 export function splitMarkdownBlocks(markdown: string): DocumentBlock[] {
-  const normalized = markdown.replace(/\r\n/g, '\n').replace(/\s+$/g, '')
-  if (!normalized.trim()) return []
-
-  const initialBlocks: string[] = []
-  const current: string[] = []
-  let inFence = false
-  let openTag: string | null = null
-
-  const flush = () => {
-    const block = current.join('\n').trimEnd()
-    if (block.trim()) initialBlocks.push(block)
-    current.length = 0
-  }
-
-  for (const line of normalized.split('\n')) {
-    const trimmed = line.trim()
-    if (trimmed.startsWith('```')) {
-      inFence = !inFence
-      current.push(line)
-      continue
-    }
-
-    if (!inFence && !openTag) {
-      const open = trimmed.match(/^<([a-z][\w-]*)\b[^>]*>/i)
-      if (open && !trimmed.includes(`</${open[1]}>`) && !trimmed.endsWith('/>')) {
-        openTag = open[1]
-      }
-    }
-
-    if (!inFence && !openTag && !trimmed) {
-      flush()
-      continue
-    }
-
-    current.push(line)
-    if (openTag && trimmed.includes(`</${openTag}>`)) openTag = null
-  }
-
-  flush()
-
-  const rawBlocks: string[] = []
-  for (const block of initialBlocks) {
-    if (/^([-*+]\s|\d+\.\s)/.test(block) && !/^---+$/.test(block)) {
-      const lines = block.split('\n')
-      let currentItem = ''
-      for (const line of lines) {
-        if (/^\s*([-*+]\s|\d+\.\s)/.test(line)) {
-          if (currentItem) rawBlocks.push(currentItem.trim())
-          currentItem = line
-        } else {
-          currentItem += '\n' + line
-        }
-      }
-      if (currentItem) rawBlocks.push(currentItem.trim())
-    } else {
-      rawBlocks.push(block)
-    }
-  }
-
-  return mergeCaptionBlocks(rawBlocks).map((block, index) => {
+  return mergeCaptionBlocks(splitRawBlocks(markdown)).map((block, index) => {
     const kind = classifyBlock(block)
     return {
       id: `block-${index + 1}`,

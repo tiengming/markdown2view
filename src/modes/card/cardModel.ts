@@ -1,5 +1,8 @@
 import { extractXhs, type XhsAspect, type XhsMeta } from '@/engine/utils/xhsCards'
 
+// === 从 blockParser 导入的公共逻辑 ===
+import { splitMarkdownBlocks, classifyBlock } from '@/engine/blockParser'
+
 export type CardPlatform = 'xiaohongshu'
 
 export interface CardContentPage {
@@ -32,68 +35,8 @@ function stripInline(text: string): string {
     .trim()
 }
 
-function splitMarkdownBlocks(markdown: string): string[] {
-  const normalized = markdown.replace(/\r\n/g, '\n').trim()
-  if (!normalized) return []
-
-  const blocks: string[] = []
-  const current: string[] = []
-  let inFence = false
-  let openTag: string | null = null
-
-  const flush = () => {
-    const block = current.join('\n').trim()
-    if (block) blocks.push(block)
-    current.length = 0
-  }
-
-  for (const line of normalized.split('\n')) {
-    const trimmed = line.trim()
-    const fence = trimmed.startsWith('```')
-    if (fence) inFence = !inFence
-
-    if (!inFence && !openTag) {
-      const open = trimmed.match(/^<([a-z][\w-]*)\b[^>]*>/i)
-      if (open && !trimmed.includes(`</${open[1]}>`) && !trimmed.endsWith('/>')) {
-        openTag = open[1]
-      }
-    }
-
-    if (!inFence && /^<page-break\s*\/?>/i.test(trimmed)) {
-      flush()
-      current.push(trimmed)
-      flush()
-      continue
-    }
-
-    if (!inFence && !openTag && !trimmed) {
-      flush()
-      continue
-    }
-
-    current.push(line)
-    if (openTag && trimmed.includes(`</${openTag}>`)) openTag = null
-  }
-
-  flush()
-  return blocks
-}
-
-function classify(block: string) {
-  const text = block.trim()
-  if (/^<page-break\s*\/?>/i.test(text)) return 'pagebreak'
-  if (/^#{1,6}\s/.test(text) || /^<title\b/.test(text) || /^<p-title\b/.test(text)) return 'heading'
-  if (/^```/.test(text)) return 'code'
-  if (/^!\[/.test(text)) return 'image'
-  if (/^>/.test(text)) return 'quote'
-  if (/^([-*+]\s|\d+\.\s)/.test(text)) return 'list'
-  if (text.includes('|') && /\n\|?[\s:-]+\|/.test(text)) return 'table'
-  if (/^<\w[\s\S]*<\/\w/.test(text)) return 'component'
-  return 'paragraph'
-}
-
 function estimateBlockUnits(block: string): number {
-  const kind = classify(block)
+  const kind = classifyBlock(block)
   if (kind === 'pagebreak') return 0
   const chars = stripInline(block).length
   const lines = block.split('\n').length
@@ -141,7 +84,7 @@ function paginateBlocks(
   }
 
   blocks.forEach((block, index) => {
-    const kind = classify(block)
+    const kind = classifyBlock(block)
     if (kind === 'pagebreak') {
       push()
       return
@@ -158,7 +101,7 @@ function paginateBlocks(
     used += height
 
     const next = blocks[index + 1]
-    if (next && classify(next) === 'heading' && (actualHeights ? used > budget * 0.75 : used > budget * 0.72)) push()
+    if (next && classifyBlock(next) === 'heading' && (actualHeights ? used > budget * 0.75 : used > budget * 0.72)) push()
   })
 
   push()

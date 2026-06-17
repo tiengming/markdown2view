@@ -809,7 +809,7 @@ async function buildDocument(
         coverChildren.push(...(await convertBlock(b, true)))
         // 若封面标题后紧跟表格，插入间距
         if (next?.kind === 'table') {
-          coverChildren.push(new Paragraph({ spacing: { before: 300 }, children: [] }))
+          coverChildren.push(new Paragraph({ spacing: { before: 600 }, children: [] }))
         }
         isFirstCoverHeading = false
       } else {

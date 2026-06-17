@@ -15,6 +15,53 @@ interface EditorToolbarProps {
 export function EditorToolbar({ view, mode, onToast }: EditorToolbarProps) {
   const imageHostConfig = useStore((s) => s.imageHostConfig)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const importInputRef = useRef<HTMLInputElement>(null)
+
+  // 导入文档处理
+  const handleImportFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !view) return
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const allowedMd = ['md', 'txt', 'markdown', 'text']
+    const allowedHtml = [...allowedMd, 'html', 'htm']
+    const allowed = mode === 'html' ? allowedHtml : allowedMd
+
+    if (!allowed.includes(ext)) {
+      const types = mode === 'html' ? '.md, .txt, .html' : '.md, .txt'
+      alert(`不支持的文件类型: .${ext}\n请导入 ${types} 格式的文件`)
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('文件过大，请导入 5MB 以内的文件')
+      e.target.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const content = String(reader.result ?? '')
+        if (!content.trim()) {
+          alert('文件内容为空，无法导入')
+          return
+        }
+        const doc = view.state.doc.toString()
+        view.dispatch({ changes: { from: 0, to: doc.length, insert: content } })
+        view.focus()
+        onToast?.(`已导入: ${file.name}`)
+      } catch {
+        alert('文件解析失败，请检查文件格式是否正确')
+      }
+    }
+    reader.onerror = () => {
+      alert('文件读取失败，请重试')
+    }
+    reader.readAsText(file, 'utf-8')
+    e.target.value = ''
+  }
 
   // 快捷插入分页标识
   const handleInsertPageBreak = () => {
@@ -62,6 +109,33 @@ export function EditorToolbar({ view, mode, onToast }: EditorToolbarProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-200 bg-slate-50/80 px-5 py-2.5 min-h-[52px] select-none text-slate-600">
+      {/* 导入文档按钮（最左侧） */}
+      <Tooltip position="bottom" text="导入文档">
+        <button
+          onClick={() => importInputRef.current?.click()}
+          className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer text-slate-600"
+        >
+          <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <polyline points="9 15 12 12 15 15"/>
+            </svg>
+          </span>
+        </button>
+      </Tooltip>
+      <input
+        type="file"
+        ref={importInputRef}
+        onChange={handleImportFile}
+        accept={mode === 'html' ? '.md,.txt,.html,.htm' : '.md,.txt,.markdown,.text'}
+        className="hidden"
+        aria-label="导入文档"
+      />
+
+      <div className="w-px h-4 bg-slate-300 mx-1 hidden sm:block" />
+
       {toolbarGroups.map((group, groupIdx) => (
         <React.Fragment key={group.id}>
           {group.type === 'buttons' ? (

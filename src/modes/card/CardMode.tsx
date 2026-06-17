@@ -5,11 +5,12 @@ import { copyText } from "@/lib/clipboard";
 import { buildCardAiGuide } from "@/lib/aiGuide";
 import { downloadBlob, elementToBlob } from "@/lib/exportImage";
 import { downloadAsZip, type ZipEntry } from "@/lib/export/zipDownload";
-import { parseMarkdown, type ThemeColors } from "@engine";
+import { parseMarkdown, collectMermaidDiagrams, preRenderMermaid, type ThemeColors } from "@engine";
 import { useEditorDocSync } from "@/lib/useEditorDocSync";
 import {
   ASPECTS,
   XHS,
+  PAD_X,
   buildContentCard,
   buildCover,
   type XhsAspect,
@@ -109,6 +110,22 @@ export function CardMode({
     externalVersion,
   } = useEditorDocSync(markdown, setMarkdown);
 
+  // mermaid 预渲染：与 A4 同构
+  const [mermaidMap, setMermaidMap] = useState<Map<string, { svg: string; error?: string }> | undefined>(undefined)
+  useEffect(() => {
+    const diagrams = collectMermaidDiagrams(debouncedMarkdown)
+    if (diagrams.length === 0) {
+      setMermaidMap(undefined)
+      return
+    }
+    const width = ASPECTS[aspect].w - 2 * PAD_X
+    let cancelled = false
+    preRenderMermaid(diagrams, width).then((map) => {
+      if (!cancelled) setMermaidMap(map)
+    })
+    return () => { cancelled = true }
+  }, [debouncedMarkdown, aspect])
+
   const [actualHeights] = useBlockHeights(measuringRef, [
     debouncedMarkdown,
     aspect,
@@ -148,7 +165,7 @@ export function CardMode({
         label: `内容图 ${index + 1}`,
         kind: "content" as const,
         html: buildContentCard(
-          parseMarkdown(page.markdown, colors),
+          parseMarkdown(page.markdown, colors, undefined, mermaidMap),
           aspect,
           index + 1,
           total,
@@ -434,7 +451,7 @@ export function CardMode({
                   key={`block-${i}`}
                   data-block-id={`block-${i}`}
                   dangerouslySetInnerHTML={{
-                    __html: parseMarkdown(block, colors),
+                    __html: parseMarkdown(block, colors, undefined, mermaidMap),
                   }}
                 />
               ))}

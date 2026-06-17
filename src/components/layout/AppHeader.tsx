@@ -3,6 +3,7 @@ import type { RenderMode } from '@/lib/store'
 import { ModeTabs } from '@/components/layout/ModeTabs'
 import { THEMES } from '@engine/composables/useTheme'
 import { HeaderMoreMenu } from '@/components/layout/HeaderMoreMenu'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface AppHeaderProps {
   mode: RenderMode
@@ -87,13 +88,13 @@ export function AppHeader({
       {headerWidth >= 960 ? (
         <div className="flex items-center gap-4">
           {headerWidth >= 1300 && (
-            <a
-              href="https://www.beeeffy.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-              title="作者的另一个项目：BeeEffy——个人AI待办与复盘成长系统"
-            >
+            <Tooltip position="bottom" text="作者的另一个项目：BeeEffy——个人AI待办与复盘成长系统">
+              <a
+                href="https://www.beeeffy.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              >
               <svg width="48" height="14" viewBox="0 0 77.63 21.69" fill="none" className="shrink-0">
                 <circle cx="10.84" cy="10.84" r="10.84" fill="currentColor"/>
                 <circle cx="35.1" cy="10.84" r="10.84" fill="currentColor" opacity="0.45"/>
@@ -101,84 +102,88 @@ export function AppHeader({
                 <path d="M64.32 1.97 L76.13 10.84 L64.32 19.72" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.45"/>
               </svg>
               {headerWidth >= 1450 && <span>BeeEffy</span>}
-            </a>
+              </a>
+            </Tooltip>
           )}
 
           {headerWidth >= 1300 && <div className="w-px h-4 bg-slate-200" />}
 
-          <a
-            href="https://github.com/ZhongXiandou/markdown2view"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="完全开源的纯前端项目，数据不传输至服务器。访问 GitHub 源码仓库"
-          >
+          <Tooltip position="bottom" text="完全开源的纯前端项目，数据不传输至服务器。访问 GitHub 源码仓库">
+            <a
+              href="https://github.com/ZhongXiandou/markdown2view"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+            >
             <svg width="14" height="14" viewBox="0 0 98 96" fill="currentColor" className="shrink-0">
               <path d="M41.4395 69.3848C28.8066 67.8535 19.9062 58.7617 19.9062 46.9902C19.9062 42.2051 21.6289 37.0371 24.5 33.5918C23.2559 30.4336 23.4473 23.7344 24.8828 20.959C28.7109 20.4805 33.8789 22.4902 36.9414 25.2656C40.5781 24.1172 44.4062 23.543 49.0957 23.543C53.7852 23.543 57.6133 24.1172 61.0586 25.1699C64.0254 22.4902 69.2891 20.4805 73.1172 20.959C74.457 23.543 74.6484 30.2422 73.4043 33.4961C76.4668 37.1328 78.0937 42.0137 78.0937 46.9902C78.0937 58.7617 69.1934 67.6621 56.3691 69.2891C59.623 71.3945 61.8242 75.9883 61.8242 81.252V91.2051C61.8242 94.0762 64.2168 95.7031 67.0879 94.5547C84.4102 87.9512 98 70.6289 98 49.1914C98 22.1074 75.9883 0 48.9043 0C21.8203 0 0 22.1074 0 49.1914C0 70.4375 13.4941 88.0469 31.6777 94.6504C34.2617 95.6074 36.75 93.8848 36.75 91.3008V83.6445C35.4102 84.2188 33.6875 84.6016 32.1562 84.6016C25.8398 84.6016 22.1074 81.1563 19.4277 74.7441C18.375 72.1602 17.2266 70.6289 15.0254 70.3418C13.877 70.2461 13.4941 69.7676 13.4941 69.1934C13.4941 68.0449 15.4082 67.1836 17.3223 67.1836C20.0977 67.1836 22.4902 68.9063 24.9785 72.4473C26.8926 75.2227 28.9023 76.4668 31.2949 76.4668C33.6875 76.4668 35.2187 75.6055 37.4199 73.4043C39.0469 71.7773 40.291 70.3418 41.4395 69.3848Z" />
             </svg>
-          </a>
+            </a>
+          </Tooltip>
 
-          <button
-            onClick={onTriggerGuide}
-            className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-            title="查看使用帮助"
-          >
+          <Tooltip position="bottom" text="查看使用帮助">
+            <button
+              onClick={onTriggerGuide}
+              className="flex items-center rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+            >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
               <circle cx="12" cy="12" r="10" />
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
               <path d="M12 17h.01" />
             </svg>
-          </button>
+            </button>
+          </Tooltip>
 
           <div className="w-px h-4 bg-slate-200" />
 
           {headerWidth >= 1300 && (
-            <button
-              onClick={onOpenSettings}
-              className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-              title="图床设置 (配置图片上传与云存储参数)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            <Tooltip position="bottom" text="图床设置（配置图片上传与云存储参数）">
+              <button
+                onClick={onOpenSettings}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
               {headerWidth >= 1450 && <span>图床设置</span>}
-            </button>
+              </button>
+            </Tooltip>
           )}
 
           {headerWidth >= 1300 && <div className="w-px h-4 bg-slate-200" />}
 
           {headerWidth >= 1300 && (
-            <button
-              onClick={onRestoreDemo}
-              className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
-              title="恢复当前模块的示例内容"
-            >
+            <Tooltip position="bottom" text="恢复当前模块的示例内容">
+              <button
+                onClick={onRestoreDemo}
+                className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[12px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+              >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                 <path d="M3 3v5h5"></path>
               </svg>
               {headerWidth >= 1450 && <span>恢复示例</span>}
-            </button>
+              </button>
+            </Tooltip>
           )}
 
           {headerWidth >= 1300 && <div className="w-px h-4 bg-slate-200" />}
 
           <div className="flex items-center gap-1.5">
             {THEMES.map((t) => (
-              <button
-                key={t.accent}
-                title={t.accent}
-                onClick={() => setTheme(t.accent, t.dark)}
-                className="h-5 w-5 rounded-full transition-transform hover:scale-110 cursor-pointer"
+              <Tooltip key={t.accent} position="bottom" text={t.accent}>
+                <button
+                  onClick={() => setTheme(t.accent, t.dark)}
+                  className="h-5 w-5 rounded-full transition-transform hover:scale-110 cursor-pointer"
                 style={{
                   background: t.accent,
                   boxShadow: accent === t.accent
                     ? '0 0 0 2px #fff, 0 0 0 4px var(--accent)'
                     : 'none',
                 }}
-              />
+                />
+              </Tooltip>
             ))}
           </div>
 

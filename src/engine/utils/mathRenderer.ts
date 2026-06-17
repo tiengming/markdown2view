@@ -4,6 +4,14 @@
 
 let mathJaxReady: Promise<void> | null = null
 
+/**
+ * 加载 MathJax（CDN 懒加载，fontCache='none' 内联路径）。
+ * 导出供 docx 导出等场景复用：await ensureMathJax() 后即可使用 window.MathJax。
+ */
+export function ensureMathJax(): Promise<void> {
+  return loadMathJax()
+}
+
 function loadMathJax(): Promise<void> {
   if (mathJaxReady) return mathJaxReady
 

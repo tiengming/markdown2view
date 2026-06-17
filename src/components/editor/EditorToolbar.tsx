@@ -3,6 +3,7 @@ import { EditorView } from '@uiw/react-codemirror'
 import { useStore } from '@/lib/store'
 import { toolbarGroups } from '@/lib/editor/toolbarConfig'
 import { Select } from '@/components/ui/Select'
+import { Tooltip } from '@/components/ui/Tooltip'
 import { uploadImageFile } from '@/lib/editor/imageStorage'
 
 interface EditorToolbarProps {
@@ -66,16 +67,16 @@ export function EditorToolbar({ view, mode, onToast }: EditorToolbarProps) {
           {group.type === 'buttons' ? (
             <div className="flex flex-wrap items-center gap-1">
               {group.items.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (view) item.action(view)
-                  }}
-                  className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
-                  title={`${item.label} ${item.shortcut ? '(' + item.shortcut + ')' : ''}`}
-                >
-                  <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">{item.icon}</span>
-                </button>
+                <Tooltip key={item.id} position="bottom" text={`${item.label} ${item.shortcut ? '(' + item.shortcut + ')' : ''}`}>
+                  <button
+                    onClick={() => {
+                      if (view) item.action(view)
+                    }}
+                    className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">{item.icon}</span>
+                  </button>
+                </Tooltip>
               ))}
             </div>
           ) : (
@@ -117,30 +118,32 @@ export function EditorToolbar({ view, mode, onToast }: EditorToolbarProps) {
       <div className="w-px h-4 bg-slate-300 mx-1 hidden sm:block" />
       <div className="flex items-center gap-1">
         {(mode === 'document' || mode === 'card') && (
-          <button
-            onClick={handleInsertPageBreak}
-            className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer text-slate-600"
-            title="插入分页标识 <page-break/>"
-          >
-            <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="3" y1="14" x2="21" y2="14" strokeDasharray="3 3"></line>
-              </svg>
-            </span>
-          </button>
+          <Tooltip position="bottom" text="插入分页标识 <page-break/>">
+            <button
+              onClick={handleInsertPageBreak}
+              className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer text-slate-600"
+            >
+              <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="3" y1="14" x2="21" y2="14" strokeDasharray="3 3"></line>
+                </svg>
+              </span>
+            </button>
+          </Tooltip>
         )}
 
-        <button
-          onClick={triggerFileSelect}
-          className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer text-slate-600"
-          title="上传图片"
-        >
-          <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-          </span>
-        </button>
+        <Tooltip position="bottom" text="上传图片">
+          <button
+            onClick={triggerFileSelect}
+            className="flex items-center justify-center rounded p-1.5 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer text-slate-600"
+          >
+            <span className="flex items-center justify-center w-[18px] h-[18px] shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </span>
+          </button>
+        </Tooltip>
         <input
           type="file"
           ref={fileInputRef}

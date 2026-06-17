@@ -85,10 +85,10 @@ export function sanitizeFilename(name: string): string {
   return name.replace(INVALID_FILENAME_CHARS, '_').replace(/\s+/g, ' ').trim()
 }
 
-export function buildDocumentFilename(title: string, markdown: string): string {
+export function buildDocumentFilename(title: string, markdown: string, ext = '.pdf'): string {
   const fallback = compactPlainText(markdown).slice(0, 15) || '未命名文档'
   const basename = sanitizeFilename((title || fallback).slice(0, 60)) || '未命名文档'
-  return `${basename}.pdf`
+  return `${basename}${ext}`
 }
 
 function estimateTextHeight(text: string, base: number, charsPerLine: number, lineHeight: number): number {

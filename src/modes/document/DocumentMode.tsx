@@ -20,9 +20,11 @@ import { UI_LABELS } from '@/lib/uiLabels'
 import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
 import { CustomPromptPopover } from '@/components/layout/CustomPromptPopover'
 import { exportMarkdownSource } from '@/lib/exportSource'
+import { exportToDocx } from '@/lib/exportDocx'
+import { useExportAction } from '@/lib/useExportAction'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
-import { Sparkles, Download, Printer } from '@/components/ui/Icon'
+import { Sparkles, Download, Printer, FileText } from '@/components/ui/Icon'
 
 
 interface DocumentModeProps {
@@ -113,6 +115,8 @@ export function DocumentMode({
     onToast(ok ? '已复制 A4 文档排版指令，可发给 AI 使用' : '复制失败，请重试')
   }
 
+  const [exporting, runExport] = useExportAction(onToast)
+
   const toolbarActions: ToolbarItem[] = [
     {
       id: 'copyGuide',
@@ -133,6 +137,17 @@ export function DocumentMode({
       label: UI_LABELS.toolbar.exportSource.label,
       tooltip: '导出为 .md 文件',
       onClick: () => exportMarkdownSource(debouncedMarkdown, filename.replace(/\.pdf$/, '.md')),
+    },
+    {
+      id: 'exportDocx',
+      icon: <FileText size={14} />,
+      label: '导出 Word',
+      tooltip: '实验性功能：文本样式可能与预览存在差异。建议使用 Markdown 编辑内容，用 PDF 导出进行分享和打印',
+      onClick: () => runExport(async () => {
+        const docxFilename = buildDocumentFilename(rendered.meta.title, contentMarkdown, '.docx')
+        return exportToDocx(blocks, settings, docxFilename)
+      }),
+      disabled: exporting,
     },
     {
       id: 'exportPdf',

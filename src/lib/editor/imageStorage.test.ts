@@ -1,5 +1,17 @@
-import { describe, it, expect, beforeAll, vi } from 'vitest'
-import { compileMarkdownImages, saveLocalImage, getLocalImage, blobToBase64 } from './imageStorage'
+import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest'
+import {
+  clearLocalImageUrlCache,
+  compileMarkdownImages,
+  compressImage,
+  createImageUploadFile,
+  getLocalImage,
+  localImageUrls,
+  preloadImagesFromMarkdown,
+  resolveImageUrl,
+  revokeImageUrl,
+  saveLocalImage,
+  validateImageFile,
+} from './imageStorage'
 
 // 模拟 FileReader
 class MockFileReader {
@@ -15,6 +27,15 @@ class MockFileReader {
 globalThis.FileReader = MockFileReader as any
 
 const mockDatabase = new Map<string, any>()
+const createObjectUrlMock = vi.fn((blob: Blob) => `blob:mock-${blob.size}-${createObjectUrlMock.mock.calls.length}`)
+const revokeObjectUrlMock = vi.fn()
+
+beforeEach(() => {
+  mockDatabase.clear()
+  clearLocalImageUrlCache()
+  createObjectUrlMock.mockClear()
+  revokeObjectUrlMock.mockClear()
+})
 
 beforeAll(() => {
   const mockStore = {
@@ -63,6 +84,9 @@ beforeAll(() => {
       return mockOpenReq as any
     }
   } as any
+
+  globalThis.URL.createObjectURL = createObjectUrlMock
+  globalThis.URL.revokeObjectURL = revokeObjectUrlMock
 })
 
 describe('imageStorage - compileMarkdownImages', () => {
@@ -94,4 +118,82 @@ describe('imageStorage - compileMarkdownImages', () => {
     const result = await compileMarkdownImages(md)
     expect(result).toBe(md)
   })
+
+  it('should resolve img:// id to cached object url', async () => {
+    const blob = new Blob(['hello-world'], { type: 'image/jpeg' })
+    await saveLocalImage('img_object_url', blob)
+
+    const first = await resolveImageUrl('img_object_url')
+    const second = await resolveImageUrl('img_object_url')
+
+    expect(first).toMatch(/^blob:mock-/)
+    expect(second).toBe(first)
+    expect(localImageUrls.img_object_url).toBe(first)
+    expect(createObjectUrlMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('should revoke image object url by id', async () => {
+    const blob = new Blob(['hello-world'], { type: 'image/jpeg' })
+    await saveLocalImage('img_revoke', blob)
+    const url = await resolveImageUrl('img_revoke')
+
+    revokeImageUrl('img_revoke')
+
+    expect(localImageUrls.img_revoke).toBeUndefined()
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith(url)
+  })
+
+  it('should prune unused image object urls from markdown', async () => {
+    await saveLocalImage('img_keep', new Blob(['keep'], { type: 'image/jpeg' }))
+    await saveLocalImage('img_drop', new Blob(['drop'], { type: 'image/jpeg' }))
+    const keepUrl = await resolveImageUrl('img_keep')
+    const dropUrl = await resolveImageUrl('img_drop')
+
+    await preloadImagesFromMarkdown(`![keep](img://img_keep)`)
+
+    expect(localImageUrls.img_keep).toBe(keepUrl)
+    expect(localImageUrls.img_drop).toBeUndefined()
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith(dropUrl)
+  })
+
+  it('should evict oldest object urls when cache exceeds limit', async () => {
+    for (let i = 0; i < 65; i++) {
+      const id = `img_lru_${i}`
+      await saveLocalImage(id, new Blob([String(i)], { type: 'image/jpeg' }))
+      await resolveImageUrl(id)
+    }
+
+    expect(localImageUrls.img_lru_0).toBeUndefined()
+    expect(localImageUrls.img_lru_64).toBeDefined()
+    expect(Object.keys(localImageUrls)).toHaveLength(64)
+    expect(revokeObjectUrlMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('should validate image file type and size', async () => {
+    const jpegBlob = new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xdb])], { type: 'image/jpeg' })
+    const jpegFile = new File([jpegBlob], 'test.jpg', { type: 'image/jpeg' })
+    const result = await validateImageFile(jpegFile)
+    expect(result).toBe('image/jpeg')
+  })
+
+  it('should reject non-image files', async () => {
+    const textFile = new File(['text'], 'test.txt', { type: 'text/plain' })
+    await expect(validateImageFile(textFile)).rejects.toThrow('请选择图片文件')
+  })
+
+  it('should reject oversized files', async () => {
+    const largeBlob = new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xdb])], { type: 'image/jpeg' })
+    const largeFile = new File([largeBlob], 'large.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(largeFile, 'size', { value: 11 * 1024 * 1024 })
+    await expect(validateImageFile(largeFile)).rejects.toThrow('图片不能超过 10MB')
+  })
+
+  it('should create upload file with correct extension', () => {
+    const blob = new Blob(['data'], { type: 'image/png' })
+    const original = new File([''], 'original.jpg', { type: 'image/jpeg' })
+    const uploadFile = createImageUploadFile(original, blob)
+    expect(uploadFile.name).toBe('original.png')
+    expect(uploadFile.type).toBe('image/png')
+  })
+
 })

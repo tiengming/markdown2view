@@ -91,9 +91,13 @@ export function useIframeScale(
     stabilizeScale()
 
     // M15: iframe 首次挂载时 contentDocument 可能为 null，
-    // 监听 load 事件确保内容就绪后重新计算缩放
+    // 监听 load 事件确保内容就绪后重新计算缩放。
+    // 若 iframe 在 effect 运行前已加载完成（如 StrictMode），立即补一次重算。
     const onIframeLoad = () => scheduleResize(0)
     iframe.addEventListener('load', onIframeLoad)
+    if (iframe.contentDocument?.readyState === 'complete') {
+      scheduleResize(0)
+    }
 
     const ro = new ResizeObserver(() => scheduleResize())
     ro.observe(iframe)

@@ -9,6 +9,8 @@ import {
   encryptToVault,
   decryptFromVault,
   clearVault,
+  isSecureContext,
+  assessPassphraseStrength,
 } from '@/lib/secureVault'
 
 interface SettingsModalProps {
@@ -27,6 +29,7 @@ type HostForm = {
   cosSecretKey: string
   cosBucket: string
   cosRegion: string
+  sendCredentials: boolean
 }
 
 /** 从图床配置构造表单初始值 */
@@ -42,6 +45,7 @@ function buildForm(c: ImageHostConfig): HostForm {
     cosSecretKey: c.cos?.SecretKey || '',
     cosBucket: c.cos?.Bucket || '',
     cosRegion: c.cos?.Region || '',
+    sendCredentials: c.sendCredentials ?? false,
   }
 }
 
@@ -55,8 +59,11 @@ function configHasSecret(c: ImageHostConfig): boolean {
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const imageHostConfig = useStore((s) => s.imageHostConfig)
   const setImageHostConfig = useStore((s) => s.setImageHostConfig)
+  const allowIntranetResources = useStore((s) => s.allowIntranetResources)
+  const setAllowIntranetResources = useStore((s) => s.setAllowIntranetResources)
 
   const cryptoOk = isCryptoAvailable()
+  const secureContext = isSecureContext()
 
   // 临时状态，用户点击保存时才写入 store
   const [form, setForm] = useState<HostForm>(() => buildForm(imageHostConfig))
@@ -69,6 +76,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [unlockPass, setUnlockPass] = useState('')
   const [unlocking, setUnlocking] = useState(false)
   const [unlockError, setUnlockError] = useState('')
+  // H2/H3: 内网资源开关（本地临时状态，保存时写入 store）
+  const [allowIntranet, setAllowIntranet] = useState(allowIntranetResources)
 
   // 每次打开弹窗时，从 store 重新初始化表单，避免「取消后重开看到上次未保存的脏值」。
   // 组件常驻挂载（hooks 之后才 return null），故必须在 isOpen 切换时重置。
@@ -83,7 +92,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setUnlockPass('')
     setUnlockError('')
     setSaveError('')
-  }, [isOpen, imageHostConfig])
+    setAllowIntranet(allowIntranetResources)
+  }, [isOpen, imageHostConfig, allowIntranetResources])
 
   if (!isOpen) return null
 
@@ -141,8 +151,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         Bucket: form.cosBucket,
         Region: form.cosRegion,
       },
+      sendCredentials: form.sendCredentials,
     }
     setImageHostConfig(patch)
+    setAllowIntranetResources(allowIntranet)
 
     if (remember && cryptoOk) {
       if (passphrase) {
@@ -352,6 +364,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     onChange={(e) => setPassphrase(e.target.value)}
                     className="w-full"
                   />
+                  {passphrase && (
+                    <PassphraseStrengthHint passphrase={passphrase} />
+                  )}
                   <p className="text-[11px] text-slate-400">口令仅用于本地加密，不上传；遗忘需重新填写密钥。</p>
                 </div>
               )}
@@ -364,8 +379,41 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <span className="shrink-0 mt-0.5"><AlertTriangle size={14} className="text-amber-600" /></span>
               <span>
                 <strong>安全提示</strong>：本应用纯前端无后端。<strong>默认密钥仅存当前会话内存</strong>，刷新即清除。勾选「记住密钥」后会用口令加密保存在本地。请勿在公共计算机上配置生产环境密钥。
-                {!cryptoOk && <><br />当前为非安全上下文（非 HTTPS），无法加密保存。</>}
+                {!secureContext && (
+                  <>
+                    <br />
+                    <strong>当前为非安全上下文（非 HTTPS）</strong>，Web Crypto 不可用，密钥仅在当前会话内存中保留，刷新即丢失。如需加密保存，请在 HTTPS 或 localhost 环境下使用。
+                  </>
+                )}
               </span>
+            </div>
+          )}
+
+          {/* M3: 发送凭证开关 + H2/H3: 允许加载内网资源开关 */}
+          {form.activeType !== 'local' && (
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 flex flex-col gap-2.5">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.sendCredentials}
+                  onChange={(e) => updateFormField('sendCredentials', e.target.checked)}
+                  className="h-3.5 w-3.5 accent-[var(--accent)]"
+                />
+                <span className="text-[12px] text-slate-600">
+                  导出时向图床域名发送凭证（Cookie）。仅依赖 Cookie 鉴权的私有图床需要开启，默认关闭。
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={allowIntranet}
+                  onChange={(e) => setAllowIntranet(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-[var(--accent)]"
+                />
+                <span className="text-[12px] text-slate-600">
+                  允许加载内网资源（如 127.0.0.1、192.168.x.x）。企业内网部署场景可开启，默认关闭以防止 SSRF。
+                </span>
+              </label>
             </div>
           )}
         </div>
@@ -377,5 +425,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
       </div>
     </div>
+  )
+}
+
+/** 口令强度提示组件（M7/H10）：提示而非强制，弱口令显示橙色警告 */
+function PassphraseStrengthHint({ passphrase }: { passphrase: string }) {
+  const assessment = assessPassphraseStrength(passphrase)
+  const colorClass =
+    assessment.level === 'weak' ? 'text-orange-500' :
+    assessment.level === 'fair' ? 'text-amber-500' :
+    'text-green-600'
+  return (
+    <p className={`text-[11px] ${colorClass}`}>
+      {assessment.label}。建议使用 8 位以上、含字母与数字的口令。
+    </p>
   )
 }

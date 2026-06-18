@@ -50,10 +50,63 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+// 【H4】根据脚本权限动态生成 CSP 元标签。
+// - 默认模式：深度限制脚本、插件、嵌套 frame，放行图片/字体/style/数据 URI
+// - 交互模式（allowScripts=true）：允许 unsafe-inline、unsafe-eval、connect-src 及可信 CDN
+// - 可信 CDN 白名单：fonts.googleapis.com、cdn.jsdelivr.net、unpkg.com
+function buildCspMeta(allowScripts: boolean): string {
+  const trustedHosts = [
+    'https://fonts.googleapis.com',
+    'https://cdn.jsdelivr.net',
+    'https://unpkg.com',
+  ]
+  const hosts = trustedHosts.join(' ')
+
+  if (allowScripts) {
+    const policy = [
+      `default-src * data: ${hosts}`,
+      `script-src 'unsafe-inline' 'unsafe-eval' * data: blob:`,
+      `style-src 'unsafe-inline' * data:`,
+      `connect-src * data:`,
+      `img-src * data: blob:`,
+      `font-src * data:`,
+      `object-src 'none'`,
+      `frame-ancestors 'none'`,
+    ].join('; ')
+    return `<meta http-equiv="Content-Security-Policy" content="${policy}">`
+  } else {
+    const policy = [
+      `default-src * data: ${hosts}`,
+      `script-src 'none'`,
+      `style-src 'unsafe-inline' * data:`,
+      `img-src * data: blob:`,
+      `font-src * data:`,
+      `object-src 'none'`,
+      `frame-src 'none'`,
+      `frame-ancestors 'none'`,
+    ].join('; ')
+    return `<meta http-equiv="Content-Security-Policy" content="${policy}">`
+  }
+}
+
 // 保证存在闭合标签，便于 iframe 增量渲染，并注入专门供 PDF 导出使用的多页分离打印样式。
-export function previewHtml(input: string): string {
-  let html = sanitizeHtml(extractHtml(input))
+export function previewHtml(input: string, options: { allowScripts?: boolean } = {}): string {
+  let html = sanitizeHtml(extractHtml(input), { allowScripts: options.allowScripts })
   if (!html) return ''
+
+  // 【H4】注入 CSP meta 标签：纵深防御，在净化器之上再加一层限制。
+  // - 默认模式（不允许脚本）：禁脚本/插件/子 frame，放行图片/样式/字体/数据 URI
+  // - 交互式模式（allowScripts=true）：降低限制至 unsafe-inline/eval，以便用户主动运行脚本
+  const cspMeta = buildCspMeta(!!options.allowScripts)
+
+  // 把 CSP 注入到 <head> 最前面（若没有 head 则附加到 html 开头）
+  if (/<head[^>]*>/i.test(html)) {
+    html = html.replace(/<head([^>]*)>/i, `<head$1>${cspMeta}`)
+  } else if (/<html[^>]*>/i.test(html)) {
+    html = html.replace(/(<html[^>]*>)/i, `$1<head>${cspMeta}</head>`)
+  } else {
+    html = cspMeta + html
+  }
 
   // 自动为所有样式表 link 标签注入 crossorigin="anonymous"，确保截图库 (modern-screenshot) 可以绕过跨域限制读取其中的 @font-face 规则进行 Base64 字体嵌入。
   html = html.replace(/<link\s+([^>]*rel=["']?stylesheet["']?[^>]*)(?=[ >])/gi, (match) => {

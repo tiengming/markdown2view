@@ -181,7 +181,14 @@ export function compressImage(file: File, maxWidth = 1600, quality = 0.7, output
 }
 
 // 内存 Object URL 缓存：img://id -> blob:http://...
+//
+// 6.8: 这是模块级可变状态，在本项目的运行约束下是安全的：
+// - 纯前端 SPA，无 SSR，不会出现服务端/客户端 realm 撕裂
+// - 每个浏览器 tab 拥有独立的 JS realm，模块级状态天然隔离
+// - ObjectURL 无法跨 realm 使用，模块级缓存与当前 document 绑定是正确语义
+// 测试场景下需在 beforeEach 中调用 clearLocalImageUrlCache() 重置状态，避免用例间污染。
 export const localImageUrls: Record<string, string> = {}
+// LRU 顺序表：与 localImageUrls 一一对应，记录访问顺序（Map 迭代顺序 = 插入顺序）。
 const localImageUrlOrder = new Map<string, string>()
 
 function revokeObjectUrl(url: string): void {
@@ -193,6 +200,8 @@ function revokeObjectUrl(url: string): void {
 function touchImageUrl(id: string): string | undefined {
   const url = localImageUrls[id]
   if (!url) return undefined
+  // LRU 语义：delete+set 把条目移到 Map 末尾（最近使用）。
+  // Map.set 对已存在的 key 不会改变迭代顺序，因此必须 delete+set。
   localImageUrlOrder.delete(id)
   localImageUrlOrder.set(id, url)
   return url
@@ -200,7 +209,14 @@ function touchImageUrl(id: string): string | undefined {
 
 function rememberImageUrl(id: string, url: string): string {
   const existing = localImageUrls[id]
-  if (existing && existing !== url) {
+  // 6.2: url 未变时原地返回，避免 revoke+recreate 导致 Map 抖动
+  if (existing === url) {
+    // 仅更新 LRU 顺序
+    localImageUrlOrder.delete(id)
+    localImageUrlOrder.set(id, url)
+    return url
+  }
+  if (existing) {
     revokeObjectUrl(existing)
   }
   localImageUrls[id] = url
@@ -211,9 +227,9 @@ function rememberImageUrl(id: string, url: string): string {
     if (!oldest) break
     const [oldestId, oldestUrl] = oldest
     localImageUrlOrder.delete(oldestId)
-    if (localImageUrls[oldestId] === oldestUrl) {
-      delete localImageUrls[oldestId]
-    }
+    // 6.2: 无条件同步清理 localImageUrls，确保两个结构大小一致，
+    // 避免 localImageUrls 残留条目导致 ObjectURL 泄漏或测试断言错位
+    delete localImageUrls[oldestId]
     revokeObjectUrl(oldestUrl)
   }
   return url

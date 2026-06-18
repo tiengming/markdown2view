@@ -110,11 +110,13 @@ export function parseCtaBlock(
   lines: string[],
   start: number,
   t: ThemeColors,
-): { html: string; next: number } {
+): { html: string; next: number } | null {
   let i = start
   const attrs = parseAttrs(lines[i])
   i++
   while (i < lines.length && !/^:::\s*$/.test(lines[i])) i++
+  // 未闭合 ::: 容器：不吞掉后续内容，回退为普通段落
+  if (i >= lines.length) return null
   i++
   let html = `<section style="margin:24px 0px;padding:32px 24px;background:linear-gradient(135deg,${t.accent},${t.dark});border-radius:16px;text-align:center;color:rgb(255,255,255)">`
   if (attrs.label)
@@ -131,7 +133,7 @@ export function parseCtaTag(
   lines: string[],
   start: number,
   t: ThemeColors,
-): { html: string; next: number } {
+): { html: string; next: number } | null {
   let i = start
   const openMatch = lines[i].match(/<cta\s*(.*)>/)
   const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
@@ -141,6 +143,8 @@ export function parseCtaTag(
     body += lines[i] + '\n'
     i++
   }
+  // 未闭合 <cta>：不吞掉后续内容，回退为普通段落
+  if (i >= lines.length) return null
   i++
   return { html: CTA_DA01.render(attrs, body, t), next: i }
 }
@@ -149,7 +153,7 @@ export function parseBreaking(
   lines: string[],
   start: number,
   t: ThemeColors,
-): { html: string; next: number } {
+): { html: string; next: number } | null {
   let i = start
   const openMatch = lines[i].match(/<breaking\s*(.*)>/)
   const attrs = openMatch && openMatch[1] ? parseAttrs(openMatch[1]) : {}
@@ -159,6 +163,8 @@ export function parseBreaking(
     body += lines[i] + '\n'
     i++
   }
+  // 未闭合 <breaking>：不吞掉后续内容，回退为普通段落
+  if (i >= lines.length) return null
   i++
   const color = attrs.color || t.accent
   let html = `<section style="margin:24px 0px;padding:28px 24px;background:linear-gradient(135deg,${t.light},rgba(255,255,255,0.8));border:1px solid ${t.border};border-radius:16px;position:relative;overflow:hidden">`
@@ -203,7 +209,7 @@ export function parseCompare(
   lines: string[],
   start: number,
   t: ThemeColors,
-): { html: string; next: number } {
+): { html: string; next: number } | null {
   let i = start
   const attrs = parseAttrs(lines[i])
   i++
@@ -235,6 +241,8 @@ export function parseCompare(
     if (side === 'right') rightContent += lines[i] + '\n'
     i++
   }
+  // 未闭合 <compare>：不吞掉后续内容，回退为普通段落
+  if (i >= lines.length) return null
   i++
 
   // 构造 body 供 Compare_DA01 解析

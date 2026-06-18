@@ -216,7 +216,7 @@ describe('parseMarkdown - mermaid 集成', () => {
     expect(html).toContain('data-block="code"')
   })
 
-  it('mermaidMap 中有 error 时降级为错误提示 + 代码块', () => {
+  it('mermaid 渲染失败时显示错误并附带源码', () => {
     const source = 'invalid syntax'
     const key = `m:${source}`
     const map = new Map<string, { svg: string; error?: string }>([
@@ -227,6 +227,135 @@ describe('parseMarkdown - mermaid 集成', () => {
     expect(html).toContain('data-block="mermaid-error"')
     expect(html).toContain('语法错误示例')
     expect(html).toContain('data-block="code"')
+  })
+})
+
+describe('parseMarkdown - 代码区域保护', () => {
+  const colors = makeColors('#2563eb', '#1e40af')
+
+  it('块级代码中的 $$ 公式不应被 KaTeX 渲染', () => {
+    const md = '```\n$$E=mc^2$$\n```'
+    const html = parseMarkdown(md, colors)
+    expect(html).not.toContain('katex')
+    expect(html).toContain('data-block="code"')
+    expect(html).toContain('$')
+  })
+
+  it('块级代码中的 $ 行内公式不应被 KaTeX 渲染', () => {
+    const md = '```\nconst x = $a + b$;\n```'
+    const html = parseMarkdown(md, colors)
+    expect(html).not.toContain('katex')
+    expect(html).toContain('data-block="code"')
+    expect(html).toContain('const x')
+  })
+
+  it('块级代码中的脚注链接不应被收集为脚注', () => {
+    const md = '```\n[a](https://example.com "desc")\n```\n\n正文 [b](https://b.com "b-desc")'
+    const html = parseMarkdown(md, colors)
+    const firstCodeBlock = html.match(/<section data-block="code"[\s\S]*?<\/section>/)?.[0] ?? ''
+    // 代码块内不应出现脚注下划线样式
+    expect(firstCodeBlock).not.toContain('text-decoration:underline')
+    // 代码块内应保留原链接标记（转义后）
+    expect(firstCodeBlock).toContain('[a]')
+    expect(firstCodeBlock).toContain('https://example.com')
+    // 正文中只有一个脚注（正文上标 + 参考资料列表各出现一次 [1]）
+    expect(html).toContain('参考资料')
+    expect(html.match(/\[1\]/g)?.length).toBe(2)
+    expect(html).not.toContain('[2]')
+  })
+
+  it('行内代码中的公式不应被 KaTeX 渲染', () => {
+    const md = '这是行内代码 `$E=mc^2$` 测试'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('$E=mc^2$')
+    expect(html).not.toContain('katex')
+  })
+
+  it('行内代码中的脚注链接不应被收集为脚注', () => {
+    const md = '这是 `[a](https://example.com "desc")` 代码'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('[a]')
+    expect(html).toContain('https://example.com')
+    expect(html).not.toContain('参考资料')
+  })
+
+  it('普通 Markdown 中的公式和脚注仍应正常渲染', () => {
+    const md = '行内公式 $E=mc^2$ 与脚注 [参考](https://example.com "示例")'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('katex')
+    expect(html).toContain('参考资料')
+    expect(html).toContain('示例')
+  })
+
+  it('mermaid 代码块不被保护，正常走渲染管线', () => {
+    const source = 'graph LR\n  A --> B'
+    const key = `m:${source}`
+    const map = new Map<string, { svg: string; error?: string }>([
+      [key, { svg: '<svg data-testid="mermaid-svg"></svg>' }],
+    ])
+    const md = '```mermaid\n' + source + '\n```'
+    const html = parseMarkdown(md, colors, undefined, map)
+    expect(html).toContain('mermaid-svg')
+    expect(html).not.toContain('data-block="code"')
+  })
+})
+
+describe('parseMarkdown - 自定义标签未闭合容错（EOF 截断）', () => {
+  const colors = makeColors('#2563eb', '#1e40af')
+
+  it('未闭合 <title> 不吞掉后续内容，回退为段落', () => {
+    const md = '<title>未闭合标题\n后续正常段落'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('后续正常段落')
+    expect(html).toContain('<title>未闭合标题')
+  })
+
+  it('未闭合 <p-title> 不吞掉后续内容，回退为段落', () => {
+    const md = '<p-title>未闭合标题\n后续正常段落'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('后续正常段落')
+    expect(html).toContain('<p-title>未闭合标题')
+  })
+
+  it('未闭合 <steps> 不吞掉后续内容，回退为段落', () => {
+    const md = '<steps>\n- 步骤 | 描述\n后续正常段落'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('后续正常段落')
+    expect(html).toContain('<steps>')
+  })
+
+  it('未闭合 <cta> 标签不吞掉后续内容，回退为段落', () => {
+    const md = '<cta title="行动召唤">\n按钮文案\n后续正常段落'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('后续正常段落')
+    expect(html).toContain('<cta title="行动召唤">')
+  })
+
+  it('未闭合 ::: cta 容器不吞掉后续内容，回退为段落', () => {
+    const md = '::: cta\n按钮文案\n后续正常段落'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('后续正常段落')
+    expect(html).toContain('::: cta')
+  })
+
+  it('未闭合 <compare> 不吞掉后续内容，回退为段落', () => {
+    const md = '<compare>\n<left>左侧内容\n后续正常段落'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('后续正常段落')
+    expect(html).toContain('<compare>')
+  })
+
+  it('正常闭合的自定义标签仍按原组件渲染', () => {
+    const titleMd = '<title>正常标题</title>\n后续段落'
+    const titleHtml = parseMarkdown(titleMd, colors)
+    expect(titleHtml).toContain('正常标题')
+    expect(titleHtml).toContain('后续段落')
+    expect(titleHtml).not.toContain('&lt;title&gt;')
+
+    const stepsMd = '<steps>\n- 步骤 | 描述\n</steps>\n后续段落'
+    const stepsHtml = parseMarkdown(stepsMd, colors)
+    expect(stepsHtml).toContain('步骤')
+    expect(stepsHtml).toContain('后续段落')
   })
 })
 

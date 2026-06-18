@@ -11,6 +11,17 @@
  *   - 实名认证 | 上传证件完成身份验证
  *   - 开始使用 | 选择功能模块开始体验
  *   </steps>
+ *
+ * 属性：
+ *   label   - 顶部标签
+ *   title   - 标题
+ *   hint    - 提示文字
+ *   active  - 强调控制：
+ *               数字（如 "1"/"2"/"3"）= 仅该步骤强调（默认 "1"）
+ *               "all"  = 全部步骤强调
+ *               "none" = 全部步骤不强调
+ *   color   - 自定义颜色（默认使用主题色）
+ *   建议：超过3步时优先使用 DA02
  */
 import { leaf, withAlpha } from '@engine/utils/helpers'
 import type { ThemeColors } from '@engine/composables/useTheme'
@@ -23,7 +34,7 @@ export const Steps_DA02 = {
     { key: 'label', label: '顶部标签', required: false, default: '' },
     { key: 'title', label: '标题', required: false, default: '' },
     { key: 'hint', label: '提示文字', required: false, default: '' },
-    { key: 'active', label: '当前步骤（1/2/3）', required: false, default: '1' },
+    { key: 'active', label: '强调控制（数字/all/none）', required: false, default: '1' },
     { key: 'color', label: '自定义颜色', required: false, default: '' },
   ],
   example: `<steps type="DA02" label="VERTICAL STEPS" title="竖向步骤流" active="2">
@@ -33,7 +44,8 @@ export const Steps_DA02 = {
 </steps>`,
 
   render(attrs: Record<string, string>, body: string, t: ThemeColors): string {
-    const active = parseInt(attrs.active || '1', 10)
+    const activeRaw = (attrs.active || '1').toLowerCase().trim()
+    const activeNum = parseInt(activeRaw, 10)
     const color = attrs.color || t.accent
 
     const steps: { name: string; desc: string }[] = []
@@ -41,6 +53,12 @@ export const Steps_DA02 = {
       const m = line.trim().match(/^-\s*(.+)\s*\|\s*(.+)/)
       if (m) steps.push({ name: m[1].trim(), desc: m[2].trim() })
     })
+    // 计算某步骤是否强调
+    const isStepActive = (idx: number): boolean => {
+      if (activeRaw === 'all') return true
+      if (activeRaw === 'none') return false
+      return idx + 1 === activeNum
+    }
 
     let html = `<section style="margin:0px 0px 24px;padding:20px;background:rgb(250,251,254);border-radius:12px;border:1px solid rgb(238,238,238)">`
     if (attrs.label)
@@ -52,7 +70,7 @@ export const Steps_DA02 = {
 
     // 竖向布局（inline-block，兼容 html2canvas，避免 table 标签污染剪贴板）
     steps.forEach((s, idx) => {
-      const isActive = idx + 1 === active
+      const isActive = isStepActive(idx)
       const borderWidth = isActive ? '2px' : '1px'
       const borderColor = isActive ? color : 'rgb(238,238,238)'
       const bgColor = isActive ? withAlpha(color) : 'rgb(255,255,255)'

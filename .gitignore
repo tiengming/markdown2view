@@ -24,5 +24,7 @@ pnpm-debug.log*
 # Excluded folders
 .agent/skills/
 .mimocode/
-vendor/
+
+public/vendor/html-anything
+public/vendor/r-markdown
 

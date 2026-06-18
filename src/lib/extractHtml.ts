@@ -3,6 +3,7 @@
 // 移植自 html-anything/next/src/lib/extract-html.ts。
 
 import { hasTailwindClasses, hasTailwindScript, generateTailwindScriptTag } from './tailwindHelper'
+import { sanitizeHtml } from './htmlSanitizer'
 
 export function extractHtml(streamed: string): string {
   if (!streamed) return ''
@@ -51,7 +52,7 @@ function escapeHtml(s: string): string {
 
 // 保证存在闭合标签，便于 iframe 增量渲染，并注入专门供 PDF 导出使用的多页分离打印样式。
 export function previewHtml(input: string): string {
-  let html = extractHtml(input)
+  let html = sanitizeHtml(extractHtml(input))
   if (!html) return ''
 
   // 自动为所有样式表 link 标签注入 crossorigin="anonymous"，确保截图库 (modern-screenshot) 可以绕过跨域限制读取其中的 @font-face 规则进行 Base64 字体嵌入。

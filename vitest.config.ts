@@ -9,6 +9,7 @@ export default defineConfig({
     },
   },
   test: {
+    environment: 'jsdom',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     exclude: ['node_modules/**', 'dist/**', 'html-anything/**', 'r-markdown/**'],
   },

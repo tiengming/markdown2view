@@ -876,20 +876,22 @@ function buildHeader(
 /**
  * 解析 footerText 模板（如 "第 {page} / {total} 页"），
  * 将 {page} 替换为 PageNumber.CURRENT，{total} 替换为 PageNumber.TOTAL_PAGES。
+ * 注意：PageNumber 是 Symbol/特殊对象，不能直接作为 ParagraphChild，需包在 TextRun 的 children 中。
  */
 function buildFooter(
   footerText: string,
   font: ReturnType<typeof getFont>,
 ): InstanceType<typeof import('docx').Footer> {
   const { Footer, Paragraph, TextRun, AlignmentType, PageNumber } = docxModule!
-  const children: (DocxTextRun | string)[] = []
+  // 将连续普通文本和页码占位符合并到同一个 TextRun 的 children 中，减少运行片段数量
+  const runChildren: (string | (typeof PageNumber)[keyof typeof PageNumber])[] = []
   let remaining = footerText
 
   while (remaining.length > 0) {
     const pi = remaining.indexOf('{page}')
     const ti = remaining.indexOf('{total}')
     if (pi === -1 && ti === -1) {
-      if (remaining) children.push(new TextRun({ text: remaining, font, size: 18, color: '64748B' }))
+      if (remaining) runChildren.push(remaining)
       break
     }
 
@@ -902,14 +904,17 @@ function buildFooter(
 
     const first = idxs[0]
     if (first.i > 0) {
-      children.push(new TextRun({ text: remaining.slice(0, first.i), font, size: 18, color: '64748B' }))
+      runChildren.push(remaining.slice(0, first.i))
     }
-    children.push(first.t === 'page' ? PageNumber.CURRENT : PageNumber.TOTAL_PAGES)
+    runChildren.push(first.t === 'page' ? PageNumber.CURRENT : PageNumber.TOTAL_PAGES)
     remaining = remaining.slice(first.i + first.l)
   }
 
   return new Footer({
-    children: [new Paragraph({ children: children as readonly import('docx').ParagraphChild[], alignment: AlignmentType.CENTER })],
+    children: [new Paragraph({
+      children: [new TextRun({ children: runChildren, font, size: 18, color: '64748B' })],
+      alignment: AlignmentType.CENTER,
+    })],
   })
 }
 

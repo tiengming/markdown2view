@@ -735,13 +735,11 @@ async function convertMermaid(
       if (!blob) throw new Error('截图失败')
 
       const pngData = await blob.arrayBuffer()
-      const finalW = w
-      const finalH = h
 
       return new Paragraph({
         alignment: AlignmentType.CENTER,
         spacing: { before: 120, after: 120 },
-        children: [new ImageRun({ data: pngData, transformation: { width: finalW, height: finalH } } as any)],
+        children: [new ImageRun({ data: pngData, transformation: { width: w, height: h } } as any)],
       })
     } finally {
       host.remove()

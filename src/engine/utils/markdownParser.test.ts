@@ -59,10 +59,24 @@ describe('parseMarkdown - Caption parsing', () => {
     expect(html).toContain('图 1: 这是加粗题注')
   })
 
+  it('should parse mermaid flowchart captions correctly', () => {
+    const md = '```mermaid\nflowchart LR\n  A --> B\n```\n图 1: 这是流程图题注'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('class="document-caption document-caption-image"')
+    expect(html).toContain('data-caption-kind="image"')
+    expect(html).toContain('这是流程图题注')
+  })
+
+  it('should support bold mermaid captions', () => {
+    const md = '```mermaid\nflowchart LR\n  A --> B\n```\n**图 2: 加粗流程图题注**'
+    const html = parseMarkdown(md, colors)
+    expect(html).toContain('class="document-caption document-caption-image"')
+    expect(html).toContain('加粗流程图题注')
+  })
+
   it('should support bold table captions above tables', () => {
     const md = '**表 1: 这是加粗表格题注**\n| col1 | col2 |\n| --- | --- |\n| a | b |'
     const html = parseMarkdown(md, colors)
-
     expect(html).toContain('class="document-caption document-caption-table"')
     expect(html).toContain('data-caption-kind="table"')
     expect(html).toContain('text-align:center')

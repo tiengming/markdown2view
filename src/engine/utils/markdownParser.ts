@@ -62,7 +62,20 @@ function hasImageAbove(lines: string[], index: number): boolean {
     if (isImageLine(line)) {
       return true
     }
+    // 检测 Mermaid 代码块闭合围栏
+    if (/^```\s*$/.test(line) && hasMermaidBlockAbove(lines, i)) {
+      return true
+    }
     break
+  }
+  return false
+}
+
+/** 检查闭合围栏是否属于 mermaid 代码块 */
+function hasMermaidBlockAbove(lines: string[], closingIdx: number): boolean {
+  for (let i = closingIdx - 1; i >= 0; i--) {
+    if (/^```mermaid\b/.test(lines[i].trim())) return true
+    if (/^```/.test(lines[i].trim())) return false // 遇到另一个围栏则不是 mermaid
   }
   return false
 }
@@ -316,7 +329,10 @@ export function parseMarkdown(
     if (/^<steps\b/.test(line)) {
       const block = extractBlock(lines, i, /^<steps\b([^>]*)>(.*)$/, /<\/steps>/) || extractBlock(lines, i, /^<steps\b([^>]*)>/, /<\/steps>/)
       if (block) {
-        const stepsRenderer = block.attrs.type === 'DA02' ? Steps_DA02 : Steps_DA01
+        // 未显式指定 type 且步骤超过3个时自动切换为 DA02（竖向布局）
+        const stepCount = block.body.split('\n').filter((l: string) => /^-\s*.+\s*\|\s*.+/.test(l.trim())).length
+        const useDA02 = block.attrs.type === 'DA02' || (!block.attrs.type && stepCount > 3)
+        const stepsRenderer = useDA02 ? Steps_DA02 : Steps_DA01
         html += stepsRenderer.render(block.attrs, block.body, t)
         i = block.next
         continue

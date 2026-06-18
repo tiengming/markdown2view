@@ -50,7 +50,10 @@ export async function renderMermaidDiagram(
   stripDimensions: boolean = true,
 ): Promise<MermaidRenderResult> {
   const mermaid = await ensureMermaid()
-  // offscreen 容器：宽度=containerWidth，让 mermaid 按真实可用宽排版
+  // offscreen 容器：宽度=containerWidth，让 mermaid 按真实可用宽排版。
+  // 注意：此路径仅调用 mermaid.render() 生成 SVG 字符串，不涉及 DOM 截图，
+  // 因此 visibility:hidden 安全（不影响 mermaid 内部布局引擎）。
+  // 对比 exportDocx.ts 中的截图路径必须用 left:-9999px 而非 visibility:hidden。
   const host = document.createElement('div')
   host.style.cssText = `position:absolute;left:-9999px;top:0;width:${containerWidth}px;visibility:hidden`
   document.body.appendChild(host)

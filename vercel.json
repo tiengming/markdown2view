@@ -1,7 +1,3 @@
 {
-  "buildCommand": "pnpm install --no-frozen-lockfile && pnpm build",
-  "installCommand": "pnpm install",
-  "hooks": {
-    "beforeBuild": "corepack enable && corepack prepare pnpm@11.7.0 --activate"
-  }
+  "buildCommand": "corepack enable && corepack prepare pnpm@11.7.0 --activate && pnpm install --no-frozen-lockfile && pnpm build"
 }

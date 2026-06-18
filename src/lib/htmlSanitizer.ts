@@ -4,7 +4,7 @@
 // 2. 默认放行所有标签、class、style，只拦截真正危险的攻击向量：
 //    - script 标签
 //    - 事件处理器属性（onclick/onload 等）
-//    - javascript: / data: 等危险伪协议
+//    - javascript: / data:text/html 等可执行伪协议；放行 data:image/* 等安全内联资源
 //    - CSS expression / behavior / @import 等 IE 遗留攻击向量
 // 3. 对 iframe / object / embed 做 sandbox 限制
 // 4. 提供 sanitizeHtml 与 sanitizeHtmlStrict 两档强度，满足不同场景需求
@@ -17,6 +17,15 @@ const URL_ATTRS = new Set(['href', 'src', 'srcset', 'poster', 'data', 'action', 
 
 const SAFE_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:'])
 
+// 允许的内联 data: 资源类型。data: 可以执行脚本（如 data:text/html），
+// 因此只放行图片、字体、JSON 等不可执行类型。
+const SAFE_DATA_MEDIA_TYPES = new Set([
+  'image/',
+  'font/',
+  'application/json',
+  'text/plain',
+])
+
 function isEventHandlerAttr(name: string): boolean {
   return name.startsWith('on') && name.length > 2
 }
@@ -24,9 +33,20 @@ function isEventHandlerAttr(name: string): boolean {
 function isDangerousUrl(value: string): boolean {
   const trimmed = value.trim().toLowerCase()
   if (!trimmed) return false
-  // 拒绝 javascript: 和 data:（可执行脚本）
-  if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:text/html')) {
+  // 拒绝 javascript: 和可执行 data:（data:text/html、javascript:）
+  if (trimmed.startsWith('javascript:')) {
     return true
+  }
+  return false
+}
+
+function isSafeDataUrl(value: string): boolean {
+  const lower = value.trim().toLowerCase()
+  if (!lower.startsWith('data:')) return false
+  // data:[media type];[base64],data
+  const mediaPart = lower.slice(5).split(';')[0]
+  for (const safe of SAFE_DATA_MEDIA_TYPES) {
+    if (mediaPart === safe || mediaPart.startsWith(safe)) return true
   }
   return false
 }
@@ -37,6 +57,8 @@ function isSafeUrl(value: string): boolean {
   if (!trimmed) return true
   // 允许相对路径、锚点、空值
   if (/^(\/|#|\.\.?\/)/.test(trimmed)) return true
+  // 允许安全的 data: 内联资源（图片、字体、JSON 等）
+  if (isSafeDataUrl(trimmed)) return true
   try {
     const url = new URL(trimmed, 'http://localhost')
     return SAFE_URL_PROTOCOLS.has(url.protocol)
@@ -149,7 +171,7 @@ function sanitizeNode(
 
     let value = attr.value
 
-    // URL 属性校验：拒绝 javascript: / data:text/html
+    // URL 属性校验：拒绝 javascript: / 可执行 data:；放行安全 data: 内联资源
     if (URL_ATTRS.has(name)) {
       if (name === 'srcset') {
         if (!isSafeSrcset(value)) continue

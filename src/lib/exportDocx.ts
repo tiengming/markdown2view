@@ -242,6 +242,81 @@ interface FormulaInfo {
 }
 type FormulaMap = Map<string, FormulaInfo>
 
+/**
+ * 文档级公式缓存。
+ * 一次性扫描整篇文档的所有公式并渲染，避免每个段落/列表重复调用 MathJax；
+ * 同时把公式替换为内部占位符，解决行内代码与公式标记冲突的问题。
+ */
+export class FormulaCache {
+  private map: FormulaMap = new Map()
+  private pending: Array<{ latex: string; display: boolean; placeholder: string }> = []
+  private blockCounter = 0
+  private inlineCounter = 0
+
+  register(latex: string, display: boolean): string {
+    const placeholder = display
+      ? `__BLOCK_FORMULA_${this.blockCounter++}__`
+      : `__INLINE_FORMULA_${this.inlineCounter++}__`
+    this.pending.push({ latex, display, placeholder })
+    return placeholder
+  }
+
+  async renderAll() {
+    for (const { latex, display, placeholder } of this.pending) {
+      if (this.map.has(placeholder)) continue
+      const info = await renderFormula(latex, display)
+      if (info) this.map.set(placeholder, info)
+    }
+  }
+
+  getFormulaMap(): FormulaMap {
+    return this.map
+  }
+}
+
+// ── 公式提取时保护代码区域，避免代码块/行内代码内的 $ 被误识别 ──
+const CB_OPEN = '\uE002', CB_CLOSE = '\uE003'
+const IC_OPEN = '\uE004', IC_CLOSE = '\uE005'
+
+export function protectCodeRegions(md: string): { text: string; codes: string[] } {
+  const codes: string[] = []
+  let text = md.replace(/```[\s\S]*?```/g, (code) => {
+    const i = codes.length
+    codes.push(code)
+    return `${CB_OPEN}${i}${CB_CLOSE}`
+  })
+  text = text.replace(/`[^`\n]+`/g, (code) => {
+    const i = codes.length
+    codes.push(code)
+    return `${IC_OPEN}${i}${IC_CLOSE}`
+  })
+  return { text, codes }
+}
+
+export function restoreCodeRegions(text: string, codes: string[]): string {
+  return text
+    .replace(new RegExp(`${CB_OPEN}(\\d+)${CB_CLOSE}`, 'g'), (_, i) => codes[parseInt(i, 10)])
+    .replace(new RegExp(`${IC_OPEN}(\\d+)${IC_CLOSE}`, 'g'), (_, i) => codes[parseInt(i, 10)])
+}
+
+/** 公式预处理：将 $/$$ 公式转为代码样式占位符，并注册到文档级缓存。 */
+export function preprocessFormulasSafe(md: string, cache: FormulaCache): string {
+  const { text, codes } = protectCodeRegions(md)
+  let result = text
+
+  result = result.replace(/\$\$\n?([\s\S]+?)\n?\$\$/g, (_m, latex: string) => {
+    const placeholder = cache.register(latex.trim(), true)
+    return '`' + placeholder + '`'
+  })
+
+  result = result.replace(/(?<![\w$])\$([^\n$]+?)\$(?![\w$])/g, (_m, latex: string) => {
+    const placeholder = cache.register(latex.trim(), false)
+    return '`' + placeholder + '`'
+  })
+
+  return restoreCodeRegions(result, codes)
+}
+
 /** MathJax 默认 1ex ≈ 6px（tex2svg 以 ex 为单位，需换算到 px 供 docx 使用） */
 const MATHJAX_EX_PX = 6
 
@@ -361,65 +436,20 @@ async function svgToPng(svgStr: string, w: number, h: number): Promise<ArrayBuff
   }
 }
 
-/** 提取 Markdown 中所有公式并渲染为 PNG 图片 */
-async function renderAllFormulas(md: string): Promise<FormulaMap> {
-  const map: FormulaMap = new Map()
-
-  // 块级 $$...$$
-  const blockRe = /\$\$([^\n]+?)\$\$/g
-  let m: RegExpExecArray | null
-  while ((m = blockRe.exec(md)) !== null) {
-    const key = m[1].trim()
-    if (map.has(key)) continue
-    const info = await renderFormula(key, true)
-    if (info) map.set(key, info)
-  }
-
-  // 多行块级 $$...$$
-  const blockMultiRe = /\$\$\n([\s\S]+?)\n\$\$/g
-  while ((m = blockMultiRe.exec(md)) !== null) {
-    const key = m[1].trim()
-    if (map.has(key)) continue
-    const info = await renderFormula(key, true)
-    if (info) map.set(key, info)
-  }
-
-  // 行内 $...$
-  const inlineRe = /(?<![\w$])\$([^\n$]+?)\$(?![\w$])/g
-  while ((m = inlineRe.exec(md)) !== null) {
-    const key = m[1].trim()
-    if (map.has(key)) continue
-    const info = await renderFormula(key, false)
-    if (info) map.set(key, info)
-  }
-
-  return map
-}
-
-/** 公式预处理：将 $/$$ 公式转为代码样式，去掉 $ 标记 */
-function preprocessFormulas(md: string): string {
-  let result = md
-  result = result.replace(/\$\$([^\n]+?)\$\$/g, (_m, c) => '`' + c + '`')
-  result = result.replace(/\$\$\n([\s\S]+?)\n\$\$/g, (_m, c) => '`' + c.trim() + '`')
-  result = result.replace(/(?<![\w$])\$([^\n$]+?)\$(?![\w$])/g, (_m, c) => '`' + c + '`')
-  return result
-}
-
 /** paragraph → docx Paragraph */
 async function convertParagraph(
   block: DocumentBlock,
   settings: DocumentSettings,
+  formulaMap: FormulaMap,
 ): Promise<InstanceType<typeof import('docx').Paragraph>> {
   const { Paragraph, AlignmentType, ImageRun } = docxModule!
   const font = getFont(settings.fontFamily)
   const sizes = getSizes(settings.fontScale)
 
-  // 检测整个段落是否仅为块级公式
-  const blockFormulaMatch = block.markdown.match(/^\$\$\s*([^\n]+?)\s*\$\$$/) ||
-    block.markdown.match(/^\$\$\n([\s\S]+?)\n\$\$$/)
+  // 检测整个段落是否仅为块级公式（markdown 已被预处理为占位符）
+  const blockFormulaMatch = block.markdown.match(/^`\s*(__BLOCK_FORMULA_\d+__)\s*`$/)
   if (blockFormulaMatch) {
-    const latex = blockFormulaMatch[1].trim()
-    const info = await renderFormula(latex, true)
+    const info = formulaMap.get(blockFormulaMatch[1])
     if (info) {
       return new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -440,14 +470,11 @@ async function convertParagraph(
     indent.firstLine = sizes.body * 20
   }
 
-  const formulaMap = await renderAllFormulas(block.markdown)
-  const processedMd = preprocessFormulas(block.markdown)
-
   return new Paragraph({
     alignment: AlignmentType.BOTH,
     spacing: { after: 120, line: getLineValue(settings.fontScale), lineRule: 'auto' as any },
     indent,
-    children: parseInlineToRuns(processedMd, font, sizes.body, '333333', formulaMap),
+    children: parseInlineToRuns(block.markdown, font, sizes.body, '333333', formulaMap),
   })
 }
 
@@ -499,12 +526,12 @@ function convertCode(
 async function convertList(
   block: DocumentBlock,
   settings: DocumentSettings,
+  formulaMap: FormulaMap,
 ): Promise<InstanceType<typeof import('docx').Paragraph>> {
   const { Paragraph, TextRun } = docxModule!
   const font = getFont(settings.fontFamily)
   const sizes = getSizes(settings.fontScale)
-  const formulaMap = await renderAllFormulas(block.markdown)
-  const md = preprocessFormulas(block.markdown)
+  const md = block.markdown
 
   // 计算缩进层级
   const indent = md.match(/^( *)/)?.[1].length ?? 0
@@ -868,7 +895,16 @@ async function buildDocument(
     pxToTwip(settings.marginLeft) -
     pxToTwip(settings.marginRight)
 
-  // --- 检测封面页 ---
+  // --- 文档级公式缓存：一次性扫描、渲染整篇文档的公式 ---
+  const formulaCache = new FormulaCache()
+  const preprocessedBlocks = blocks.map((b) => ({
+    ...b,
+    markdown: preprocessFormulasSafe(b.markdown, formulaCache),
+  }))
+  await formulaCache.renderAll()
+  const formulaMap = formulaCache.getFormulaMap()
+
+  // --- 检测封面页（基于原始 blocks，封面页检测不依赖公式预处理） ---
   const firstPbIdx = blocks.findIndex((b) => b.kind === 'pagebreak')
   const hasCover =
     firstPbIdx !== -1 &&
@@ -881,10 +917,10 @@ async function buildDocument(
   const convertBlock = async (block: DocumentBlock, isDocumentTitle = false) => {
     switch (block.kind) {
       case 'heading':   return [convertHeading(block, settings, isDocumentTitle)]
-      case 'paragraph': return [await convertParagraph(block, settings)]
+      case 'paragraph': return [await convertParagraph(block, settings, formulaMap)]
       case 'quote':     return [convertQuote(block, settings)]
       case 'code':      return [convertCode(block, settings)]
-      case 'list':      return [await convertList(block, settings)]
+      case 'list':      return [await convertList(block, settings, formulaMap)]
       case 'rule':      return [convertRule()]
       case 'image':     return [await convertImage(block.markdown, settings)]
       case 'mermaid':   return [await convertMermaid(block.markdown, settings)]
@@ -910,7 +946,7 @@ async function buildDocument(
 
   if (hasCover && firstPbIdx >= 0) {
     // 封面页 section（无页眉页脚）
-    const coverBlocks = blocks.slice(0, firstPbIdx)
+    const coverBlocks = preprocessedBlocks.slice(0, firstPbIdx)
     const coverChildren: any[] = []
     let isFirstCoverHeading = true
     for (let ci = 0; ci < coverBlocks.length; ci++) {
@@ -939,7 +975,7 @@ async function buildDocument(
     })
 
     // 正文 section
-    const mainBlocks = blocks.slice(firstPbIdx + 1)
+    const mainBlocks = preprocessedBlocks.slice(firstPbIdx + 1)
     const mainChildren: any[] = []
     let firstMainHeadingSeen = false
     for (const b of mainBlocks) {
@@ -961,7 +997,7 @@ async function buildDocument(
     // 单一 section（含页眉页脚）
     const children: any[] = []
     let firstHeadingSeen = false
-    for (const b of blocks) {
+    for (const b of preprocessedBlocks) {
       if (b.kind === 'pagebreak') {
         children.push(new Paragraph({ children: [new PageBreak()] }))
         continue

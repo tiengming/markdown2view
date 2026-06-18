@@ -50,15 +50,14 @@ export async function exportIframeToPdf(
       const bgColor = resolveBackground(doc, iframe.contentWindow!)
 
       // 仅对当前可见的页面节点进行截图，避免截取外层的 margin 和空白区域
-      const blob = await captureElementInIframeToBlob(iframe, pageNodes[i], { 
+      // captureElementInIframeToBlob 在截图时已完成尺寸对齐，返回的 width/height 与截图 1:1
+      const { blob, width, height } = await captureElementInIframeToBlob(iframe, pageNodes[i], { 
         scale: 3, 
         type: 'image/jpeg',
         backgroundColor: bgColor
       })
-
-      // 读取当前可见页的实际尺寸
-      const w = pageNodes[i].offsetWidth || pageNodes[i].scrollWidth
-      const h = pageNodes[i].offsetHeight || pageNodes[i].scrollHeight
+      const w = width
+      const h = height
 
       // 将 Blob 转为 data URL
       const dataUrl = await blobToDataUrl(blob)
@@ -103,15 +102,14 @@ export async function exportSinglePageToPdf(
   const bgColor = resolveBackground(doc, iframe.contentWindow!)
 
   // 仅截取实际内容区域，避免截取外层的留白
-  const blob = await captureElementInIframeToBlob(iframe, wrapper as HTMLElement, { 
+  // captureElementInIframeToBlob 返回与截图 1:1 对齐的尺寸
+  const { blob, width, height } = await captureElementInIframeToBlob(iframe, wrapper as HTMLElement, { 
     scale: 3, 
     type: 'image/jpeg',
     backgroundColor: bgColor
   })
-
-  // 读取实际内容尺寸
-  const w = (wrapper as HTMLElement).offsetWidth || doc.documentElement.clientWidth
-  const h = (wrapper as HTMLElement).offsetHeight || doc.documentElement.scrollHeight
+  const w = width
+  const h = height
 
   const dataUrl = await blobToDataUrl(blob)
 

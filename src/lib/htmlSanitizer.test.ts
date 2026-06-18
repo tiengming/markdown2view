@@ -70,6 +70,26 @@ describe('sanitizeHtml (宽松模式)', () => {
     expect(sanitizeHtml(html)).toBe(html)
   })
 
+  it('保留安全 data: 内联图片', () => {
+    const html = '<img src="data:image/png;base64,iVBORw0KGgo=">'
+    expect(sanitizeHtml(html)).toBe(html)
+  })
+
+  it('保留安全 data: SVG 背景图', () => {
+    const html = '<div style="background:url(data:image/svg+xml,%3Csvg%3E%3C/svg%3E)">x</div>'
+    expect(sanitizeHtml(html)).toBe(html)
+  })
+
+  it('移除可执行 data:text/html 链接', () => {
+    const html = '<a href="data:text/html,%3Cscript%3Ealert(1)%3C/script%3E">link</a>'
+    expect(sanitizeHtml(html)).toBe('<a>link</a>')
+  })
+
+  it('移除可执行 data:application/javascript 链接', () => {
+    const html = '<script src="data:application/javascript,alert(1)"></script>'
+    expect(sanitizeHtml(html)).toBe('')
+  })
+
   it('移除危险 style 属性（expression）', () => {
     const html = '<div style="width:expression(alert(1))">x</div>'
     expect(sanitizeHtml(html)).toBe('<div>x</div>')

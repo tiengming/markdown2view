@@ -20,6 +20,12 @@ export type ImageOpts = {
   maxHeight?: number
 }
 
+type NavigatorWithSaveBlob = Navigator & {
+  msSaveOrOpenBlob?: (blob: Blob, defaultName?: string) => boolean
+}
+
+const OBJECT_URL_REVOKE_DELAY = 10000
+
 const NEXT_FRAME = (win: Window = window) =>
   new Promise<void>((r) => win.requestAnimationFrame(() => win.requestAnimationFrame(() => r())))
 
@@ -167,7 +173,33 @@ export async function elementToBlob(element: HTMLElement, opts: ImageOpts = {}):
   return blob
 }
 
+function scheduleObjectUrlRevoke(url: string) {
+  let revoked = false
+  let timer: ReturnType<typeof setTimeout> | null = null
+
+  const revoke = () => {
+    if (revoked) return
+    revoked = true
+    if (timer) clearTimeout(timer)
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+    URL.revokeObjectURL(url)
+  }
+
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') revoke()
+  }
+
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  timer = setTimeout(revoke, OBJECT_URL_REVOKE_DELAY)
+}
+
 export function downloadBlob(blob: Blob, filename: string) {
+  const navigatorWithSaveBlob = window.navigator as NavigatorWithSaveBlob
+  if (navigatorWithSaveBlob.msSaveOrOpenBlob) {
+    navigatorWithSaveBlob.msSaveOrOpenBlob(blob, filename)
+    return
+  }
+
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -175,7 +207,7 @@ export function downloadBlob(blob: Blob, filename: string) {
   document.body.appendChild(a)
   a.click()
   a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
+  scheduleObjectUrlRevoke(url)
 }
 
 /**

@@ -10,6 +10,7 @@ import { useEditorDocSync } from '@/lib/useEditorDocSync'
 import { useImageUpload } from '@/lib/useImageUpload'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
+import { ModeLayout } from '@/components/layout/ModeLayout'
 import { useIframeScale } from './useIframeScale'
 import { usePageNavigation } from './usePageNavigation'
 import { useHtmlExports } from './useHtmlExports'
@@ -26,12 +27,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   const guideTrigger = useStore((s) => s.guideTrigger.html)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const editorScrollerRef = useRef<HTMLElement | null>(null)
-  const previewPaneRef = useRef<HTMLElement | null>(null)
+  const previewPaneRef = useRef<HTMLDivElement | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [promptOpen, setPromptOpen] = useState(false)
   const [editorReady, setEditorReady] = useState(0)
   const [allowScripts, setAllowScripts] = useState(false)
-  const [activeView, setActiveView] = useState<'edit' | 'preview'>('edit')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [previewLoading, setPreviewLoading] = useState(false)
 
@@ -160,36 +160,11 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   })
 
   return (
-    <main className="flex flex-col min-h-0 flex-1 bg-slate-200">
-      {/* 移动端视图切换 Tab */}
-      <div className="flex shrink-0 border-b border-slate-200 bg-white md:hidden">
-        <button
-          onClick={() => setActiveView('edit')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'edit'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          编辑内容
-        </button>
-        <button
-          onClick={() => setActiveView('preview')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'preview'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          实时预览
-        </button>
-      </div>
-
+    <>
       <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" aria-label="上传图片" className="hidden" />
-
-      {/* 左右分栏 */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-2 gap-px bg-slate-200">
-        <section className={`min-h-0 overflow-hidden bg-white flex flex-col ${activeView === 'edit' ? 'flex' : 'hidden md:flex'}`}>
+      <ModeLayout
+        previewClassName="bg-white"
+        editor={
           <CodeEditor
             value={localHtml}
             onChange={setLocalHtml}
@@ -201,10 +176,10 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
             }}
             onToast={onToast}
           />
-        </section>
-        <section ref={previewPaneRef} className={`min-h-0 overflow-hidden bg-white flex flex-col relative ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}>
-          {!isFullscreen && <PreviewToolbar actions={toolbarActions} className="shrink-0" />}
-          <div className="flex-1 min-h-0 relative">
+        }
+        toolbar={!isFullscreen ? <PreviewToolbar actions={toolbarActions} className="shrink-0" /> : undefined}
+        preview={
+          <div ref={previewPaneRef} className="flex-1 min-h-0 relative">
             {previewLoading && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-100/70 animate-fade-in">
                 <div className="canvas-skeleton" aria-hidden="true">
@@ -237,8 +212,8 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
               }}
             />
           </div>
-        </section>
-      </div>
+        }
+      />
 
       <PromptLibrary
         mode="html"
@@ -271,6 +246,6 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
           },
         ]}
       />
-    </main>
+    </>
   )
 }

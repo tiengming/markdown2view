@@ -8,6 +8,7 @@ import { ArticlePreview } from './ArticlePreview'
 import { useEditorDocSync } from '@/lib/useEditorDocSync'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
+import { ModeLayout } from '@/components/layout/ModeLayout'
 
 interface ArticleModeProps {
   markdown: string
@@ -30,13 +31,12 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
   const [mermaidMap, setMermaidMap] = useState<Map<string, { svg: string; error?: string }> | undefined>(undefined)
 
   const rendered = useMemo(
-    () => renderMarkdown(debouncedMarkdown, colors, mermaidMap),
-    [debouncedMarkdown, colors, mermaidMap],
+    () => renderMarkdown(debouncedMarkdown, colors, mermaidMap, onToast),
+    [debouncedMarkdown, colors, mermaidMap, onToast],
   )
   const editorScrollerRef = useRef<HTMLElement | null>(null)
   const previewScrollRef = useRef<HTMLDivElement>(null)
   const [editorReady, setEditorReady] = useState(0)
-  const [activeView, setActiveView] = useState<'edit' | 'preview'>('edit')
 
   // mermaid 预渲染：collectMermaidDiagrams → preRenderMermaid → 存入 state
   // rendered.html 依赖此 map，map 就绪后 mermaid 块才正确渲染（就绪前降级为代码块）
@@ -60,33 +60,9 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
   useScrollSync(editorScrollerRef, previewScrollRef, [editorReady])
 
   return (
-    <main className="flex flex-col min-h-0 flex-1 bg-slate-200">
-      {/* 移动端视图切换 Tab */}
-      <div className="flex shrink-0 border-b border-slate-200 bg-white md:hidden">
-        <button
-          onClick={() => setActiveView('edit')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'edit'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          编辑内容
-        </button>
-        <button
-          onClick={() => setActiveView('preview')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'preview'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          实时预览
-        </button>
-      </div>
-
-      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-2 gap-px bg-slate-200">
-        <section className={`min-h-0 overflow-hidden bg-white flex flex-col ${activeView === 'edit' ? 'flex' : 'hidden md:flex'}`}>
+    <>
+      <ModeLayout
+        editor={
           <CodeEditor
             value={localMarkdown}
             onChange={setLocalMarkdown}
@@ -97,16 +73,16 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
             }}
             onToast={onToast}
           />
-        </section>
-        <section className={`min-h-0 overflow-hidden bg-slate-50 flex flex-col ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}>
+        }
+        preview={
           <ArticlePreview
             rendered={rendered}
             markdown={debouncedMarkdown}
             scrollRef={previewScrollRef}
             onToast={onToast}
           />
-        </section>
-      </div>
+        }
+      />
       <UserGuidePopover
         guideKey="m2v-article-guide-seen"
         forceOpenTrigger={guideTrigger}
@@ -130,6 +106,6 @@ export function ArticleMode({ markdown, setMarkdown, colors, onToast }: ArticleM
           },
         ]}
       />
-    </main>
+    </>
   )
 }

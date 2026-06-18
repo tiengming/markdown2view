@@ -16,7 +16,6 @@ import {
   type XhsAspect,
 } from "@/engine/utils/xhsCards";
 import { createCardModel, type CardPlatform } from "./cardModel";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { FontSelect } from "@/components/ui/FontSelect";
@@ -32,6 +31,7 @@ import { exportMarkdownSource } from '@/lib/exportSource'
 import { useBlockHeights } from '@/lib/useBlockHeights'
 import { useExportAction } from '@/lib/useExportAction'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
+import { ModeLayout } from '@/components/layout/ModeLayout'
 import { Sparkles, Download, Clipboard, ImageIcon, Package } from '@/components/ui/Icon'
 
 interface CardModeProps {
@@ -76,7 +76,6 @@ export function CardMode({
   const [editorReady, setEditorReady] = useState(0);
 
   const [containerWidth, setContainerWidth] = useState(0);
-  const [activeView, setActiveView] = useState<'edit' | 'preview'>('edit');
 
   useEffect(() => {
     const el = previewScrollRef.current;
@@ -165,7 +164,7 @@ export function CardMode({
         label: `内容图 ${index + 1}`,
         kind: "content" as const,
         html: buildContentCard(
-          parseMarkdown(page.markdown, colors, undefined, mermaidMap),
+          parseMarkdown(page.markdown, colors, undefined, mermaidMap, onToast),
           aspect,
           index + 1,
           total,
@@ -346,33 +345,10 @@ export function CardMode({
   );
 
   return (
-    <main className="flex flex-col min-h-0 flex-1 bg-slate-200">
-      {/* 移动端视图切换 Tab */}
-      <div className="flex shrink-0 border-b border-slate-200 bg-white md:hidden">
-        <button
-          onClick={() => setActiveView('edit')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'edit'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          编辑内容
-        </button>
-        <button
-          onClick={() => setActiveView('preview')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'preview'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          实时预览
-        </button>
-      </div>
-
-      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-2 gap-px bg-slate-200">
-        <section className={`min-h-0 overflow-hidden bg-white flex flex-col ${activeView === 'edit' ? 'flex' : 'hidden md:flex'}`}>
+    <>
+      <ModeLayout
+        previewClassName="bg-slate-100"
+        editor={
           <CodeEditor
             value={localMarkdown}
             onChange={setLocalMarkdown}
@@ -384,123 +360,121 @@ export function CardMode({
             }}
             onToast={onToast}
           />
-        </section>
-
-        <section
-          className={`min-h-0 overflow-hidden bg-slate-100 flex flex-col ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}
-        >
+        }
+        toolbar={
           <PreviewToolbar
             leftContent={toolbarLeftContent}
             actions={toolbarActions}
             className="shrink-0"
           />
-
+        }
+        preview={
           <div
             ref={previewScrollRef}
             className="flex-1 overflow-auto flex flex-col gap-4 px-5 py-5"
           >
-          <aside className="mx-auto w-full max-w-[480px] rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-[13px] leading-6 text-blue-800">
-            当前分页图文适合快速生成清晰、统一的多页卡片；如果需要更强的品牌风格、复杂版式或活动海报，可以切换到自由画布使用“小红书多页图文”风格深度生成。
-          </aside>
-          <aside className="group relative mx-auto w-full max-w-[480px] rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-xs font-semibold text-slate-400">
-                发布文案
+            <aside className="mx-auto w-full max-w-[480px] rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-[13px] leading-6 text-blue-800">
+              当前分页图文适合快速生成清晰、统一的多页卡片；如果需要更强的品牌风格、复杂版式或活动海报，可以切换到自由画布使用“小红书多页图文”风格深度生成。
+            </aside>
+            <aside className="group relative mx-auto w-full max-w-[480px] rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-xs font-semibold text-slate-400">
+                  发布文案
+                </div>
+                <button
+                  onClick={copyCaption}
+                  disabled={!model.caption}
+                  className="text-xs font-medium text-[var(--accent)] opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-0"
+                >
+                  复制
+                </button>
               </div>
-              <button
-                onClick={copyCaption}
-                disabled={!model.caption}
-                className="text-xs font-medium text-[var(--accent)] opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-0"
-              >
-                复制
-              </button>
-            </div>
-            <pre className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">
-              {model.caption ||
-                "从 frontmatter 或 <title> 中补充 title / summary / chips 后，这里会生成可复制文案。"}
-            </pre>
-          </aside>
+              <pre className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">
+                {model.caption ||
+                  "从 frontmatter 或 <title> 中补充 title / summary / chips 后，这里会生成可复制文案。"}
+              </pre>
+            </aside>
 
-            <div 
+            <div
               ref={cardsContainerRef}
               className="flex flex-col items-center gap-6 pb-12"
               style={{
                 zoom: cardScale < 1 ? cardScale : undefined,
               }}
             >
-            {/* 隐藏测量容器 */}
-            <div
-              ref={measuringRef}
-              className="social-card-render"
-              style={{
-                position: "absolute",
-                visibility: "hidden",
-                top: -9999,
-                width: size.w,
-                boxSizing: "border-box",
-                padding: "32px 30px 0",
-                fontSize: 15,
-                lineHeight: 1.8,
-                wordWrap: "break-word",
-                overflowWrap: "break-word",
-                fontFamily: getFontFamilyCss(cardFont),
-              }}
-            >
-              {model.rawBlocks?.map((block, i) => (
-                <section
-                  key={`block-${i}`}
-                  data-block-id={`block-${i}`}
-                  dangerouslySetInnerHTML={{
-                    __html: parseMarkdown(block, colors, undefined, mermaidMap),
-                  }}
-                />
+              {/* 隐藏测量容器 */}
+              <div
+                ref={measuringRef}
+                className="social-card-render"
+                style={{
+                  position: "absolute",
+                  visibility: "hidden",
+                  top: -9999,
+                  width: size.w,
+                  boxSizing: "border-box",
+                  padding: "32px 30px 0",
+                  fontSize: 15,
+                  lineHeight: 1.8,
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                  fontFamily: getFontFamilyCss(cardFont),
+                }}
+              >
+                {model.rawBlocks?.map((block, i) => (
+                  <section
+                    key={`block-${i}`}
+                    data-block-id={`block-${i}`}
+                    dangerouslySetInnerHTML={{
+                      __html: parseMarkdown(block, colors, undefined, mermaidMap, onToast),
+                    }}
+                  />
+                ))}
+              </div>
+
+              {cards.map((card, index) => (
+                <div
+                  key={card.id}
+                  className="group relative shadow-md transition-shadow hover:shadow-lg"
+                  style={{ width: size.w, height: size.h }}
+                >
+                  <div
+                    ref={(el) => {
+                      cardRefs.current[card.id] = el;
+                    }}
+                    className="h-full w-full overflow-hidden rounded-md bg-white"
+                    dangerouslySetInnerHTML={{ __html: card.html }}
+                  />
+
+                  {/* 悬浮下载按钮 */}
+                  <button
+                    onClick={() => exportOne(card, index)}
+                    disabled={exporting}
+                    className="absolute -right-3 -bottom-3 flex h-8 items-center justify-center gap-1 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 opacity-0 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 group-hover:opacity-100 disabled:opacity-0"
+                    title={`下载${card.label}`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    下载
+                  </button>
+                </div>
               ))}
             </div>
-
-            {cards.map((card, index) => (
-              <div
-                key={card.id}
-                className="group relative shadow-md transition-shadow hover:shadow-lg"
-                style={{ width: size.w, height: size.h }}
-              >
-                <div
-                  ref={(el) => {
-                    cardRefs.current[card.id] = el;
-                  }}
-                  className="h-full w-full overflow-hidden rounded-md bg-white"
-                  dangerouslySetInnerHTML={{ __html: card.html }}
-                />
-
-                {/* 悬浮下载按钮 */}
-                <button
-                  onClick={() => exportOne(card, index)}
-                  disabled={exporting}
-                  className="absolute -right-3 -bottom-3 flex h-8 items-center justify-center gap-1 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 opacity-0 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 group-hover:opacity-100 disabled:opacity-0"
-                  title={`下载${card.label}`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  下载
-                </button>
-              </div>
-            ))}
           </div>
-        </div>
-      </section>
-      </div>
+        }
+      />
       <UserGuidePopover
         guideKey="m2v-card-guide-seen"
         forceOpenTrigger={guideTrigger}
@@ -524,6 +498,6 @@ export function CardMode({
           },
         ]}
       />
-    </main>
+    </>
   );
 }

@@ -25,6 +25,7 @@ import { exportToDocx } from '@/lib/exportDocx'
 import { useExportAction } from '@/lib/useExportAction'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
+import { ModeLayout } from '@/components/layout/ModeLayout'
 import { Sparkles, Download, Printer, FileText } from '@/components/ui/Icon'
 
 
@@ -50,7 +51,6 @@ export function DocumentMode({
   const previewScrollRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [editorReady, setEditorReady] = useState(0)
-  const [activeView, setActiveView] = useState<'edit' | 'preview'>('edit')
 
   useScrollSync(editorScrollerRef, previewScrollRef, [editorReady])
 
@@ -112,8 +112,8 @@ export function DocumentMode({
         fontScale: settings.fontScale,
         centerTitle: settings.centerTitle,
         indentParagraph: settings.indentParagraph,
-      }, mermaidMap),
-    [blocks, colors, settings.fontFamily, settings.fontScale, settings.centerTitle, settings.indentParagraph, mermaidMap],
+      }, mermaidMap, onToast),
+    [blocks, colors, settings.fontFamily, settings.fontScale, settings.centerTitle, settings.indentParagraph, mermaidMap, onToast],
   )
 
   // @page 分页样式（随页面/页边距/页眉页脚/页码设置变化）
@@ -246,33 +246,12 @@ export function DocumentMode({
   )
 
   return (
-    <main className="document-shell flex flex-col min-h-0 flex-1 bg-slate-200">
-      {/* 移动端视图切换 Tab */}
-      <div className="flex shrink-0 border-b border-slate-200 bg-white md:hidden">
-        <button
-          onClick={() => setActiveView('edit')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'edit'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          编辑内容
-        </button>
-        <button
-          onClick={() => setActiveView('preview')}
-          className={`flex-1 py-3 text-center text-[13px] font-bold transition-all cursor-pointer ${
-            activeView === 'preview'
-              ? 'text-[var(--accent)] border-b-2 border-[var(--accent)] bg-slate-50/50'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          实时预览
-        </button>
-      </div>
-
-      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-2 gap-px bg-slate-200">
-        <section className={`document-editor-pane min-h-0 overflow-hidden bg-white flex flex-col ${activeView === 'edit' ? 'flex' : 'hidden md:flex'}`}>
+    <>
+      <ModeLayout
+        className="document-shell"
+        editorClassName="document-editor-pane"
+        previewClassName="document-workspace bg-slate-100"
+        editor={
           <CodeEditor
             value={localMarkdown}
             onChange={setLocalMarkdown}
@@ -284,11 +263,9 @@ export function DocumentMode({
             }}
             onToast={onToast}
           />
-        </section>
-
-        <section className={`document-workspace min-h-0 overflow-hidden bg-slate-100 flex flex-col ${activeView === 'preview' ? 'flex' : 'hidden md:flex'}`}>
-          <PreviewToolbar leftContent={toolbarLeftContent} actions={toolbarActions} className="document-toolbar shrink-0" />
-
+        }
+        toolbar={<PreviewToolbar leftContent={toolbarLeftContent} actions={toolbarActions} className="document-toolbar shrink-0" />}
+        preview={
           <div ref={previewScrollRef} className="document-preview-area w-full flex-1 overflow-auto px-4 py-4 relative">
             {status !== 'done' && (
               <div className="document-loading-overlay absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-100/70 animate-fade-in">
@@ -311,8 +288,8 @@ export function DocumentMode({
               className="block w-full min-h-[480px] border-0 bg-transparent"
             />
           </div>
-        </section>
-      </div>
+        }
+      />
       <UserGuidePopover
         guideKey="m2v-document-guide-seen"
         forceOpenTrigger={guideTrigger}
@@ -336,6 +313,6 @@ export function DocumentMode({
           },
         ]}
       />
-    </main>
+    </>
   )
 }

@@ -12,6 +12,6 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     exclude: ['node_modules/**', 'dist/**', 'html-anything/**', 'r-markdown/**'],
-    setupFiles: ['./src/test/setupIdb.ts'],
+    setupFiles: ['./src/test/setupIdb.ts', './src/test/setupTests.ts'],
   },
 })

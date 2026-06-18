@@ -110,7 +110,7 @@ function paginateBlocks(
   return pages
 }
 
-export function buildCardCaption(meta: XhsMeta, platform: CardPlatform): string {
+export function buildCardCaption(meta: XhsMeta): string {
   const platformTag = '小红书'
   const parts = [meta.title, meta.summary].filter(Boolean)
   const chips = Array.from(new Set([platformTag, ...meta.chips]))
@@ -127,6 +127,7 @@ export function createCardModel(
   actualHeights?: Record<string, number>,
   pixelBudget?: number
 ): CardModel {
+  void platform
   let { meta, contentMd } = extractXhs(markdown)
   
   // 强制将列表项拆分为独立 Block，以允许分页逻辑在长列表内部打断
@@ -139,7 +140,7 @@ export function createCardModel(
   return {
     meta,
     contentMarkdown: contentMd,
-    caption: buildCardCaption(meta, platform),
+    caption: buildCardCaption(meta),
     pages,
     rawBlocks: blocks, // Add this so UI can render the hidden blocks
   }

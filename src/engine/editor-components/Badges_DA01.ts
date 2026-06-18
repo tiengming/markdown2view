@@ -1,5 +1,6 @@
 import { leaf } from '@engine/utils/helpers'
 import type { ThemeColors } from '@engine/composables/useTheme'
+import { fontSize, fontWeight, lineHeight, radius, spacing } from '@engine/tokens'
 
 /**
  * Badges_DA01 - 彩色标签徽章（默认A型01号样式）
@@ -48,14 +49,13 @@ export const Badges_DA01 = {
     }
     const c = tones[tone] || tones.accent
 
-    // color / bg 属性优先于 tone
     const finalColor = attrs.color || c.color
     const finalBg = attrs.bg || c.bg
     const finalBorder = attrs.bg ? attrs.bg + '50' : c.border
 
-    let html = `<section style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0px;align-items:center">`
+    let html = `<section style="display:flex;gap:${spacing[3]};flex-wrap:wrap;margin:${spacing[6]} 0px;align-items:center">`
     items.forEach((item) => {
-      html += `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;background:${finalBg};color:${finalColor};border:1px solid ${finalBorder};line-height:1.6;white-space:nowrap">${leaf(item)}</span>`
+      html += `<span style="display:inline-flex;align-items:center;gap:${spacing[1]};padding:${spacing[1]} ${spacing[5]};border-radius:${radius.full};font-size:${fontSize.base};font-weight:${fontWeight.semibold};background:${finalBg};color:${finalColor};border:1px solid ${finalBorder};line-height:${lineHeight.loosest};white-space:nowrap">${leaf(item)}</span>`
     })
     html += `</section>`
     return html

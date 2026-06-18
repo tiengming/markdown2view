@@ -1,5 +1,6 @@
 import { leaf } from '@engine/utils/helpers'
 import type { ThemeColors } from '@engine/composables/useTheme'
+import { color, fontSize, fontWeight, letterSpacing, lineHeight, neutral, spacing } from '@engine/tokens'
 
 /**
  * PTitle - 段落标题（默认A型01号样式）
@@ -118,7 +119,7 @@ export const PTitle = {
     const subtitle = attrs.subtitle
     const level = parseInt(attrs.level || '1', 10)
     const accent = t.accent
-    const titleColor = attrs.color || 'rgb(17,24,39)'
+    const titleColor = attrs.color || color.textPrimary
     const numColor = attrs['num-color'] || accent
     const subtitleColor = attrs['subtitle-color'] || accent
     const hasNum = num !== ''
@@ -139,48 +140,48 @@ export const PTitle = {
       let subtitleMarginLeft: string, subtitleFontSize: string, chapterFontSize: string
       let outerMargin: string
       if (size === 'small') {
-        numFontSize = '40px'
-        titleFontSize = '20px'
+        numFontSize = fontSize['10xl']
+        titleFontSize = fontSize['4xl']
         titleMarginTop = '-40px'
         titleMarginLeft = '34px'
         subtitleMarginLeft = '34px'
-        subtitleFontSize = '9px'
+        subtitleFontSize = fontSize['2xs']
         chapterFontSize = '8px'
-        outerMargin = '28px 0px 16px'
+        outerMargin = `${spacing[11]} 0px ${spacing[7]}`
       } else if (size === 'medium') {
-        numFontSize = '48px'
-        titleFontSize = '24px'
+        numFontSize = fontSize['11xl']
+        titleFontSize = fontSize['6xl']
         titleMarginTop = '-48px'
         titleMarginLeft = '40px'
         subtitleMarginLeft = '40px'
-        subtitleFontSize = '10px'
-        chapterFontSize = '9px'
-        outerMargin = '32px 0px 20px'
+        subtitleFontSize = fontSize['2xs']
+        chapterFontSize = fontSize['2xs']
+        outerMargin = `${spacing[12]} 0px ${spacing[9]}`
       } else {
-        numFontSize = '60px'
-        titleFontSize = '30px'
+        numFontSize = fontSize['12xl']
+        titleFontSize = fontSize['8xl']
         titleMarginTop = '-60px'
         titleMarginLeft = '50px'
         subtitleMarginLeft = '50px'
-        subtitleFontSize = '11px'
-        chapterFontSize = '10px'
-        outerMargin = '36px 0px 24px'
+        subtitleFontSize = fontSize.xs
+        chapterFontSize = fontSize['2xs']
+        outerMargin = `${spacing[13]} 0px ${spacing[10]}`
       }
 
       const numBlock =
         hasNum && hide !== 'num'
-          ? `<strong style="display:block;font-size:${numFontSize};line-height:1;color:${numColor};letter-spacing:-3px;white-space:nowrap;opacity:0.25"><span leaf="">${num}</span></strong>`
+          ? `<strong style="display:block;font-size:${numFontSize};line-height:1;color:${numColor};letter-spacing:${letterSpacing.tighter};white-space:nowrap;opacity:0.25"><span leaf="">${num}</span></strong>`
           : ''
       const titleBlock =
         hasNum && hide !== 'num'
-          ? `<strong style="display:block;font-size:${titleFontSize};font-weight:900;color:${titleColor};line-height:1.26;letter-spacing:-0.8px;margin-top:${titleMarginTop};margin-left:${titleMarginLeft}"><span leaf="">${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}</span></strong>`
-          : `<strong style="display:block;font-size:${titleFontSize};font-weight:900;color:${titleColor};line-height:1.26;letter-spacing:-0.8px"><span leaf="">${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}</span></strong>`
+          ? `<strong style="display:block;font-size:${titleFontSize};font-weight:${fontWeight.black};color:${titleColor};line-height:1.26;letter-spacing:${letterSpacing.tight};margin-top:${titleMarginTop};margin-left:${titleMarginLeft}"><span leaf="">${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}</span></strong>`
+          : `<strong style="display:block;font-size:${titleFontSize};font-weight:${fontWeight.black};color:${titleColor};line-height:1.26;letter-spacing:${letterSpacing.tight}"><span leaf="">${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}</span></strong>`
       const subtitleHtml = subtitle
-        ? `<span style="display:block;margin-left:${hasNum && hide !== 'num' ? subtitleMarginLeft : '0'};font-size:${subtitleFontSize};color:${subtitleColor};font-weight:700;text-transform:uppercase;letter-spacing:1.6px"><span leaf="">${leaf(subtitle)}</span></span>`
+        ? `<span style="display:block;margin-left:${hasNum && hide !== 'num' ? subtitleMarginLeft : '0'};font-size:${subtitleFontSize};color:${subtitleColor};font-weight:${fontWeight.bold};text-transform:uppercase;letter-spacing:1.6px"><span leaf="">${leaf(subtitle)}</span></span>`
         : ''
       const chapterLine =
         hasNum && hide !== 'line'
-          ? `<section style="display:flex;align-items:center;margin:0;padding-bottom:12px"><span style="font-size:${chapterFontSize};font-weight:800;color:rgb(148,163,184);letter-spacing:2.6px;text-transform:uppercase;white-space:nowrap"><span leaf="">CHAPTER ${num}</span></span><section style="flex:1;border-top:1px solid rgb(229,231,235);margin:0 0 0 12px;height:0"></section></section>`
+          ? `<section style="display:flex;align-items:center;margin:0;padding-bottom:${spacing[5]}"><span style="font-size:${chapterFontSize};font-weight:${fontWeight.extrabold};color:${color.inkFaint};letter-spacing:2.6px;text-transform:uppercase;white-space:nowrap"><span leaf="">CHAPTER ${num}</span></span><section style="flex:1;border-top:1px solid ${neutral.gray250};margin:0 0 0 ${spacing[5]};height:0"></section></section>`
           : ''
 
       return `
@@ -201,14 +202,14 @@ export const PTitle = {
       const titleText = `${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}`
       if (hasNum) {
         return `
-<section style="margin:32px 0px 20px;overflow:hidden">
-    <section style="float:left;white-space:nowrap;font-size:24px;font-weight:900;color:${numColor};line-height:1.4;letter-spacing:-0.3px"><span leaf="">${num}</span></section>
-    <section style="margin-left:32px;font-size:24px;font-weight:800;color:${titleColor};line-height:1.4;letter-spacing:-0.3px"><span leaf="">${titleText}</span></section>
+<section style="margin:${spacing[12]} 0px ${spacing[9]};overflow:hidden">
+    <section style="float:left;white-space:nowrap;font-size:${fontSize['6xl']};font-weight:${fontWeight.black};color:${numColor};line-height:${lineHeight.normal};letter-spacing:${letterSpacing.tight}"><span leaf="">${num}</span></section>
+    <section style="margin-left:${spacing[9]};font-size:${fontSize['6xl']};font-weight:${fontWeight.extrabold};color:${titleColor};line-height:${lineHeight.normal};letter-spacing:${letterSpacing.tight}"><span leaf="">${titleText}</span></section>
 </section>`
       }
       return `
-<section style="margin:32px 0px 20px">
-  <section style="font-size:24px;font-weight:800;color:${titleColor};line-height:1.4;letter-spacing:-0.3px"><span leaf="">${titleText}</span></section>
+<section style="margin:${spacing[12]} 0px ${spacing[9]}">
+  <section style="font-size:${fontSize['6xl']};font-weight:${fontWeight.extrabold};color:${titleColor};line-height:${lineHeight.normal};letter-spacing:${letterSpacing.tight}"><span leaf="">${titleText}</span></section>
 </section>`
     }
 
@@ -217,14 +218,14 @@ export const PTitle = {
       const titleText3 = `${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}`
       if (hasNum) {
         return `
-<section style="margin:28px 0px 16px;overflow:hidden">
-    <section style="float:left;white-space:nowrap;font-size:20px;font-weight:900;color:${numColor};line-height:1.45"><span leaf="">${num}</span></section>
-    <section style="margin-left:28px;font-size:20px;font-weight:700;color:${titleColor};line-height:1.45"><span leaf="">${titleText3}</span></section>
+<section style="margin:${spacing[11]} 0px ${spacing[7]};overflow:hidden">
+    <section style="float:left;white-space:nowrap;font-size:${fontSize['4xl']};font-weight:${fontWeight.black};color:${numColor};line-height:1.45"><span leaf="">${num}</span></section>
+    <section style="margin-left:${spacing[8]};font-size:${fontSize['4xl']};font-weight:${fontWeight.bold};color:${titleColor};line-height:1.45"><span leaf="">${titleText3}</span></section>
 </section>`
       }
       return `
-<section style="margin:28px 0px 16px">
-  <section style="font-size:20px;font-weight:700;color:${titleColor};line-height:1.45"><span leaf="">${titleText3}</span></section>
+<section style="margin:${spacing[11]} 0px ${spacing[7]}">
+  <section style="font-size:${fontSize['4xl']};font-weight:${fontWeight.bold};color:${titleColor};line-height:1.45"><span leaf="">${titleText3}</span></section>
 </section>`
     }
 
@@ -232,14 +233,14 @@ export const PTitle = {
     const titleText4 = `${hasPrefix ? prefix + ' ' : ''}${leaf(title)}${hasSuffix ? ' ' + suffix : ''}`
     if (hasNum) {
       return `
-<section style="margin:24px 0px 12px;overflow:hidden">
-    <section style="float:left;white-space:nowrap;font-size:16px;font-weight:900;color:${numColor};line-height:1.5"><span leaf="">${num}</span></section>
-    <section style="margin-left:24px;font-size:16px;font-weight:700;color:${titleColor};line-height:1.5"><span leaf="">${titleText4}</span></section>
+<section style="margin:${spacing[10]} 0px ${spacing[5]};overflow:hidden">
+    <section style="float:left;white-space:nowrap;font-size:${fontSize.xl};font-weight:${fontWeight.black};color:${numColor};line-height:${lineHeight.snug}"><span leaf="">${num}</span></section>
+    <section style="margin-left:${spacing[7]};font-size:${fontSize.xl};font-weight:${fontWeight.bold};color:${titleColor};line-height:${lineHeight.snug}"><span leaf="">${titleText4}</span></section>
 </section>`
     }
     return `
-<section style="margin:24px 0px 12px">
-  <section style="font-size:16px;font-weight:700;color:${titleColor};line-height:1.5"><span leaf="">${titleText4}</span></section>
+<section style="margin:${spacing[10]} 0px ${spacing[5]}">
+  <section style="font-size:${fontSize.xl};font-weight:${fontWeight.bold};color:${titleColor};line-height:${lineHeight.snug}"><span leaf="">${titleText4}</span></section>
 </section>`
   },
 }

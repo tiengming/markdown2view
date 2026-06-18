@@ -6,6 +6,7 @@ import { renderMath } from './mathRenderer'
 import { renderMermaidDiagram } from './mermaidRenderer'
 import { renderFrontMatter } from './components'
 import { createDefaultBlockRenderers, type BlockRenderContext } from './blockRenderRegistry'
+import { color, fontSize, fontWeight, lineHeight, spacing } from '../tokens'
 
 /**
  * 收集 md 中所有公式（去重），按 inline/block 分类返回，用于预渲染。
@@ -228,11 +229,11 @@ export function parseMarkdown(
   }
 
   if (footnotes.length > 0) {
-    html += `<section style="margin:32px 0px 0px;padding-top:20px;border-top:1px solid ${t.border}">`
-    html += `<h2 style="margin:0px 0px 16px;font-size:18px;font-weight:700;color:rgb(17,24,39);line-height:1.4">参考资料</h2>`
-    html += `<section style="font-size:14px;color:rgb(100,116,139);line-height:1.8">`
+    html += `<section style="margin:${spacing[13]} 0px 0px;padding-top:${spacing[8]};border-top:1px solid ${t.border}">`
+    html += `<h2 style="margin:0px 0px ${spacing[7]};font-size:${fontSize['3xl']};font-weight:${fontWeight.bold};color:${color.textPrimary};line-height:${lineHeight.normal}">参考资料</h2>`
+    html += `<section style="font-size:${fontSize.md};color:${color.inkMuted};line-height:${lineHeight.loosest}">`
     footnotes.forEach((fn, idx) => {
-      html += `<p style="margin:6px 0px"><span style="color:${t.accent};font-weight:600">[${idx + 1}]</span> ${leaf(fn.desc)}：<a href="${esc(fn.url)}" style="color:${t.accent};word-break:break-all">${esc(fn.url)}</a></p>`
+      html += `<p style="margin:${spacing[2]} 0px"><span style="color:${t.accent};font-weight:${fontWeight.semibold}">[${idx + 1}]</span> ${leaf(fn.desc)}：<a href="${esc(fn.url)}" style="color:${t.accent};word-break:break-all">${esc(fn.url)}</a></p>`
     })
     html += `</section></section>`
   }

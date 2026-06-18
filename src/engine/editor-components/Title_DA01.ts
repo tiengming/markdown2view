@@ -1,5 +1,16 @@
 import { leaf } from '@engine/utils/helpers'
 import type { ThemeColors } from '@engine/composables/useTheme'
+import {
+  color,
+  fontSize,
+  fontWeight,
+  letterSpacing,
+  lineHeight,
+  neutral,
+  radius,
+  shadowRaw,
+  spacing,
+} from '@engine/tokens'
 
 /**
  * Title_DA01 - 标题卡片（默认A型01号样式）
@@ -16,36 +27,36 @@ import type { ThemeColors } from '@engine/composables/useTheme'
 // ── 样式常量 ──────────────────────────────────────────
 const S = {
   card:
-    'margin:0px 0px 30px;box-shadow:rgba(15,23,42,0.05) 0px 10px 24px;' +
-    'border-radius:14px;border:1px solid rgba(229,231,235,0.9);' +
-    'overflow:hidden;background:linear-gradient(135deg,rgb(248,250,252) 0%,rgb(238,244,251) 100%)',
-  body: 'padding:20px;background:rgba(255,255,255,0.92)',
-  badge: (color: string) =>
-    `margin:0px;padding:0px 0px 10px;font-size:10px;color:${color};` +
-    'letter-spacing:2.4px;text-transform:uppercase;font-weight:800',
+    `margin:0px 0px ${spacing[12]};${shadowRaw.card};` +
+    `border-radius:${radius['3xl']};border:1px solid ${neutral.gray250};` +
+    `overflow:hidden;background:linear-gradient(135deg,${neutral.gray100} 0%,rgb(238,244,251) 100%)`,
+  body: `padding:${spacing[9]};background:${color.surface}eb`,
+  badge: (accent: string) =>
+    `margin:0px;padding:0px 0px ${spacing[4]};font-size:${fontSize['2xs']};color:${accent};` +
+    `letter-spacing:${letterSpacing['3xl']};text-transform:uppercase;font-weight:${fontWeight.extrabold}`,
   title:
-    'margin:0px;font-size:28px;font-weight:900;color:rgb(17,24,39);' +
-    'line-height:1.2;letter-spacing:-0.5px;word-break:break-all',
+    `margin:0px;font-size:${fontSize['7xl']};font-weight:${fontWeight.black};color:${color.textPrimary};` +
+    `line-height:${lineHeight.tight};letter-spacing:${letterSpacing.tight};word-break:break-all`,
   subtitle:
-    'margin:0px;padding:10px 0px 0px;font-size:14px;color:rgb(71,85,105);' +
-    'line-height:1.7;font-weight:400;text-align:justify;letter-spacing:0.3px',
-  chips: 'margin:0px;padding:10px 0px 0px;font-size:0px;line-height:1.8',
+    `margin:0px;padding:${spacing[4]} 0px 0px;font-size:${fontSize.md};color:${color.ink};` +
+    `line-height:${lineHeight.looser};font-weight:${fontWeight.normal};text-align:justify;letter-spacing:${letterSpacing.wide}`,
+  chips: `margin:0px;padding:${spacing[4]} 0px 0px;font-size:0px;line-height:${lineHeight.loosest}`,
   chip:
-    'display:inline-block;margin:0px 8px 0px 0px;font-size:10px;' +
-    'color:#576B95;font-weight:700;letter-spacing:0.02em;white-space:nowrap',
+    `display:inline-block;margin:0px ${spacing[3]} 0px 0px;font-size:${fontSize['2xs']};` +
+    `color:#576B95;font-weight:${fontWeight.bold};letter-spacing:0.02em;white-space:nowrap`,
   statLabel:
-    'margin:0px 0px 8px;font-size:10px;line-height:1.2;' +
-    'color:rgb(148,163,184);font-weight:800;letter-spacing:0.4px',
+    `margin:0px 0px ${spacing[3]};font-size:${fontSize['2xs']};line-height:${lineHeight.normal};` +
+    `color:${color.inkFaint};font-weight:${fontWeight.extrabold};letter-spacing:${letterSpacing.wide}`,
   statNum: (bg: string) =>
     `display:inline-block;width:64px;height:64px;line-height:64px;` +
-    `text-align:center;border-radius:10px;background-color:${bg};` +
-    'box-shadow:rgba(15,23,42,0.16) 0px 12px 24px',
+    `text-align:center;border-radius:${radius.xl};background-color:${bg};` +
+    shadowRaw.float,
   numText:
-    'font-size:30px;line-height:64px;color:rgb(255,255,255);' +
-    'font-weight:900;letter-spacing:-1px',
+    `font-size:${fontSize['8xl']};line-height:64px;color:${color.surface};` +
+    `font-weight:${fontWeight.black};letter-spacing:${letterSpacing.tighter}`,
   charCount:
-    'margin:8px 0px 0px;font-size:10px;color:rgb(148,163,184);' +
-    'font-weight:700;letter-spacing:0.3px',
+    `margin:${spacing[3]} 0px 0px;font-size:${fontSize['2xs']};color:${color.inkFaint};` +
+    `font-weight:${fontWeight.bold};letter-spacing:${letterSpacing.wide}`,
   tdLeft: 'vertical-align:top;border:0px;padding:0px;text-align:left',
   tdRight: 'vertical-align:top;border:0px;padding:0px;text-align:right',
   table:
@@ -87,7 +98,7 @@ export const Title_DA01 = {
   render(attrs: Record<string, string>, body: string, t: ThemeColors, ...rest: unknown[]): string {
     const raw = (rest[0] as string) || ''
     const { chars, minutes } = countChars(raw)
-    const color = attrs.color || t.accent
+    const accent = attrs.color || t.accent
 
     return `
       <section style="${S.card}">
@@ -97,14 +108,14 @@ export const Title_DA01 = {
               <colgroup><col><col style="width:90px;"></colgroup>
               <tbody><tr>
                 <td valign="top" align="left" style="${S.tdLeft}">
-                  ${attrs.badge ? `<p style="${S.badge(color)}">${leaf(attrs.badge)}</p>` : ''}
+                  ${attrs.badge ? `<p style="${S.badge(accent)}">${leaf(attrs.badge)}</p>` : ''}
                   ${body ? `<p style="${S.title}">${leaf(body)}</p>` : ''}
                   ${attrs.subtitle ? `<p style="${S.subtitle}">${leaf(attrs.subtitle)}</p>` : ''}
                   ${attrs.chips ? `<section style="${S.chips}">${renderChips(attrs.chips)}</section>` : ''}
                 </td>
                 <td data-colwidth="90" width="90" valign="top" align="right" style="${S.tdRight}">
                   <p style="${S.statLabel}">${leaf('预计阅读(分)')}</p>
-                  <section style="${S.statNum(color)}">
+                  <section style="${S.statNum(accent)}">
                     <span style="${S.numText}">${leaf(minutes)}</span>
                   </section>
                   <p style="${S.charCount}">${leaf(`共 ${chars} 字`)}</p>

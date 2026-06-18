@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect, useState, useCallback } from "react";
 import { useStore, useContentStore, type DemoContents } from "@/lib/store";
-import type { RenderMode } from "@/lib/store";
 import { Toast, type ToastState } from "@/components/ui/Toast";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -81,7 +80,6 @@ export default function App() {
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
   const platform = useStore((s) => s.platform);
-  const setPlatform = useStore((s) => s.setPlatform);
   const documentSettings = useStore((s) => s.documentSettings);
   const updateDocumentSettings = useStore((s) => s.updateDocumentSettings);
   const triggerGuide = useStore((s) => s.triggerGuide);
@@ -186,7 +184,6 @@ export default function App() {
               setMarkdown={setCardMarkdown}
               colors={colors}
               platform={platform === "xiaohongshu" ? platform : "xiaohongshu"}
-              setPlatform={setPlatform}
               onToast={showToast}
             />
           )}

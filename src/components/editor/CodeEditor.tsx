@@ -161,7 +161,11 @@ export function CodeEditor({
     } catch (err) {
       console.error('Paste/Drop image error:', err)
       const msg = `图片导入失败: ${err instanceof Error ? err.message : '未知错误'}`
-      onToast ? onToast(msg) : alert(msg)
+      if (onToast) {
+        onToast(msg)
+      } else {
+        alert(msg)
+      }
     }
   }
 

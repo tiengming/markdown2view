@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface GuideIconProps {
   className?: string
   size?: number

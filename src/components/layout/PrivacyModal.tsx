@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface PrivacyModalProps {
   isOpen: boolean
   onClose: () => void

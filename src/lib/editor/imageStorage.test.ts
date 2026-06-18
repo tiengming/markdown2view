@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest'
 import {
   clearLocalImageUrlCache,
   compileMarkdownImages,
-  compressImage,
   createImageUploadFile,
   getLocalImage,
   localImageUrls,
@@ -17,7 +16,7 @@ import {
 class MockFileReader {
   onloadend: (() => void) | null = null
   result: string = ''
-  readAsDataURL(blob: Blob) {
+  readAsDataURL(_blob: Blob) {
     this.result = 'data:image/jpeg;base64,dGVzdC1pbWFnZS1kYXRh'
     setTimeout(() => {
       this.onloadend?.()

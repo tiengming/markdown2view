@@ -1,6 +1,7 @@
 import type { ThemeColors } from '../composables/useTheme'
 import { esc, leaf, parseAttrs } from './helpers'
 import { inlineFormat } from './inlineFormat'
+import { color, fontSize, fontWeight, letterSpacing, lineHeight, neutral, radius, shadowRaw, spacing } from '../tokens'
 import { Compare_DA01 } from '@engine/editor-components/Compare_DA01'
 import { Compare_DA02 } from '@engine/editor-components/Compare_DA02'
 import { CTA_DA01 } from '@engine/editor-components/Cta_DA01'
@@ -19,28 +20,28 @@ export function renderFrontMatter(
     : ''
   const charCount = cleanText.length
   const readMin = Math.max(1, Math.ceil(charCount / 400))
-  let html = `<section style="margin:0px 0px 30px;box-shadow:rgba(15,23,42,0.05) 0px 10px 24px;border-radius:14px;border:1px solid rgba(229,231,235,0.9);overflow:hidden;background:linear-gradient(135deg,rgb(248,250,252) 0%,rgb(238,244,251) 100%)">`
-  html += `<section style="padding:20px;background:rgba(255,255,255,0.92)">`
+  let html = `<section style="margin:0px 0px ${spacing[12]};${shadowRaw.card};border-radius:${radius['3xl']};border:1px solid ${neutral.gray250};overflow:hidden;background:linear-gradient(135deg,${neutral.gray100} 0%,rgb(238,244,251) 100%)">`
+  html += `<section style="padding:${spacing[9]};background:${color.surface}eb">`
   html += `<section class="tableWrapper"><table style="border:0px;border-collapse:collapse;table-layout:fixed;min-width:115px;width:100%;margin-bottom:0"><colgroup><col><col style="width:90px;"></colgroup><tbody><tr>`
   html += `<td valign="top" align="left" style="vertical-align:top;border:0px;padding:0px;text-align:left">`
   if (meta.badge)
-    html += `<p style="margin:0px;padding:0px 0px 10px;font-size:10px;color:${t.accent};letter-spacing:2.4px;text-transform:uppercase;font-weight:800">${leaf(meta.badge)}</p>`
+    html += `<p style="margin:0px;padding:0px 0px ${spacing[4]};font-size:${fontSize['2xs']};color:${t.accent};letter-spacing:${letterSpacing['3xl']};text-transform:uppercase;font-weight:${fontWeight.extrabold}">${leaf(meta.badge)}</p>`
   if (meta.title)
-    html += `<p style="margin:0px;font-size:28px;font-weight:900;color:rgb(17,24,39);line-height:1.2;letter-spacing:-0.5px;word-break:break-all">${leaf(meta.title)}</p>`
+    html += `<p style="margin:0px;font-size:${fontSize['7xl']};font-weight:${fontWeight.black};color:${color.textPrimary};line-height:${lineHeight.tight};letter-spacing:${letterSpacing.tight};word-break:break-all">${leaf(meta.title)}</p>`
   if (meta.subtitle)
-    html += `<p style="margin:0px;padding:10px 0px 0px;font-size:14px;color:rgb(71,85,105);line-height:1.7;font-weight:400;text-align:justify;letter-spacing:0.3px">${leaf(meta.subtitle)}</p>`
+    html += `<p style="margin:0px;padding:${spacing[4]} 0px 0px;font-size:${fontSize.md};color:${color.ink};line-height:${lineHeight.looser};font-weight:${fontWeight.normal};text-align:justify;letter-spacing:${letterSpacing.wide}">${leaf(meta.subtitle)}</p>`
   if (meta.chips) {
-    html += `<section style="margin:0px;padding:10px 0px 0px;font-size:0px;line-height:1.8">`
+    html += `<section style="margin:0px;padding:${spacing[4]} 0px 0px;font-size:0px;line-height:${lineHeight.loosest}">`
     meta.chips.split('|').forEach((c) => {
-      html += `<span style="display:inline-block;margin:0px 8px 0px 0px;font-size:10px;color:#576B95;font-weight:700;letter-spacing:0.02em;white-space:nowrap">${leaf('#' + c.trim())}</span>`
+      html += `<span style="display:inline-block;margin:0px ${spacing[3]} 0px 0px;font-size:${fontSize['2xs']};color:#576B95;font-weight:${fontWeight.bold};letter-spacing:0.02em;white-space:nowrap">${leaf('#' + c.trim())}</span>`
     })
     html += `</section>`
   }
   html += `</td>`
   html += `<td data-colwidth="90" width="90" valign="top" align="right" style="vertical-align:top;border:0px;padding:0px;text-align:right">`
-  html += `<p style="margin:0px 0px 8px;font-size:10px;line-height:1.2;color:rgb(148,163,184);font-weight:800;letter-spacing:0.4px">${leaf('预计阅读(分)')}</p>`
-  html += `<section style="display:inline-block;width:64px;height:64px;line-height:64px;text-align:center;border-radius:10px;background-color:${t.accent};box-shadow:rgba(15,23,42,0.16) 0px 12px 24px"><span style="font-size:30px;line-height:64px;color:rgb(255,255,255);font-weight:900;letter-spacing:-1px">${leaf(readMin)}</span></section>`
-  html += `<p style="margin:8px 0px 0px;font-size:10px;color:rgb(148,163,184);font-weight:700;letter-spacing:0.3px">${leaf('共 ' + charCount + ' 字')}</p>`
+  html += `<p style="margin:0px 0px ${spacing[3]};font-size:${fontSize['2xs']};line-height:${lineHeight.normal};color:${color.inkFaint};font-weight:${fontWeight.extrabold};letter-spacing:${letterSpacing.wide}">${leaf('预计阅读(分)')}</p>`
+  html += `<section style="display:inline-block;width:64px;height:64px;line-height:64px;text-align:center;border-radius:${radius.xl};background-color:${t.accent};${shadowRaw.float}"><span style="font-size:${fontSize['8xl']};line-height:64px;color:${color.surface};font-weight:${fontWeight.black};letter-spacing:${letterSpacing.tighter}">${leaf(readMin)}</span></section>`
+  html += `<p style="margin:${spacing[3]} 0px 0px;font-size:${fontSize['2xs']};color:${color.inkFaint};font-weight:${fontWeight.bold};letter-spacing:${letterSpacing.wide}">${leaf('共 ' + charCount + ' 字')}</p>`
   html += `</td>`
   html += `</tr></tbody></table></section>`
   html += `</section></section>`
@@ -63,25 +64,25 @@ export function parseSteps(
   }
   i++
   const active = parseInt(attrs.active || '1')
-  const color = attrs.color || t.accent
+  const accentColor = attrs.color || t.accent
 
-  let html = `<section style="margin:0px 0px 24px;padding:40px 20px;background:rgb(250,251,254);border-radius:12px;border:1px solid rgb(238,238,238)">`
+  let html = `<section style="margin:0px 0px ${spacing[10]};padding:${spacing[14]} ${spacing[9]};background:${neutral.gray50};border-radius:${radius['2xl']};border:1px solid ${neutral.gray200}">`
   if (attrs.label)
-    html += `<p style="margin:0px 0px 4px;font-size:10px;color:rgb(153,153,153);letter-spacing:2px;font-weight:700">${leaf(attrs.label)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[1]};font-size:${fontSize['2xs']};color:${neutral.gray500};letter-spacing:${letterSpacing['2xl']};font-weight:${fontWeight.bold}">${leaf(attrs.label)}</p>`
   if (attrs.title)
-    html += `<p style="margin:0px 0px 4px;font-size:18px;font-weight:800;color:rgb(26,26,26)">${leaf(attrs.title)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[1]};font-size:${fontSize['3xl']};font-weight:${fontWeight.extrabold};color:${neutral.gray1000}">${leaf(attrs.title)}</p>`
   if (attrs.hint)
-    html += `<p style="margin:0px 0px 16px;font-size:12px;color:rgb(153,153,153)">${leaf(attrs.hint)}</p>`
-  html += `<section style="display:flex;gap:12px;overflow-x:auto">`
+    html += `<p style="margin:0px 0px ${spacing[7]};font-size:${fontSize.sm};color:${neutral.gray500}">${leaf(attrs.hint)}</p>`
+  html += `<section style="display:flex;gap:${spacing[5]};overflow-x:auto">`
   steps.forEach((s, idx) => {
     const isActive = idx + 1 === active
     const itemStyle = isActive
-      ? `flex:1;min-width:100px;padding:16px 12px;background:${color}10;border-radius:10px;border:2px solid ${color};text-align:center;position:relative`
-      : `flex:1;min-width:100px;padding:16px 12px;background:rgb(255,255,255);border-radius:10px;border:1px solid rgb(238,238,238);text-align:center;position:relative`
+      ? `flex:1;min-width:100px;padding:${spacing[7]} ${spacing[6]};background:${accentColor}10;border-radius:${radius.xl};border:2px solid ${accentColor};text-align:center;position:relative`
+      : `flex:1;min-width:100px;padding:${spacing[7]} ${spacing[6]};background:${color.surface};border-radius:${radius.xl};border:1px solid ${neutral.gray200};text-align:center;position:relative`
     html += `<section style="${itemStyle}">`
-    html += `<p style="margin:0px 0px 4px;font-size:20px;font-weight:900;color:${color}">${leaf(idx + 1)}</p>`
-    html += `<p style="margin:0px 0px 2px;font-size:13px;font-weight:700;color:rgb(51,65,85)">${leaf(s.name)}</p>`
-    html += `<p style="margin:0px;font-size:11px;color:rgb(153,153,153)">${leaf(s.desc)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[1]};font-size:${fontSize['5xl']};font-weight:${fontWeight.black};color:${accentColor}">${leaf(idx + 1)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[0]};font-size:${fontSize.base};font-weight:${fontWeight.bold};color:${color.textTertiary}">${leaf(s.name)}</p>`
+    html += `<p style="margin:0px;font-size:${fontSize.xs};color:${neutral.gray500}">${leaf(s.desc)}</p>`
     html += `</section>`
   })
   html += `</section></section>`
@@ -118,13 +119,13 @@ export function parseCtaBlock(
   // 未闭合 ::: 容器：不吞掉后续内容，回退为普通段落
   if (i >= lines.length) return null
   i++
-  let html = `<section style="margin:24px 0px;padding:32px 24px;background:linear-gradient(135deg,${t.accent},${t.dark});border-radius:16px;text-align:center;color:rgb(255,255,255)">`
+  let html = `<section style="margin:${spacing[10]} 0px;padding:${spacing[13]} ${spacing[9]};background:linear-gradient(135deg,${t.accent},${t.dark});border-radius:${radius['4xl']};text-align:center;color:${color.surface}">`
   if (attrs.label)
-    html += `<p style="margin:0px 0px 8px;font-size:11px;letter-spacing:3px;font-weight:700;opacity:0.8">${leaf(attrs.label)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[3]};font-size:${fontSize.xs};letter-spacing:${letterSpacing['5xl']};font-weight:${fontWeight.bold};opacity:0.8">${leaf(attrs.label)}</p>`
   if (attrs.title)
-    html += `<p style="margin:0px 0px 16px;font-size:20px;font-weight:800;line-height:1.4">${leaf(attrs.title)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[7]};font-size:${fontSize['4xl']};font-weight:${fontWeight.extrabold};line-height:${lineHeight.normal}">${leaf(attrs.title)}</p>`
   if (attrs.button)
-    html += `<span style="display:inline-block;padding:12px 32px;background:rgba(255,255,255,0.2);border-radius:8px;font-weight:700;letter-spacing:1px;backdrop-filter:blur(4px)">${leaf(attrs.button)}</span>`
+    html += `<span style="display:inline-block;padding:${spacing[5]} ${spacing[9]};background:rgba(255,255,255,0.2);border-radius:${radius.lg};font-weight:${fontWeight.bold};letter-spacing:${letterSpacing.widest};backdrop-filter:blur(4px)">${leaf(attrs.button)}</span>`
   html += `</section>`
   return { html, next: i }
 }
@@ -293,11 +294,11 @@ export function parseCallout(
   }
   const bg = bgs[type] || '#f0f4fa'
   const border = borders[type] || t.accent
-  let html = `<section style="margin:16px 0px;padding:16px 18px;background:${bg};border-left:4px solid ${border};border-radius:0px 10px 10px 0px">`
+  let html = `<section style="margin:${spacing[7]} 0px;padding:${spacing[7]} ${spacing[6]};background:${bg};border-left:4px solid ${border};border-radius:0px ${radius.xl} ${radius.xl} 0px">`
   if (title)
-    html += `<p style="margin:0px 0px 6px;font-size:16px;font-weight:700;color:rgb(51,65,85)">${leaf((icons[type] || '') + ' ' + title)}</p>`
+    html += `<p style="margin:0px 0px ${spacing[2]};font-size:${fontSize.xl};font-weight:${fontWeight.bold};color:${color.textTertiary}">${leaf((icons[type] || '') + ' ' + title)}</p>`
   if (body.trim())
-    html += `<section style="font-size:16px;color:rgb(85,85,85);line-height:1.7;letter-spacing:0.5px;text-align:justify">${inlineFormat(body.trim(), t)}</section>`
+    html += `<section style="font-size:${fontSize.xl};color:${neutral.gray700};line-height:${lineHeight.looser};letter-spacing:${letterSpacing.wider};text-align:justify">${inlineFormat(body.trim(), t)}</section>`
   html += `</section>`
   return { html, next: i }
 }
@@ -308,16 +309,16 @@ export function parseEngage(
   t: ThemeColors,
 ): { html: string; next: number } {
   const attrs = parseAttrs(lines[start])
-  let html = `<section style="margin:48px 0px 28px;width:677px;max-width:100%;box-sizing:border-box;overflow:hidden;text-align:center;padding:32px 24px;border-radius:14px;background:rgba(${t.rgb},0.05);border:1px dashed rgba(229,231,235,0.9)">`
+  let html = `<section style="margin:${spacing[15]} 0px ${spacing[11]};width:677px;max-width:100%;box-sizing:border-box;overflow:hidden;text-align:center;padding:${spacing[13]} ${spacing[9]};border-radius:${radius['3xl']};background:rgba(${t.rgb},0.05);border:1px dashed ${neutral.gray250}">`
   if (attrs.title)
-    html += `<p style="margin:0px 0px 20px;font-size:16px;font-weight:800;color:rgb(30,41,59);line-height:1.6">${leaf(attrs.title)}</p>`
-  html += `<section style="margin:0px 0px 14px;text-align:center;font-size:0px;line-height:1;color:${t.accent}">`
-  html += `<span style="display:inline-block;margin:0px 10px;width:28px;height:28px;vertical-align:middle"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" fill="currentColor"></path></svg></span>`
-  html += `<span style="display:inline-block;margin:0px 10px;width:28px;height:28px;vertical-align:middle"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path></svg></span>`
-  html += `<span style="display:inline-block;margin:0px 10px;width:28px;height:28px;vertical-align:middle"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M11.7333 8.26667V4L19.2 11.4667L11.7333 18.9333V14.5778C5.33333 14.5778 2.31111 18.2222 1.6 22.2222C2.84444 16.8889 6.22222 11.5556 11.7333 8.26667Z" fill="currentColor"></path></svg></span>`
+    html += `<p style="margin:0px 0px ${spacing[8]};font-size:${fontSize.xl};font-weight:${fontWeight.extrabold};color:${neutral.gray850};line-height:${lineHeight.loose}">${leaf(attrs.title)}</p>`
+  html += `<section style="margin:0px 0px ${spacing[6]};text-align:center;font-size:0px;line-height:1;color:${t.accent}">`
+  html += `<span style="display:inline-block;margin:0px ${spacing[5]};width:28px;height:28px;vertical-align:middle"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" fill="currentColor"></path></svg></span>`
+  html += `<span style="display:inline-block;margin:0px ${spacing[5]};width:28px;height:28px;vertical-align:middle"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"></path></svg></span>`
+  html += `<span style="display:inline-block;margin:0px ${spacing[5]};width:28px;height:28px;vertical-align:middle"><svg viewBox="0 0 24 24" width="28" height="28" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M11.7333 8.26667V4L19.2 11.4667L11.7333 18.9333V14.5778C5.33333 14.5778 2.31111 18.2222 1.6 22.2222C2.84444 16.8889 6.22222 11.5556 11.7333 8.26667Z" fill="currentColor"></path></svg></span>`
   html += `</section>`
-  html += `<p style="margin:0px 0px 4px;font-size:10px;color:${t.accent};font-weight:800;letter-spacing:2px;text-transform:uppercase">${leaf('点赞 · 推荐 · 转发')}</p>`
-  html += `<p style="font-size:10px;color:rgb(203,213,225);letter-spacing:1px;margin:0px">${leaf(attrs.label || 'THANKS FOR READING')}</p>`
+  html += `<p style="margin:0px 0px ${spacing[1]};font-size:${fontSize['2xs']};color:${t.accent};font-weight:${fontWeight.extrabold};letter-spacing:${letterSpacing['2xl']};text-transform:uppercase">${leaf('点赞 · 推荐 · 转发')}</p>`
+  html += `<p style="font-size:${fontSize['2xs']};color:${neutral.gray400};letter-spacing:${letterSpacing.widest};margin:0px">${leaf(attrs.label || 'THANKS FOR READING')}</p>`
   html += `</section>`
   return { html, next: start + 1 }
 }
@@ -331,9 +332,9 @@ export function parseGallery(lines: string[], start: number): { html: string; ne
     imgs.push({ alt: m[1], src: m[2] })
   }
   i++
-  let html = `<section style="white-space:nowrap;overflow-x:auto;margin:12px 0px;padding:4px 0px">`
+  let html = `<section style="white-space:nowrap;overflow-x:auto;margin:${spacing[5]} 0px;padding:${spacing[1]} 0px">`
   imgs.forEach((img) => {
-    html += `<img src="${esc(img.src)}" alt="${esc(img.alt)}" style="display:inline-block;vertical-align:top;max-height:200px;border-radius:8px;margin-right:8px">`
+    html += `<img src="${esc(img.src)}" alt="${esc(img.alt)}" style="display:inline-block;vertical-align:top;max-height:200px;border-radius:${radius.lg};margin-right:${spacing[3]}">`
   })
   html += `</section>`
   return { html, next: i }

@@ -39,7 +39,6 @@ interface CardModeProps {
   setMarkdown: (markdown: string) => void;
   colors: ThemeColors;
   platform: CardPlatform;
-  setPlatform: (platform: CardPlatform) => void;
   onToast: (message: string) => void;
 }
 
@@ -59,7 +58,6 @@ export function CardMode({
   setMarkdown,
   colors,
   platform,
-  setPlatform,
   onToast,
 }: CardModeProps) {
   const [aspect, setAspect] = useState<XhsAspect>("3:4");
@@ -264,7 +262,7 @@ export function CardMode({
   };
 
   const handleCopyGuide = async () => {
-    const ok = await copyText(buildCardAiGuide(platform, aspect));
+    const ok = await copyText(buildCardAiGuide(aspect));
     onToast(ok ? "已复制图文卡片排版指令，可发给 AI 使用" : "复制失败，请重试");
   };
 

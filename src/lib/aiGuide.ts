@@ -262,7 +262,7 @@ export function buildDocumentAiGuide(): string {
   ].join("\n");
 }
 
-export function buildCardAiGuide(platform: string, aspect: string): string {
+export function buildCardAiGuide(aspect: string): string {
   const platformName = "小红书";
   return [
     `# ${platformName}图文卡片 Markdown 生成指令`,

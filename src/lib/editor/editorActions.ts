@@ -4,7 +4,6 @@ import { EditorView } from '@uiw/react-codemirror'
 export const toggleInlineFormat = (view: EditorView, marker: string): boolean => {
   const { state } = view
   const { from, to } = state.selection.main
-  const len = marker.length
   const selected = state.sliceDoc(from, to)
 
   // 检测选中文本自身是否被 marker 包裹 (特例：如果是包裹 <lead> 这样的非对称标签，这里目前只处理对称标记如 ** 或 ::)

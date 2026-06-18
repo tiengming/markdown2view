@@ -1,6 +1,7 @@
 import type { ThemeColors } from '../composables/useTheme'
 import { esc, leaf, lightenHex, pangu } from './helpers'
 import { localImageUrls } from '@/lib/editor/imageStorage'
+import { color, fontSize, fontWeight, neutral, radius, spacing } from '../tokens'
 
 export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<string, string>): string {
   // 中英文/数字自动加空格：先保护行内代码与链接/图片 URL，避免破坏代码与网址
@@ -20,13 +21,13 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
   text = text.replace(
     /__FN_(\d+)__\|([^|]+)\|/g,
     (_m, p1: string, label: string) =>
-      `<span style="color:${t.accent};text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px;cursor:pointer">${leaf(label)}</span><sup style="color:${t.accent};font-size:0.75em;font-weight:600">[${parseInt(p1) + 1}]</sup>`,
+      `<span style="color:${t.accent};text-decoration:underline;text-decoration-style:dashed;text-underline-offset:3px;cursor:pointer">${leaf(label)}</span><sup style="color:${t.accent};font-size:0.75em;font-weight:${fontWeight.semibold}">[${parseInt(p1) + 1}]</sup>`,
   )
   // 兼容没有显示文字的格式
   text = text.replace(
     /__FN_(\d+)__/g,
     (_m, p1: string) =>
-      `<sup style="color:${t.accent};font-weight:600;cursor:pointer">[${parseInt(p1) + 1}]</sup>`,
+      `<sup style="color:${t.accent};font-weight:${fontWeight.semibold};cursor:pointer">[${parseInt(p1) + 1}]</sup>`,
   )
 
   // `行内代码` — 先用占位符隔离，避免内部 $...$ / ** / ^ / ~ 等被后续正则误匹配
@@ -35,7 +36,7 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
     /`([^`]+)`/g,
     (_m, p1: string) => {
       const idx = codeStore.length
-      codeStore.push(`<code style="background:#f0f0f5;padding:2px 6px;border-radius:4px;font-size:13px;font-family:SF Mono,Consolas,monospace;color:#e83e8c">${leaf(p1)}</code>`)
+      codeStore.push(`<code style="background:${neutral.gray100};padding:${spacing[0]} ${spacing[2]};border-radius:${radius.sm};font-size:${fontSize.base};font-family:SF Mono,Consolas,monospace;color:#e83e8c">${leaf(p1)}</code>`)
       return `\x00CODE_${idx}\x00`
     },
   )
@@ -49,7 +50,7 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
         const svg = formulaMap.get(`i:${formula}`)
         if (svg) return svg
         // 降级：显示公式原文
-        return `<code style="font-style:italic;background:#f3f4f6;padding:1px 4px;border-radius:3px">${esc(formula)}</code>`
+        return `<code style="font-style:italic;background:${neutral.gray100};padding:1px 4px;border-radius:${radius.sm}">${esc(formula)}</code>`
       },
     )
   }
@@ -58,13 +59,13 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
   text = text.replace(
     /==([^=]+)==/g,
     (_m, p1: string) =>
-      `<span style="background:linear-gradient(120deg,rgba(${t.rgb},0.1) 0%,rgba(${t.rgb},0.16) 100%);padding:0px 6px;border-radius:4px;font-weight:700;color:${t.accent}">${leaf(p1)}</span>`,
+      `<span style="background:linear-gradient(120deg,rgba(${t.rgb},0.1) 0%,rgba(${t.rgb},0.16) 100%);padding:0px ${spacing[2]};border-radius:${radius.sm};font-weight:${fontWeight.bold};color:${t.accent}">${leaf(p1)}</span>`,
   )
   // !!胶囊文字!!
   text = text.replace(
     /!!([^!]+)!!/g,
     (_m, p1: string) =>
-      `<span style="display:inline-block;padding:0 5px;border-radius:20px;font-size:14px;font-weight:600;background:${t.light};color:${t.accent};border:1px solid ${t.border}">${leaf(p1)}</span>`,
+      `<span style="display:inline-block;padding:0 ${spacing[2]};border-radius:20px;font-size:${fontSize.md};font-weight:${fontWeight.semibold};background:${t.light};color:${t.accent};border:1px solid ${t.border}">${leaf(p1)}</span>`,
   )
   // ^^加重强调^^
   text = text.replace(
@@ -74,7 +75,7 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
   // ::柔光重点::
   text = text.replace(/::([^:]+)::/g, (_m, p1: string) => {
     const light = lightenHex(t.accent, 0.15)
-    return `<span style="color:${light};font-weight:700">${leaf(p1)}</span>`
+    return `<span style="color:${light};font-weight:${fontWeight.bold}">${leaf(p1)}</span>`
   })
   // __下划线__
   text = text.replace(
@@ -85,14 +86,14 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
   // ~~删除线~~
   text = text.replace(
     /~~([^~]+)~~/g,
-    (_m, p1: string) => `<del style="color:#9ca3af">${leaf(p1)}</del>`,
+    (_m, p1: string) => `<del style="color:${neutral.gray500}">${leaf(p1)}</del>`,
   )
   // ~下标~
   text = text.replace(/~([^~]+)~/g, (_m, p1: string) => `<sub>${leaf(p1)}</sub>`)
   // ^上标^
   text = text.replace(/\^([^^]+)\^/g, (_m, p1: string) => `<sup>${leaf(p1)}</sup>`)
   // **粗体**
-  text = text.replace(/\*\*([^*]+)\*\*/g, (_m, p1: string) => `<strong style="font-weight:800;color:rgb(17,24,39)">${leaf(p1)}</strong>`)
+  text = text.replace(/\*\*([^*]+)\*\*/g, (_m, p1: string) => `<strong style="font-weight:${fontWeight.extrabold};color:${color.textPrimary}">${leaf(p1)}</strong>`)
   // *斜体*
   text = text.replace(/\*([^*]+)\*/g, (_m, p1: string) => `<em>${leaf(p1)}</em>`)
 
@@ -109,9 +110,9 @@ export function inlineFormat(text: string, t: ThemeColors, formulaMap?: Map<stri
         const parts = size.split(/\s+/)
         const w = parts[0] || '100%'
         const h = parts[1] || '250px'
-        return `<img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="width:${w};max-height:${h};border-radius:6px;display:block">`
+        return `<img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="width:${w};max-height:${h};border-radius:${radius.md};display:block">`
       }
-      return `<img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="max-width:100%;border-radius:6px;display:block">`
+      return `<img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="max-width:100%;border-radius:${radius.md};display:block">`
     },
   )
   // 链接 [text](url)

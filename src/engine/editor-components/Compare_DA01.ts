@@ -22,6 +22,7 @@
 import { leaf, esc } from '@engine/utils/helpers'
 import { resolveColor } from '@engine/utils/colorUtils'
 import type { ThemeColors } from '@engine/composables/useTheme'
+import { color, fontSize, fontWeight, letterSpacing, lineHeight, neutral, radius, spacing } from '@engine/tokens'
 
 export const Compare_DA01 = {
   id: 'Compare_DA01',
@@ -49,7 +50,7 @@ export const Compare_DA01 = {
 </left>
 <right>
 新版采用全新设计语言
-![新版](https://picsum.photos/400/120?random=4)[100% 120px]
+![新版](https://picsum.photos/400/120?random=4)
 用户体验大幅提升
 </right>
 </compare>`,
@@ -81,19 +82,17 @@ export const Compare_DA01 = {
       return lines
         .map((line) => {
           const trimmed = line.trim()
-          // 图片行
           const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)(?:\[([^\]]+)\])?$/)
           if (imgMatch) {
             const [, alt, src, size] = imgMatch
             if (size) {
               const parts = size.split(/\s+/)
-              return `<img src="${esc(src)}" alt="${esc(alt)}" style="width:${parts[0] || '100%'};max-height:${parts[1] || '120px'};border-radius:6px;display:block;margin:6px 0">`
+              return `<img src="${esc(src)}" alt="${esc(alt)}" style="width:${parts[0] || '100%'};max-height:${parts[1] || '120px'};border-radius:${radius.md};display:block;margin:${spacing[1]} 0">`
             }
-            return `<img src="${esc(src)}" alt="${esc(alt)}" style="width:100%;max-height:120px;border-radius:6px;display:block;margin:6px 0">`
+            return `<img src="${esc(src)}" alt="${esc(alt)}" style="width:100%;max-height:120px;border-radius:${radius.md};display:block;margin:${spacing[1]} 0">`
           }
-          // 文字行
           const rendered = inlineRenderer ? inlineRenderer(trimmed) : leaf(trimmed)
-          return `<p style="margin:4px 0;font-size:14px;color:rgb(100,116,139);line-height:1.6">${rendered}</p>`
+          return `<p style="margin:${spacing[1]} 0;font-size:${fontSize.md};color:${color.inkMuted};line-height:${lineHeight.relaxed}">${rendered}</p>`
         })
         .join('')
     }
@@ -106,21 +105,21 @@ export const Compare_DA01 = {
     ): string => {
       let html = ''
       if (label) {
-        html += `<p style="margin:0px 0px 4px;font-size:10px;font-weight:700;color:${labelColor};letter-spacing:2px">${leaf(label)}</p>`
+        html += `<p style="margin:0px 0px ${spacing[1]};font-size:${fontSize['2xs']};font-weight:${fontWeight.bold};color:${labelColor};letter-spacing:${letterSpacing['2xl']}">${leaf(label)}</p>`
       }
       if (title) {
-        html += `<p style="margin:0px 0px 8px;font-size:14px;font-weight:700;color:rgb(51,65,85)">${leaf(title)}</p>`
+        html += `<p style="margin:0px 0px ${spacing[3]};font-size:${fontSize.md};font-weight:${fontWeight.bold};color:${color.textTertiary}">${leaf(title)}</p>`
       }
       html += renderContent(content)
       return html
     }
 
+    const cardStyle = `padding:${spacing[7]};background:${neutral.gray50};border-radius:${radius['2xl']}`
+
     if (isVertical) {
-      // ── 竖向布局 ──
-      return `<section style="display:flex;flex-direction:column;gap:12px;margin:20px 0px"><section style="padding:16px;background:rgb(250,251,254);border-radius:12px">${renderSide(attrs['left-label'] || '', attrs['left-title'] || '', left, 'rgb(153,153,153)')}</section><section style="padding:16px;background:rgb(250,251,254);border-radius:12px">${renderSide(attrs['right-label'] || '', attrs['right-title'] || '', right, hex)}</section></section>`
+      return `<section style="display:flex;flex-direction:column;gap:${spacing[5]};margin:${spacing[9]} 0px"><section style="${cardStyle}">${renderSide(attrs['left-label'] || '', attrs['left-title'] || '', left, neutral.gray500)}</section><section style="${cardStyle}">${renderSide(attrs['right-label'] || '', attrs['right-title'] || '', right, hex)}</section></section>`
     }
 
-    // ── 横向布局（默认）──
-    return `<section style="display:flex;gap:16px;margin:20px 0px"><section style="flex:1;min-width:0;padding:16px;background:rgb(250,251,254);border-radius:12px">${renderSide(attrs['left-label'] || '', attrs['left-title'] || '', left, 'rgb(153,153,153)')}</section><section style="flex:1;min-width:0;padding:16px;background:rgb(250,251,254);border-radius:12px">${renderSide(attrs['right-label'] || '', attrs['right-title'] || '', right, hex)}</section></section>`
+    return `<section style="display:flex;gap:${spacing[7]};margin:${spacing[9]} 0px"><section style="flex:1;min-width:0;${cardStyle}">${renderSide(attrs['left-label'] || '', attrs['left-title'] || '', left, neutral.gray500)}</section><section style="flex:1;min-width:0;${cardStyle}">${renderSide(attrs['right-label'] || '', attrs['right-title'] || '', right, hex)}</section></section>`
   },
 }

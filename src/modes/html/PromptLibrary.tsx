@@ -67,7 +67,7 @@ const NON_HTML_BUILTIN_PROMPTS: Record<string, DesignStyle[]> = {
       visualTone: '科技',
       family: 'sans-serif',
       displayLevel: 'primary',
-      style: buildCardAiGuide('小红书', '3:4'),
+      style: buildCardAiGuide('3:4'),
       previewHtml: '<div style="padding: 20px; font-family: sans-serif; font-size: 14px; color: #333; line-height: 1.6; max-width: 250px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 333px; border-bottom: 4px solid #ff2442;"> <h1 style="font-size: 20px; margin-bottom: 8px; color: #ff2442; text-align: center;">吸睛大标题</h1> <p style="text-align: center; color: #666;">直击痛点的短文案</p> </div>',
     }
   ]

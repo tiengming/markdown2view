@@ -13,6 +13,11 @@ import sql from 'highlight.js/lib/languages/sql'
 import typescript from 'highlight.js/lib/languages/typescript'
 import xml from 'highlight.js/lib/languages/xml'
 import { esc } from './helpers'
+import { fontSize, lineHeight, radius, spacing } from '../tokens'
+
+// 代码块容器专用颜色（暗色 one-dark 主题，独立于正文语义 token）
+const CODE_BG = '#1e1e2e'
+const CODE_FG = '#cdd6f4'
 
 hljs.registerLanguage('bash', bash)
 hljs.registerLanguage('cpp', cpp)
@@ -93,5 +98,5 @@ export function renderCodeBlock(code: string, lang = 'text'): string {
   const language = lang.trim() || 'text'
   const highlighted = inlineHighlight(code.trimEnd(), language)
 
-  return `<section data-block="code" style="background:rgb(30,30,46);color:rgb(205,214,244);padding:14px 16px;border-radius:8px;overflow:hidden;margin:14px 0px;font-size:12.5px;line-height:1.6"><pre data-lang="${esc(language)}" style="margin:0px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font-family:SFMono-Regular,Consolas,Monaco,monospace"><code style="background:none;color:inherit;padding:0;font-size:inherit;font-family:inherit;white-space:inherit;overflow-wrap:inherit;word-break:inherit">${highlighted || '&nbsp;'}</code></pre></section>`
+  return `<section data-block="code" style="background:${CODE_BG};color:${CODE_FG};padding:${spacing[6]} ${spacing[7]};border-radius:${radius.lg};overflow:hidden;margin:${spacing[6]} 0px;font-size:${fontSize.sm};line-height:${lineHeight.relaxed}"><pre data-lang="${esc(language)}" style="margin:0px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font-family:SFMono-Regular,Consolas,Monaco,monospace"><code style="background:none;color:inherit;padding:0;font-size:inherit;font-family:inherit;white-space:inherit;overflow-wrap:inherit;word-break:inherit">${highlighted || '&nbsp;'}</code></pre></section>`
 }

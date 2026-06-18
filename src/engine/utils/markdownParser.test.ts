@@ -10,7 +10,7 @@ describe('parseMarkdown - Caption parsing', () => {
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-image"')
     expect(html).toContain('data-caption-kind="image"')
-    expect(html).toContain('margin:8px 0px 16px')
+    expect(html).toContain('margin:10px 0px 16px')
     expect(html).toContain('这是图片题注')
   })
 
@@ -19,7 +19,7 @@ describe('parseMarkdown - Caption parsing', () => {
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-table"')
     expect(html).toContain('data-caption-kind="table"')
-    expect(html).toContain('margin:16px 0px 8px')
+    expect(html).toContain('margin:16px 0px 10px')
     expect(html).toContain('这是表格题注')
   })
 
@@ -35,19 +35,19 @@ describe('parseMarkdown - Caption parsing', () => {
     const md1 = '![img](url)\nFig. 1 - Figure caption'
     const html1 = parseMarkdown(md1, colors)
     expect(html1).toContain('class="document-caption document-caption-image"')
-    expect(html1).toContain('margin:8px 0px 16px')
+    expect(html1).toContain('margin:10px 0px 16px')
     
     const md2 = 'Table 10 Example table\n| col1 | col2 |\n| --- | --- |\n'
     const html2 = parseMarkdown(md2, colors)
     expect(html2).toContain('class="document-caption document-caption-table"')
-    expect(html2).toContain('margin:16px 0px 8px')
+    expect(html2).toContain('margin:16px 0px 10px')
   })
 
   it('should parse Chinese numeric captions correctly with image above', () => {
     const md = '![img](url)\n图 十一. 图片题注'
     const html = parseMarkdown(md, colors)
     expect(html).toContain('class="document-caption document-caption-image"')
-    expect(html).toContain('margin:8px 0px 16px')
+    expect(html).toContain('margin:10px 0px 16px')
     expect(html).toContain('图片题注')
   })
 

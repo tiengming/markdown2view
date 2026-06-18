@@ -3,6 +3,7 @@ import { esc, leaf, parseAttrs } from './helpers'
 import { inlineFormat } from './inlineFormat'
 import { renderCodeBlock } from './codeBlock'
 import { localImageUrls } from '@/lib/editor/imageStorage'
+import { color, fontSize, fontWeight, letterSpacing, lineHeight, neutral, radius, shadowRaw, spacing } from '../tokens'
 import {
   parseCtaBlock,
   parseCtaInline,
@@ -156,7 +157,7 @@ const separatorRenderer: BlockRenderer = {
   name: 'separator',
   match: (line) => /^---+\s*$/.test(line.trim()),
   render: (_ctx, _line, _lines, i) => ({
-    html: `<section style="border:none;height:1px;background:linear-gradient(90deg,transparent,rgb(221,221,221),transparent);margin:24px 0px"></section>`,
+    html: `<section style="border:none;height:1px;background:linear-gradient(90deg,transparent,${neutral.gray350},transparent);margin:${spacing[10]} 0px"></section>`,
     next: i + 1,
   }),
 }
@@ -260,22 +261,22 @@ const readingPathRenderer: BlockRenderer = {
     const { t, pTitleLevel1List } = ctx
     let html = ''
     if (pTitleLevel1List.length > 1) {
-      html += `<section style="margin:0px 0px 30px"><section>`
-      html += `<section style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:14px;gap:12px"><section style="flex-shrink:0"><p style="margin:0px;padding:0px 0px 6px;font-size:10px;color:rgb(100,116,139);text-transform:uppercase;letter-spacing:2.8px;font-weight:800;white-space:nowrap">${leaf('READING PATH')}</p><p style="margin:0px;font-size:16px;line-height:1.35;color:rgb(17,24,39);font-weight:800">${leaf('阅读路线')}</p></section><p style="margin:0px;font-size:10px;color:rgb(148,163,184);white-space:nowrap">${leaf(pTitleLevel1List.length + ' 个章节')}</p></section>`
-      html += `<section style="padding:14px 12px 12px;border:1px solid rgb(229,231,235);border-radius:13px;background:linear-gradient(rgb(255,255,255) 0%,rgb(248,250,252) 100%);box-shadow:rgba(15,23,42,0.04) 0px 12px 30px;overflow-x:auto;white-space:nowrap;font-size:0px">`
+      html += `<section style="margin:0px 0px ${spacing[12]}"><section>`
+      html += `<section style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:${spacing[6]};gap:${spacing[5]}"><section style="flex-shrink:0"><p style="margin:0px;padding:0px 0px ${spacing[2]};font-size:${fontSize['2xs']};color:${color.inkMuted};text-transform:uppercase;letter-spacing:${letterSpacing['4xl']};font-weight:${fontWeight.extrabold};white-space:nowrap">${leaf('READING PATH')}</p><p style="margin:0px;font-size:${fontSize.xl};line-height:${lineHeight.snug};color:${color.textPrimary};font-weight:${fontWeight.extrabold}">${leaf('阅读路线')}</p></section><p style="margin:0px;font-size:${fontSize['2xs']};color:${color.inkFaint};white-space:nowrap">${leaf(pTitleLevel1List.length + ' 个章节')}</p></section>`
+      html += `<section style="padding:${spacing[6]} ${spacing[5]} ${spacing[5]};border:1px solid ${neutral.gray250};border-radius:${radius['3xl']};background:linear-gradient(${color.surface} 0%,${neutral.gray100} 100%);${shadowRaw.cardHover};overflow-x:auto;white-space:nowrap;font-size:0px">`
       pTitleLevel1List.forEach((item, idx) => {
         const label = item.title.replace(/::.*/, '').trim().replace(/^\d+\s*/, '')
         const num = item.num || String(idx + 1).padStart(2, '0')
         const isActive = idx === 0
         html += `<section style="display:inline-flex;vertical-align:middle;align-items:center">`
         html += `<section style="display:inline-block;vertical-align:top;width:126px;white-space:normal;text-align:center">`
-        html += `<section style="display:flex;justify-content:center;margin-bottom:10px">`
-        html += `<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:999px;background:${isActive ? t.accent : 'rgb(255,255,255)'};color:${isActive ? 'rgb(255,255,255)' : 'rgb(17,24,39)'};border:1px solid ${isActive ? t.accent : 'rgb(219,227,238)'};font-size:11px;font-weight:900;letter-spacing:1.2px;white-space:nowrap">${leaf(num)}</span>`
+        html += `<section style="display:flex;justify-content:center;margin-bottom:${spacing[4]}">`
+        html += `<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:${radius.full};background:${isActive ? t.accent : color.surface};color:${isActive ? color.surface : color.textPrimary};border:1px solid ${isActive ? t.accent : '#dbe3ee'};font-size:${fontSize.xs};font-weight:${fontWeight.black};letter-spacing:${letterSpacing.xl};white-space:nowrap">${leaf(num)}</span>`
         html += `</section>`
-        html += `<p style="margin:0px;font-size:13px;line-height:1.55;color:${isActive ? 'rgb(17,24,39)' : 'rgb(31,41,55)'};font-weight:800;letter-spacing:0.05px;white-space:normal;word-break:break-all">${leaf(label)}</p>`
+        html += `<p style="margin:0px;font-size:${fontSize.base};line-height:1.55;color:${isActive ? color.textPrimary : color.inkStrong};font-weight:${fontWeight.extrabold};letter-spacing:${letterSpacing.normal};white-space:normal;word-break:break-all">${leaf(label)}</p>`
         html += `</section>`
         if (idx < pTitleLevel1List.length - 1) {
-          html += `<span style="display:inline-block;vertical-align:middle;width:32px;height:1px;line-height:1px;margin:0px 8px;background:linear-gradient(90deg,rgba(148,163,184,0.35),rgba(148,163,184,0.85));color:transparent;overflow:hidden">${leaf('-')}</span>`
+          html += `<span style="display:inline-block;vertical-align:middle;width:32px;height:1px;line-height:1px;margin:0px ${spacing[3]};background:linear-gradient(90deg,${neutral.gray500}59,${neutral.gray500}d9);color:transparent;overflow:hidden">${leaf('-')}</span>`
         }
         html += `</section>`
       })
@@ -365,9 +366,9 @@ const quoteRenderer: BlockRenderer = {
       ql.push(lines[j].replace(/^>\s?/, ''))
       j++
     }
-    let html = `<section style="margin:14px 0px;padding:12px 16px;background:rgb(247,248,252);border-left:3px solid ${t.accent};border-radius:0px 6px 6px 0px;color:rgb(85,85,85);font-size:16px">`
+    let html = `<section style="margin:${spacing[6]} 0px;padding:${spacing[5]} ${spacing[7]};background:${neutral.gray150};border-left:3px solid ${t.accent};border-radius:0px ${radius.md} ${radius.md} 0px;color:${neutral.gray700};font-size:${fontSize.xl}">`
     ql.forEach((l) => {
-      html += `<section><p style="margin:4px 0px;line-height:1.8;text-align:justify;letter-spacing:0.5px">${inlineFormat(l, t, formulaMap)}</p></section>`
+      html += `<section><p style="margin:${spacing[1]} 0px;line-height:${lineHeight.loosest};text-align:justify;letter-spacing:${letterSpacing.wider}">${inlineFormat(l, t, formulaMap)}</p></section>`
     })
     html += `</section>`
     return { html, next: j }
@@ -442,28 +443,28 @@ const headingRenderer: BlockRenderer = {
     const h1m = line.match(/^#\s+(.+)/)
     if (h1m) {
       return {
-        html: `<h1 style="margin:0px 0px 16px;font-size:24px;font-weight:700;color:rgb(17,24,39);line-height:1.4">${inlineFormat(h1m[1], t, formulaMap)}</h1>`,
+        html: `<h1 style="margin:0px 0px ${spacing[7]};font-size:${fontSize['6xl']};font-weight:${fontWeight.bold};color:${color.textPrimary};line-height:${lineHeight.normal}">${inlineFormat(h1m[1], t, formulaMap)}</h1>`,
         next: i + 1,
       }
     }
     const h2m = line.match(/^##\s+(.+)/)
     if (h2m) {
       return {
-        html: `<h2 style="margin:28px 0px 12px;font-size:20px;font-weight:700;color:rgb(17,24,39);line-height:1.4">${inlineFormat(h2m[1], t, formulaMap)}</h2>`,
+        html: `<h2 style="margin:${spacing[11]} 0px ${spacing[5]};font-size:${fontSize['4xl']};font-weight:${fontWeight.bold};color:${color.textPrimary};line-height:${lineHeight.normal}">${inlineFormat(h2m[1], t, formulaMap)}</h2>`,
         next: i + 1,
       }
     }
     const h3m = line.match(/^###\s+(.+)/)
     if (h3m) {
       return {
-        html: `<h3 style="margin:24px 0px 10px;font-size:17px;font-weight:700;color:rgb(31,41,55);line-height:1.4">${inlineFormat(h3m[1], t, formulaMap)}</h3>`,
+        html: `<h3 style="margin:${spacing[10]} 0px ${spacing[4]};font-size:${fontSize['2xl']};font-weight:${fontWeight.bold};color:${color.inkStrong};line-height:${lineHeight.normal}">${inlineFormat(h3m[1], t, formulaMap)}</h3>`,
         next: i + 1,
       }
     }
     const h4m = line.match(/^####\s+(.+)/)
     if (h4m) {
       return {
-        html: `<h4 style="margin:20px 0px 8px;font-size:15px;font-weight:700;color:rgb(55,65,81);line-height:1.4">${inlineFormat(h4m[1], t, formulaMap)}</h4>`,
+        html: `<h4 style="margin:${spacing[9]} 0px ${spacing[3]};font-size:${fontSize.lg};font-weight:${fontWeight.bold};color:${color.textQuaternary};line-height:${lineHeight.normal}">${inlineFormat(h4m[1], t, formulaMap)}</h4>`,
         next: i + 1,
       }
     }
@@ -481,13 +482,13 @@ const blockFormulaRenderer: BlockRenderer = {
         const svg = formulaMap.get(`b:${f}`)
         if (svg) return svg
       }
-      return `<code style="display:inline-block;background:#f3f4f6;padding:6px 12px;border-radius:6px;font-size:14px;font-family:SF Mono,Consolas,monospace;color:#e83e8c;max-width:100%;overflow-x:auto;white-space:nowrap">$$${esc(f)}$$</code>`
+      return `<code style="display:inline-block;background:${neutral.gray100};padding:${spacing[2]} ${spacing[5]};border-radius:${radius.md};font-size:${fontSize.md};font-family:SF Mono,Consolas,monospace;color:#e83e8c;max-width:100%;overflow-x:auto;white-space:nowrap">$$${esc(f)}$$</code>`
     }
     const singleMatch = line.match(/^\$\$(.+?)\$\$/)
     if (singleMatch) {
       const formula = singleMatch[1].trim()
       return {
-        html: `<section style="text-align:center;margin:24px 0;overflow-x:auto;color:#333">${resolveSvg(formula)}</section>`,
+        html: `<section style="text-align:center;margin:${spacing[10]} 0;overflow-x:auto;color:${neutral.gray1000}">${resolveSvg(formula)}</section>`,
         next: i + 1,
       }
     }
@@ -500,7 +501,7 @@ const blockFormulaRenderer: BlockRenderer = {
     if (j < lines.length) j++
     const formula = formulaLines.join('\n').trim()
     return {
-      html: `<section style="text-align:center;margin:24px 0;overflow-x:auto;color:#333">${resolveSvg(formula)}</section>`,
+      html: `<section style="text-align:center;margin:${spacing[10]} 0;overflow-x:auto;color:${neutral.gray1000}">${resolveSvg(formula)}</section>`,
       next: j,
     }
   },
@@ -524,9 +525,9 @@ const codeBlockRenderer: BlockRenderer = {
       const source = code.replace(/\s+$/, '')
       const entry = mermaidMap?.get(`m:${source}`)
       if (entry?.svg) {
-        html += `<section data-block="mermaid" style="max-width:100%;margin:16px auto;text-align:center;break-inside:avoid"><div class="m2v-mermaid-figure" style="width:100%;max-width:100%;max-height:var(--m2v-mermaid-max-height,none);overflow:hidden">${entry.svg}</div></section>`
+        html += `<section data-block="mermaid" style="max-width:100%;margin:${spacing[7]} auto;text-align:center;break-inside:avoid"><div class="m2v-mermaid-figure" style="width:100%;max-width:100%;max-height:var(--m2v-mermaid-max-height,none);overflow:hidden">${entry.svg}</div></section>`
       } else if (entry?.error) {
-        html += `<section data-block="mermaid-error" style="background:rgb(254,242,242);border-left:3px solid rgb(220,80,80);padding:10px 14px;margin:14px 0;font-size:12.5px;color:rgb(120,30,30)">图表渲染失败：${esc(entry.error)}</section>`
+        html += `<section data-block="mermaid-error" style="background:${color.errorBg};border-left:3px solid ${color.errorBorder};padding:${spacing[4]} ${spacing[6]};margin:${spacing[6]} 0;font-size:${fontSize.sm};color:${color.errorText}">图表渲染失败：${esc(entry.error)}</section>`
         html += renderCodeBlock(code, 'mermaid')
       } else {
         html += renderCodeBlock(code, 'mermaid')
@@ -562,17 +563,17 @@ const tableRenderer: BlockRenderer = {
     }
     let html = ''
     if (isContinuation) {
-      html += `<section style="margin:0px 0px 10px;text-align:center;font-size:12px;color:rgb(100,116,139);font-style:italic">（续表）</section>`
+      html += `<section style="margin:0px 0px ${spacing[4]};text-align:center;font-size:${fontSize.sm};color:${color.inkMuted};font-style:italic">（续表）</section>`
     }
-    html += `<section style="margin:0px 0px 30px;display:flex;justify-content:center;width:100%"><section style="box-shadow:rgba(15,23,42,0.05) 0px 10px 24px;border-radius:12px;border:1px solid rgba(229,231,235,0.9);overflow:hidden;background:#ffffff;max-width:100%;width:max-content"><section style="padding:16px;background:#ffffff"><section class="tableWrapper"><table style="border-collapse:collapse;table-layout:auto;width:100%;border:1px solid rgb(226,232,240)"><thead><tr style="background-color:rgb(248,250,252)">`
+    html += `<section style="margin:0px 0px ${spacing[12]};display:flex;justify-content:center;width:100%"><section style="${shadowRaw.card};border-radius:${radius['2xl']};border:1px solid ${neutral.gray250};overflow:hidden;background:${color.surface};max-width:100%;width:max-content"><section style="padding:${spacing[7]};background:${color.surface}"><section class="tableWrapper"><table style="border-collapse:collapse;table-layout:auto;width:100%;border:1px solid ${neutral.gray300}"><thead><tr style="background-color:${neutral.gray100}">`
     headers.forEach((h) => {
-      html += `<th valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;font-weight:700;color:rgb(51,65,85)">${inlineFormat(h, t, formulaMap) || '&nbsp;'}</th>`
+      html += `<th valign="top" align="left" style="vertical-align:top;border:1px solid ${neutral.gray300};padding:${spacing[4]} ${spacing[6]};text-align:left;font-size:${fontSize.base};font-weight:${fontWeight.bold};color:${color.textTertiary}">${inlineFormat(h, t, formulaMap) || '&nbsp;'}</th>`
     })
     html += `</tr></thead><tbody>`
     rows.forEach((r) => {
       html += `<tr>`
       r.forEach((c) => {
-        html += `<td valign="top" align="left" style="vertical-align:top;border:1px solid rgb(226,232,240);padding:10px 14px;text-align:left;font-size:13px;color:rgb(51,65,85)">${inlineFormat(c, t, formulaMap) || '&nbsp;'}</td>`
+        html += `<td valign="top" align="left" style="vertical-align:top;border:1px solid ${neutral.gray300};padding:${spacing[4]} ${spacing[6]};text-align:left;font-size:${fontSize.base};color:${color.textTertiary}">${inlineFormat(c, t, formulaMap) || '&nbsp;'}</td>`
       })
       html += `</tr>`
     })
@@ -587,19 +588,19 @@ const unorderedListRenderer: BlockRenderer = {
   render: (ctx, _line, lines, i) => {
     const { t, formulaMap } = ctx
     let j = i
-    let html = `<section style="margin:10px 0px;padding-left:24px">`
+    let html = `<section style="margin:${spacing[4]} 0px;padding-left:${spacing[9]}">`
     while (j < lines.length && /^\s*[-*+]\s/.test(lines[j])) {
       const li = lines[j].replace(/^\s*[-*+]\s/, '')
       const cb = li.match(/^\[([ x])\]\s*(.*)/)
       if (cb) {
         const isChecked = cb[1] === 'x'
-        const uncheckedBorder = t.border === '#e2e8f0' ? '#94a3b8' : t.border
+        const uncheckedBorder = t.border === color.borderDefault ? color.inkFaint : t.border
         const checkSvg = isChecked
           ? '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 9l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           : `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="${uncheckedBorder}" stroke-width="1.5" fill="none"/></svg>`
-        html += `<section style="margin:5px 0px"><span style="display:inline-flex;align-items:center;gap:8px"><span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;${isChecked ? `background:${t.accent};border-radius:4px` : ''}">${checkSvg}</span><span>${inlineFormat(cb[2], t, formulaMap)}</span></span></section>`
+        html += `<section style="margin:${spacing[1]} 0px"><span style="display:inline-flex;align-items:center;gap:${spacing[3]}"><span style="width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;${isChecked ? `background:${t.accent};border-radius:${radius.sm}` : ''}">${checkSvg}</span><span>${inlineFormat(cb[2], t, formulaMap)}</span></span></section>`
       } else {
-        html += `<section style="margin:5px 0px;line-height:1.8;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${t.accent};margin-right:10px;margin-top:10px;flex-shrink:0"></span><span style="flex:1">${inlineFormat(li, t, formulaMap)}</span></section>`
+        html += `<section style="margin:${spacing[1]} 0px;line-height:${lineHeight.loosest};letter-spacing:${letterSpacing.wider};display:flex;align-items:flex-start"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:${t.accent};margin-right:${spacing[5]};margin-top:${spacing[5]};flex-shrink:0"></span><span style="flex:1">${inlineFormat(li, t, formulaMap)}</span></section>`
       }
       j++
     }
@@ -614,12 +615,12 @@ const orderedListRenderer: BlockRenderer = {
   render: (ctx, _line, lines, i) => {
     const { t, formulaMap } = ctx
     let j = i
-    let html = `<section style="margin:10px 0px;padding-left:24px">`
+    let html = `<section style="margin:${spacing[4]} 0px;padding-left:${spacing[9]}">`
     while (j < lines.length && /^\s*\d+\.\s/.test(lines[j])) {
       const match = lines[j].match(/^\s*(\d+)\.\s/)
       const num = match ? match[1] : '1'
       const content = lines[j].replace(/^\s*\d+\.\s/, '')
-      html += `<section style="margin:5px 0px;line-height:1.8;letter-spacing:0.5px;display:flex;align-items:flex-start"><span style="color:${t.accent};font-weight:800;margin-right:8px;flex-shrink:0;min-width:16px">${num}.</span><span style="flex:1">${inlineFormat(content, t, formulaMap)}</span></section>`
+      html += `<section style="margin:${spacing[1]} 0px;line-height:${lineHeight.loosest};letter-spacing:${letterSpacing.wider};display:flex;align-items:flex-start"><span style="color:${t.accent};font-weight:${fontWeight.extrabold};margin-right:${spacing[3]};flex-shrink:0;min-width:16px">${num}.</span><span style="flex:1">${inlineFormat(content, t, formulaMap)}</span></section>`
       j++
     }
     html += `</section>`
@@ -642,9 +643,9 @@ const imageRenderer: BlockRenderer = {
     let html = ''
     if (size) {
       const parts = size.split(/\s+/)
-      html += `<section style="max-height:${parts[1] || '250px'};overflow-y:auto;border-radius:8px;margin:12px 0px;display:flex;justify-content:center"><img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="width:${parts[0] || '100%'};display:block;margin:0 auto"></section>`
+      html += `<section style="max-height:${parts[1] || '250px'};overflow-y:auto;border-radius:${radius.lg};margin:${spacing[5]} 0px;display:flex;justify-content:center"><img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="width:${parts[0] || '100%'};display:block;margin:0 auto"></section>`
     } else {
-      html += `<section style="margin:12px 0px;display:flex;justify-content:center"><img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="max-width:100%;border-radius:6px;display:block;margin:0 auto"></section>`
+      html += `<section style="margin:${spacing[5]} 0px;display:flex;justify-content:center"><img src="${esc(resolvedSrc)}" alt="${esc(alt)}" style="max-width:100%;border-radius:${radius.md};display:block;margin:0 auto"></section>`
     }
     return { html, next: i + 1 }
   },
@@ -694,10 +695,10 @@ const paragraphRenderer: BlockRenderer = {
         ? 'document-caption document-caption-table'
         : 'document-caption document-caption-image'
       const captionKind = isTableCaption ? 'table' : 'image'
-      const sectionStyle = isTableCaption ? 'margin:16px 0px 8px' : 'margin:8px 0px 16px'
-      html += `<section data-caption-kind="${captionKind}" style="${sectionStyle};display:flex;justify-content:center;width:100%"><p class="${captionClass}" style="margin:0px;font-size:13px;color:rgb(100,116,139);line-height:1.5;text-align:center;white-space:nowrap">${inlineFormat(trimmedLine, t, formulaMap)}</p></section>`
+      const sectionStyle = isTableCaption ? `margin:${spacing[7]} 0px ${spacing[4]}` : `margin:${spacing[4]} 0px ${spacing[7]}`
+      html += `<section data-caption-kind="${captionKind}" style="${sectionStyle};display:flex;justify-content:center;width:100%"><p class="${captionClass}" style="margin:0px;font-size:${fontSize.base};color:${color.inkMuted};line-height:${lineHeight.relaxed};text-align:center;white-space:nowrap">${inlineFormat(trimmedLine, t, formulaMap)}</p></section>`
     } else {
-      html += `<section style="margin:0px 0px 24px"><p style="margin:0px;font-size:16px;color:rgb(51,65,85);line-height:1.85;letter-spacing:0.5px;text-align:justify;overflow-wrap:break-word">${inlineFormat(line, t, formulaMap)}</p></section>`
+      html += `<section style="margin:0px 0px ${spacing[10]}"><p style="margin:0px;font-size:${fontSize.xl};color:${color.textTertiary};line-height:${lineHeight.document};letter-spacing:${letterSpacing.wider};text-align:justify;overflow-wrap:break-word">${inlineFormat(line, t, formulaMap)}</p></section>`
     }
     return { html, next: i + 1 }
   },

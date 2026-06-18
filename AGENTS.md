@@ -67,7 +67,7 @@
 * 面向项目维护者或后续 AI 代理的说明文档，优先使用中文。
 * 代码中的必要注释使用中文；仅在引用库 API、协议字段、命令参数或英文原文时保留英文。
 * 代码本身的变量名、函数名、文件名按技术栈惯例处理，不强行中文化。
-* 聊天记录素材会持续追加或更新，因此后续脚本和数据流程应支持增量处理、可重复运行和缓存复用。
+* Git的时候，也要使用中文说明。
 
 ## 2. 当前项目总目标
 
@@ -77,15 +77,16 @@
 
 * 总体实施规划（技术架构）：`docs/技术架构设计.md`
 * 技术路线图：`docs/技术路线图.md`
+* 设计指引：`DESIGN.md`
 * 项目使用 Skill：`.agent/skills/`（含 `awesome-design-md` 设计风格、`design-system`、`frontend-dev`、`vercel-react-best-practices`）
-* 参考项目：`r-markdown/`（公众号渲染引擎）、`html-anything/`（HTML 沙箱容器与导出层）
+* 参考项目：`public/vendor/r-markdown/`（公众号渲染引擎）、`public/vendor/html-anything/`（HTML 沙箱容器与导出层）
 
 核心要求：
 
 * 技术栈：React 18 + Vite + TypeScript + Tailwind；状态用 Zustand；编辑器用 CodeMirror 6。
 * AI 协作为「复制指令 → 外部 AI 生成 → 回填系统」的离线工作流，**不集成本地 CLI、不需要后端**。
-* 公众号渲染引擎从 `r-markdown` 原样移植（其引擎为框架无关的纯 TS）。
-* 导出能力（iframe→PNG 等）从 `html-anything/next/src/lib/export/` 移植。
+* 公众号渲染引擎从 `public/vendor/r-markdown` 原样移植（其引擎为框架无关的纯 TS）。
+* 导出能力（iframe→PNG 等）从 `public/vendor/html-anything/next/src/lib/export/` 移植。
 * 前端项目依赖统一记录在 `package.json`；不涉及 Python，故不创建 `requirements.txt`。
 
 ## 3. 执行经验与开发规范

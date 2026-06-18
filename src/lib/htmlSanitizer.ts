@@ -112,7 +112,7 @@ function sanitizeNode(
   const tagName = el.tagName.toLowerCase()
 
   // 严格模式下：丢弃 script 内容；宽松模式下：同样丢弃（script 无合法用途）
-  if (tagName === 'script') {
+  if (DANGEROUS_TAGS.has(tagName)) {
     return null
   }
 

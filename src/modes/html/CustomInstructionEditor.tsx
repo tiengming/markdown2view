@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { CustomInstruction, RenderMode } from '@/lib/store'
+import type { RenderMode } from '@/lib/store'
 import { useStore } from '@/lib/store'
 import { OUTPUT_TYPES, VISUAL_TONES, type OutputType, type VisualTone, type DesignStyle } from '@/data/designPrompts'
 

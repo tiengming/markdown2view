@@ -10,6 +10,7 @@
  */
 import type { ThemeColors } from '../composables/useTheme'
 import { esc, parseAttrs } from './helpers'
+import { color as globalColor, fontSize, fontWeight, letterSpacing, lineHeight, neutral, radius, spacing } from '../tokens'
 
 // ── 设计令牌（对齐公众号配图）──
 // 注意：强调色（accent）不写死，跟随 r-markdown 当前主题色（buildCover/内容图都用传入的 ThemeColors）。
@@ -205,7 +206,7 @@ function chipsHtml(chips: string[], t: ThemeColors): string {
   if (!chips.length) return ''
   let html = `<section style="margin:0px;font-size:0px;line-height:1.9">`
   chips.forEach((c) => {
-    html += `<span style="display:inline-block;margin:0px 8px 0px 0px;padding:3px 12px;border-radius:999px;border:1.5px solid ${t.border};background:${t.light};font-size:12px;font-weight:700;color:${t.dark};white-space:nowrap">${esc('#' + c)}</span>`
+    html += `<span style="display:inline-block;margin:0px ${spacing[3]} 0px 0px;padding:${spacing[1]} ${spacing[5]};border-radius:${radius.full};border:1.5px solid ${t.border};background:${t.light};font-size:${fontSize.sm};font-weight:${fontWeight.bold};color:${t.dark};white-space:nowrap">${esc('#' + c)}</span>`
   })
   html += `</section>`
   return html
@@ -228,36 +229,36 @@ export function buildCover(meta: XhsMeta, aspect: XhsAspect, t: ThemeColors, fon
 
   // 徽章（line-height + nowrap 确保圆角把 Day N 整个包住）
   if (meta.badge) {
-    html += `<section style="flex-shrink:0;margin:0px 0px 16px"><span style="display:inline-block;padding:6px 16px;border-radius:11px;background:${t.accent};color:#fff;font-size:15px;font-weight:800;line-height:1.3;letter-spacing:0.5px;white-space:nowrap;box-shadow:0 4px 12px ${t.accent}55">${esc(meta.badge)}</span></section>`
+    html += `<section style="flex-shrink:0;margin:0px 0px ${spacing[7]}"><span style="display:inline-block;padding:${spacing[2]} ${spacing[7]};border-radius:11px;background:${t.accent};color:${globalColor.surface};font-size:${fontSize.lg};font-weight:${fontWeight.extrabold};line-height:${lineHeight.snug};letter-spacing:${letterSpacing.wide};white-space:nowrap;box-shadow:0 4px 12px ${t.accent}55">${esc(meta.badge)}</span></section>`
   }
 
   // 标题 + 波浪线
-  html += `<h1 style="flex-shrink:0;margin:0px;font-size:34px;line-height:1.18;font-weight:900;letter-spacing:-0.5px;word-break:break-word">${titleHtml(meta.title, t.accent)}</h1>`
-  html += `<section style="flex-shrink:0;margin:8px 0px 14px">${swoosh(Math.min(contentW, 220), t.accent)}</section>`
+  html += `<h1 style="flex-shrink:0;margin:0px;font-size:${fontSize['9xl']};line-height:1.18;font-weight:${fontWeight.black};letter-spacing:${letterSpacing.tight};word-break:break-word">${titleHtml(meta.title, t.accent)}</h1>`
+  html += `<section style="flex-shrink:0;margin:${spacing[3]} 0px ${spacing[6]}">${swoosh(Math.min(contentW, 220), t.accent)}</section>`
 
   // 摘要：占满中间剩余空间，超出部分用底部渐变淡出（到最后消失）
   const teaser = meta.teaser || meta.summary
   if (teaser) {
-    html += `<section style="position:relative;flex:1 1 auto;min-height:0;overflow:hidden;margin:0px 0px 14px">`
-    html += `<p style="margin:0px;font-size:15.5px;line-height:1.75;color:${XHS.inkSoft};font-weight:500">${esc(teaser)}</p>`
+    html += `<section style="position:relative;flex:1 1 auto;min-height:0;overflow:hidden;margin:0px 0px ${spacing[6]}">`
+    html += `<p style="margin:0px;font-size:15.5px;line-height:1.75;color:${XHS.inkSoft};font-weight:${fontWeight.medium}">${esc(teaser)}</p>`
     html += `<section style="position:absolute;left:0px;right:0px;bottom:0px;height:56px;background:linear-gradient(to bottom,rgba(247,242,232,0),${XHS.bg})"></section>`
     html += `</section>`
   }
 
   // 黑色高亮条（可选 hook）
   if (meta.hook) {
-    html += `<section style="flex-shrink:0;margin:0px 0px 12px"><span style="display:inline-block;padding:8px 16px;border-radius:12px;background:${XHS.ink};color:#fff;font-size:15px;font-weight:800;line-height:1.45">${esc(meta.hook)}</span></section>`
+    html += `<section style="flex-shrink:0;margin:0px 0px ${spacing[5]}"><span style="display:inline-block;padding:${spacing[3]} ${spacing[7]};border-radius:${radius['2xl']};background:${XHS.ink};color:${globalColor.surface};font-size:${fontSize.lg};font-weight:${fontWeight.extrabold};line-height:1.45">${esc(meta.hook)}</span></section>`
   }
 
   // 话题标签
   if (meta.chips.length) {
-    html += `<section style="flex-shrink:0;margin:0px 0px 14px">${chipsHtml(meta.chips, t)}</section>`
+    html += `<section style="flex-shrink:0;margin:0px 0px ${spacing[6]}">${chipsHtml(meta.chips, t)}</section>`
   }
 
   // 页脚：字数 / 阅读时长 + 品牌
-  html += `<section style="flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;border-top:1.5px dashed ${XHS.dash};padding-top:12px">`
-  html += `<span style="font-size:12px;color:${XHS.inkFaint};font-weight:700;letter-spacing:0.3px">${esc('共 ' + meta.charCount + ' 字 · 约 ' + meta.readMin + ' 分钟')}</span>`
-  html += `<span style="font-size:13px;color:${t.dark};font-weight:800">${esc('@' + meta.brand)}</span>`
+  html += `<section style="flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;border-top:1.5px dashed ${XHS.dash};padding-top:${spacing[5]}">`
+  html += `<span style="font-size:${fontSize.sm};color:${XHS.inkFaint};font-weight:${fontWeight.bold};letter-spacing:${letterSpacing.wide}">${esc('共 ' + meta.charCount + ' 字 · 约 ' + meta.readMin + ' 分钟')}</span>`
+  html += `<span style="font-size:${fontSize.base};color:${t.dark};font-weight:${fontWeight.extrabold}">${esc('@' + meta.brand)}</span>`
   html += `</section>`
 
   html += `</section>`
@@ -276,14 +277,14 @@ export function buildContentCard(
   const { w, h } = ASPECTS[aspect]
   const footerBand = 44
 
-  let html = `<section style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;background:#fff;overflow:hidden;font-family:${fontFamily};color:#333">`
-  html += `<section class="social-card-render" style="box-sizing:border-box;height:${h - footerBand}px;overflow:hidden;padding:${PAD_TOP}px ${PAD_X}px 0;font-size:15px;line-height:1.8;word-wrap:break-word;overflow-wrap:break-word">`
+  let html = `<section style="position:relative;box-sizing:border-box;width:${w}px;height:${h}px;background:${globalColor.surface};overflow:hidden;font-family:${fontFamily};color:${neutral.gray1000}">`
+  html += `<section class="social-card-render" style="box-sizing:border-box;height:${h - footerBand}px;overflow:hidden;padding:${PAD_TOP}px ${PAD_X}px 0;font-size:${fontSize.lg};line-height:${lineHeight.loosest};word-wrap:break-word;overflow-wrap:break-word">`
   html += contentHtml
   html += `</section>`
-  html += `<section style="position:absolute;left:0;right:0;bottom:0;height:${footerBand}px;box-sizing:border-box;background:#fff;padding:0 ${PAD_X}px">`
+  html += `<section style="position:absolute;left:0;right:0;bottom:0;height:${footerBand}px;box-sizing:border-box;background:${globalColor.surface};padding:0 ${PAD_X}px">`
   html += `<section style="height:100%;display:flex;align-items:center;justify-content:space-between;border-top:1.5px dashed ${XHS.dash}">`
-  html += `<span style="font-size:14px;color:${t.dark};font-weight:800">${esc('@' + brand)}</span>`
-  html += `<span style="font-size:13px;color:${XHS.inkFaint};font-weight:800;letter-spacing:0.5px">${page} / ${total}</span>`
+  html += `<span style="font-size:${fontSize.md};color:${t.dark};font-weight:${fontWeight.extrabold}">${esc('@' + brand)}</span>`
+  html += `<span style="font-size:${fontSize.base};color:${XHS.inkFaint};font-weight:${fontWeight.extrabold};letter-spacing:${letterSpacing.wider}">${page} / ${total}</span>`
   html += `</section>`
   html += `</section>`
   html += `</section>`

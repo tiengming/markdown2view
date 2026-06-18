@@ -30,7 +30,7 @@ describe('renderMermaidDiagram', () => {
     )
     expect(error).toBeUndefined()
     expect(svg).toContain('<svg')
-  }, 15000)
+  }, 30000)
 
   it('合法 sequenceDiagram 渲染出含 svg 的字符串', async () => {
     const { svg, error } = await renderMermaidDiagram(

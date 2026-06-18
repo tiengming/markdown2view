@@ -1,6 +1,7 @@
 import { leaf } from '@engine/utils/helpers'
-import { resolveColor, darkenColor, colorToAlpha } from '@engine/utils/colorUtils'
+import { resolveColor, darkenColor } from '@engine/utils/colorUtils'
 import type { ThemeColors } from '@engine/composables/useTheme'
+import { color, fontSize, fontWeight, letterSpacing, lineHeight, radius, spacing } from '@engine/tokens'
 
 /**
  * CTA_DA01 - 行动号召卡片（默认A型01号样式）
@@ -64,43 +65,41 @@ export const CTA_DA01 = {
     const hex = resolveColor(attrs.color || t.accent)
 
     if (attrs.light) {
-      // 浅色背景：6% 透明度主题色 + 深色文字 + 实色按钮
-      const bg = colorToAlpha(hex, 0.06)
+      const bg = `${hex}0f`
 
-      let html = `<section style="margin:24px 0px;padding:32px 24px;background:${bg};border-radius:16px;text-align:center">`
+      let html = `<section style="margin:${spacing[10]} 0px;padding:${spacing[13]} ${spacing[9]};background:${bg};border-radius:${radius['4xl']};text-align:center">`
 
       if (attrs.label)
-        html += `<p style="margin:0px 0px 8px;font-size:11px;letter-spacing:3px;font-weight:700;color:${hex}">${leaf(attrs.label)}</p>`
+        html += `<p style="margin:0px 0px ${spacing[3]};font-size:${fontSize.xs};letter-spacing:${letterSpacing['5xl']};font-weight:${fontWeight.bold};color:${hex}">${leaf(attrs.label)}</p>`
 
       if (attrs.title)
-        html += `<p style="margin:0px 0px 16px;font-size:20px;font-weight:800;line-height:1.4;color:rgb(26,26,26)">${leaf(attrs.title)}</p>`
+        html += `<p style="margin:0px 0px ${spacing[7]};font-size:${fontSize['4xl']};font-weight:${fontWeight.extrabold};line-height:${lineHeight.normal};color:${color.textPrimary}">${leaf(attrs.title)}</p>`
 
       if (attrs.button)
-        html += `<span style="display:inline-block;padding:12px 32px;background:${hex};border-radius:8px;font-weight:700;letter-spacing:1px;color:rgb(255,255,255)">${leaf(attrs.button)}</span>`
+        html += `<span style="display:inline-block;padding:${spacing[5]} ${spacing[9]};background:${hex};border-radius:${radius.lg};font-weight:${fontWeight.bold};letter-spacing:${letterSpacing.widest};color:${color.surface}">${leaf(attrs.button)}</span>`
 
       if (body.trim())
-        html += `<section style="margin-top:16px;font-size:14px;color:rgb(85,85,85);line-height:1.7">${leaf(body.trim())}</section>`
+        html += `<section style="margin-top:${spacing[7]};font-size:${fontSize.md};color:${color.ink};line-height:${lineHeight.looser}">${leaf(body.trim())}</section>`
 
       html += `</section>`
       return html
     }
 
-    // 深色渐变背景（默认）
     const darkHex = darkenColor(hex)
 
-    let html = `<section style="margin:24px 0px;padding:32px 24px;background:linear-gradient(135deg,${hex},${darkHex});border-radius:16px;text-align:center;color:rgb(255,255,255)">`
+    let html = `<section style="margin:${spacing[10]} 0px;padding:${spacing[13]} ${spacing[9]};background:linear-gradient(135deg,${hex},${darkHex});border-radius:${radius['4xl']};text-align:center;color:${color.surface}">`
 
     if (attrs.label)
-      html += `<p style="margin:0px 0px 8px;font-size:11px;letter-spacing:3px;font-weight:700;opacity:0.8">${leaf(attrs.label)}</p>`
+      html += `<p style="margin:0px 0px ${spacing[3]};font-size:${fontSize.xs};letter-spacing:${letterSpacing['5xl']};font-weight:${fontWeight.bold};opacity:0.8">${leaf(attrs.label)}</p>`
 
     if (attrs.title)
-      html += `<p style="margin:0px 0px 16px;font-size:20px;font-weight:800;line-height:1.4">${leaf(attrs.title)}</p>`
+      html += `<p style="margin:0px 0px ${spacing[7]};font-size:${fontSize['4xl']};font-weight:${fontWeight.extrabold};line-height:${lineHeight.normal}">${leaf(attrs.title)}</p>`
 
     if (attrs.button)
-      html += `<span style="display:inline-block;padding:12px 32px;background:rgba(255,255,255,0.2);border-radius:8px;font-weight:700;letter-spacing:1px;backdrop-filter:blur(4px)">${leaf(attrs.button)}</span>`
+      html += `<span style="display:inline-block;padding:${spacing[5]} ${spacing[9]};background:rgba(255,255,255,0.2);border-radius:${radius.lg};font-weight:${fontWeight.bold};letter-spacing:${letterSpacing.widest};backdrop-filter:blur(4px)">${leaf(attrs.button)}</span>`
 
     if (body.trim())
-      html += `<section style="margin-top:16px;font-size:14px;opacity:0.85;line-height:1.7">${leaf(body.trim())}</section>`
+      html += `<section style="margin-top:${spacing[7]};font-size:${fontSize.md};opacity:0.85;line-height:${lineHeight.looser}">${leaf(body.trim())}</section>`
 
     html += `</section>`
     return html

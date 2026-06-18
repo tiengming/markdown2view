@@ -36,7 +36,7 @@ describe('AI Guide Prompts', () => {
   })
 
   it('should generate Card guide with Xiaohongshu card platform details', () => {
-    const guide = buildCardAiGuide('xiaohongshu', '3:4')
+    const guide = buildCardAiGuide('3:4')
     expect(guide).toContain('小红书图文卡片')
     expect(guide).toContain('YAML frontmatter')
     expect(guide).toContain('brand:')

@@ -1,5 +1,5 @@
 import type { ContentMeta } from '@/lib/render/metadata'
-import { parseTableMarkdown, estimateTableRowHeight, estimateTableHeight, type TableData } from '@/engine/utils/markdownParser'
+import { parseTableMarkdown, estimateTableRowHeight, estimateTableHeight } from '@/engine/utils/markdownParser'
 
 // === 从 blockParser 导入的公共逻辑 ===
 import {
@@ -186,7 +186,6 @@ function splitTableByHeight(
   tableMarkdown: string,
   availableHeight: number,
   effectiveHeight: number,
-  settings: { marginTop: number; marginBottom: number },
   actualTableHeight?: number,
   tableRowHeights?: number[],
   tableOverhead?: number
@@ -383,7 +382,7 @@ export function paginateDocumentBlocks(
         const actualTableHeight = actualHeights?.[block.id]
         const blockRowHeights = tableRowHeights?.[block.id]
         const blockOverhead = tableOverheads?.[block.id]
-        const splitResult = splitTableByHeight(block.markdown, availableHeight, effectiveHeight, settings, actualTableHeight, blockRowHeights, blockOverhead)
+        const splitResult = splitTableByHeight(block.markdown, availableHeight, effectiveHeight, actualTableHeight, blockRowHeights, blockOverhead)
         
         if (splitResult && splitResult.pages.length > 1) {
           // 表格需要跨页

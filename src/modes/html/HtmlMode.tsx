@@ -1,101 +1,24 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { CodeEditor } from '@/components/editor/CodeEditor'
-import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
+import { PreviewToolbar } from '@/components/layout/PreviewToolbar'
 import { HtmlSandbox } from '@/components/preview/HtmlSandbox'
 import { previewHtml } from '@/lib/extractHtml'
-import { downloadBlob, resolveBackground, captureElementInIframeToBlob } from '@/lib/exportImage'
-import { downloadAsZip, type ZipEntry } from '@/lib/export/zipDownload'
 import { copyText } from '@/lib/clipboard'
 import { buildDesignPrompt, type DesignStyle } from '@/data/designPrompts'
 import { PromptLibrary } from './PromptLibrary'
 import { useEditorDocSync } from '@/lib/useEditorDocSync'
-import { detectPages, type PageInfo } from '@/lib/multipage'
-import { Button } from '@/components/ui/Button'
-import { Tooltip } from '@/components/ui/Tooltip'
 import { useImageUpload } from '@/lib/useImageUpload'
-import { exportHtmlSource } from '@/lib/exportSource'
-import { UI_LABELS } from '@/lib/uiLabels'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
-import { useExportAction } from '@/lib/useExportAction'
-import { Play, RotateCcw, Book, ImageIcon, Package, Download, Printer } from '@/components/ui/Icon'
+import { useIframeScale } from './useIframeScale'
+import { usePageNavigation } from './usePageNavigation'
+import { useHtmlExports } from './useHtmlExports'
+import { useHtmlToolbar } from './useHtmlToolbar'
 
 interface HtmlModeProps {
   html: string
   setHtml: (html: string) => void
   onToast: (message: string) => void
-}
-
-function firstContentElement(doc: Document): HTMLElement {
-  return (
-    doc.querySelector<HTMLElement>('body > div')
-    || doc.querySelector<HTMLElement>('body > main')
-    || doc.querySelector<HTMLElement>('body > section')
-    || doc.body
-  )
-}
-
-function firstPreviewPage(doc: Document): HTMLElement | null {
-  const pageNodes = Array.from(doc.querySelectorAll<HTMLElement>('.page, .slide, .card'))
-  return pageNodes.find((node) => node.style.display !== 'none') || pageNodes[0] || null
-}
-
-async function nextFrame(): Promise<void> {
-  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-}
-
-async function withScaleReset<T>(doc: Document, task: () => Promise<T>): Promise<T> {
-  const oldZoom = doc.body.style.zoom
-  const oldScale = doc.documentElement.style.getPropertyValue('--auto-scale')
-
-  doc.body.style.zoom = '1'
-  doc.documentElement.style.setProperty('--auto-scale', '1')
-
-  try {
-    return await task()
-  } finally {
-    doc.body.style.zoom = oldZoom
-    if (oldScale) {
-      doc.documentElement.style.setProperty('--auto-scale', oldScale)
-    } else {
-      doc.documentElement.style.removeProperty('--auto-scale')
-    }
-  }
-}
-
-async function withVisiblePage<T>(
-  pageNodes: HTMLElement[],
-  visibleIndex: number,
-  task: () => Promise<T>,
-): Promise<T> {
-  const originalStyles = pageNodes.map((node) => node.style.display)
-  pageNodes.forEach((node, index) => {
-    node.style.display = index === visibleIndex ? '' : 'none'
-  })
-  await nextFrame()
-
-  try {
-    return await task()
-  } finally {
-    pageNodes.forEach((node, index) => {
-      node.style.display = originalStyles[index]
-    })
-  }
-}
-
-async function captureIframeElement(
-  iframe: HTMLIFrameElement,
-  element: HTMLElement,
-): Promise<Blob> {
-  const doc = iframe.contentDocument
-  const win = iframe.contentWindow
-  if (!doc || !win) throw new Error('预览尚未就绪')
-
-  const bgColor = resolveBackground(doc, win)
-  return captureElementInIframeToBlob(iframe, element, {
-    scale: 2,
-    backgroundColor: bgColor,
-  })
 }
 
 // HTML 可视化模式：左侧编辑 HTML，右侧 iframe 沙箱实时渲染，支持 Prompt 指令库与导出 PNG。
@@ -104,15 +27,13 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const editorScrollerRef = useRef<HTMLElement | null>(null)
   const previewPaneRef = useRef<HTMLElement | null>(null)
-  const lastWheelFlipAtRef = useRef(0)
-  const currentPageRef = useRef(0)
   const [refreshKey, setRefreshKey] = useState(0)
   const [promptOpen, setPromptOpen] = useState(false)
   const [editorReady, setEditorReady] = useState(0)
-  const [exporting, runExport] = useExportAction(onToast)
   const [allowScripts, setAllowScripts] = useState(false)
   const [activeView, setActiveView] = useState<'edit' | 'preview'>('edit')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   // 监听全屏状态变化，用于在全屏播放时隐藏工具栏
   useEffect(() => {
@@ -122,7 +43,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     document.addEventListener('fullscreenchange', onFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
   }, [])
-  
+
   // store ↔ 编辑器双向同步（防抖回写 + 外部变更信号）
   const {
     localValue: localHtml,
@@ -150,9 +71,8 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
   // 图片上传
   const { fileInputRef, uploading, triggerUpload, handleFileChange } = useImageUpload(onToast)
 
-  const [pages, setPages] = useState<PageInfo[]>([])
-  const [currentPage, setCurrentPage] = useState(0)
-  const [previewLoading, setPreviewLoading] = useState(false)
+  // 分页与导航
+  const { pages, currentPage, setCurrentPage, detect } = usePageNavigation(iframeRef, previewPaneRef)
 
   // 是否存在可渲染内容（空内容时由沙箱显示占位提示，无需加载动画）
   const hasContent = useMemo(() => Boolean(previewHtml(debouncedHtml)), [debouncedHtml])
@@ -162,9 +82,18 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     setPreviewLoading(hasContent)
   }, [debouncedHtml, refreshKey, hasContent])
 
-  useEffect(() => {
-    currentPageRef.current = currentPage
-  }, [currentPage])
+  // iframe 自动缩放
+  useIframeScale(iframeRef, pages, currentPage, refreshKey)
+
+  // 导出操作
+  const {
+    exporting,
+    handleExport,
+    handleExportCurrentPage,
+    handleExportPagesZip,
+    handleExportPdf,
+    handleExportSource,
+  } = useHtmlExports(iframeRef, pages, currentPage, htmlTitle, localHtml, onToast)
 
   // One-way scroll sync: editor → iframe
   useEffect(() => {
@@ -197,429 +126,37 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
     }
   }, [editorReady, refreshKey])
 
-  // 多页模式：只显示当前页，隐藏其他页，并触发缩放
-  useEffect(() => {
-    if (pages.length === 0) return
-    pages.forEach((p, i) => {
-      p.node.style.display = i === currentPage ? '' : 'none'
-    })
-    // 页面切换后触发一次缩放，确保当前页正确适配
-    const iframe = iframeRef.current
-    if (iframe) {
-      requestAnimationFrame(() => {
-        const doc = iframe.contentDocument
-        if (!doc) return
-        const viewW = iframe.clientWidth
-        const viewH = iframe.clientHeight
-        if (!viewW || !viewH) return
-        const visiblePage = firstPreviewPage(doc)
-        if (!visiblePage) return
-        doc.body.style.zoom = '1'
-        const rawW = visiblePage.offsetWidth
-        const rawH = visiblePage.offsetHeight
-        if (rawW && rawH) {
-          const scale = Math.min(viewW / rawW, viewH / rawH)
-          doc.documentElement.style.setProperty('--auto-scale', scale.toString())
-        }
-      })
-    }
-  }, [pages, currentPage])
-
-  // 键盘翻页支持
-  useEffect(() => {
-    if (pages.length === 0) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // 避免输入框冲突
-      const active = document.activeElement
-      if (active?.tagName === 'TEXTAREA' || active?.tagName === 'INPUT' || active?.closest('.cm-editor')) {
-        return
-      }
-
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        setCurrentPage((prev) => {
-          const next = Math.min(prev + 1, pages.length - 1)
-          if (next !== prev) e.preventDefault()
-          return next
-        })
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        setCurrentPage((prev) => {
-          const next = Math.max(prev - 1, 0)
-          if (next !== prev) e.preventDefault()
-          return next
-        })
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    const iframeDoc = iframeRef.current?.contentDocument
-    if (iframeDoc) {
-      iframeDoc.addEventListener('keydown', handleKeyDown)
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      if (iframeDoc) {
-        iframeDoc.removeEventListener('keydown', handleKeyDown)
-      }
-    }
-  }, [pages])
-
-  // 多页模式：鼠标滚轮在右侧渲染区内上下翻页。
-  useEffect(() => {
-    if (pages.length <= 1) return
-
-    const flipByWheel = (event: WheelEvent) => {
-      if (Math.abs(event.deltaY) < 24) return
-
-      const now = Date.now()
-      if (now - lastWheelFlipAtRef.current < 360) {
-        event.preventDefault()
-        return
-      }
-
-      const prev = currentPageRef.current
-      const next = event.deltaY > 0
-        ? Math.min(prev + 1, pages.length - 1)
-        : Math.max(prev - 1, 0)
-
-      if (next !== prev) {
-        currentPageRef.current = next
-        setCurrentPage(next)
-        lastWheelFlipAtRef.current = now
-      }
-      event.preventDefault()
-    }
-
-    const pane = previewPaneRef.current
-    const iframeDoc = iframeRef.current?.contentDocument
-    pane?.addEventListener('wheel', flipByWheel, { passive: false })
-    iframeDoc?.addEventListener('wheel', flipByWheel, { passive: false })
-
-    return () => {
-      pane?.removeEventListener('wheel', flipByWheel)
-      iframeDoc?.removeEventListener('wheel', flipByWheel)
-    }
-  }, [pages])
-
-  // 自动等比例缩放适应窗口大小
-  useEffect(() => {
-    const iframe = iframeRef.current
-    if (!iframe) return
-
-    let cancelled = false
-    let contentObserver: ResizeObserver | null = null
-    const timers: ReturnType<typeof setTimeout>[] = []
-
-    const handleResize = () => {
-      if (cancelled) return
-      const doc = iframe.contentDocument
-      if (!doc) return
-      
-      const viewW = iframe.clientWidth
-      const viewH = iframe.clientHeight
-      if (!viewW || !viewH) return
-      
-      if (pages.length > 0) {
-        // 多页模式：寻找当前可见页获取真实尺寸
-        const visiblePage = firstPreviewPage(doc)
-        if (!visiblePage) return
-
-        doc.body.style.zoom = '1'
-        const rawW = visiblePage.offsetWidth
-        const rawH = visiblePage.offsetHeight
-        
-        if (rawW && rawH) {
-          const scale = Math.min(viewW / rawW, viewH / rawH)
-          doc.documentElement.style.setProperty('--auto-scale', scale.toString())
-        }
-      } else {
-        // 单页模式：适应宽度
-        const wrapper = doc.querySelector('body > div') as HTMLElement
-          || doc.querySelector('body > main') as HTMLElement
-          || doc.querySelector('body > section') as HTMLElement
-          || doc.body
-
-        doc.documentElement.style.removeProperty('--auto-scale')
-        const oldZoom = doc.body.style.zoom
-        doc.body.style.zoom = '1'
-        const rawW = wrapper.offsetWidth
-        if (rawW) {
-          const scale = viewW / rawW
-          doc.body.style.zoom = scale.toString()
-        } else {
-          doc.body.style.zoom = oldZoom
-        }
-      }
-    }
-
-    const scheduleResize = (delay = 0) => {
-      const timer = setTimeout(() => requestAnimationFrame(handleResize), delay)
-      timers.push(timer)
-    }
-
-    const observeContent = () => {
-      contentObserver?.disconnect()
-      const doc = iframe.contentDocument
-      if (!doc) return
-
-      contentObserver = new ResizeObserver(() => scheduleResize())
-      contentObserver.observe(doc.documentElement)
-      contentObserver.observe(doc.body)
-      const page = firstPreviewPage(doc)
-      if (page) contentObserver.observe(page)
-
-      doc.fonts?.ready.then(() => scheduleResize()).catch(() => {})
-      doc.querySelectorAll('img').forEach((img) => {
-        if (!img.complete) img.addEventListener('load', () => scheduleResize(), { once: true })
-      })
-    }
-
-    const stabilizeScale = () => {
-      observeContent()
-      // 减少定时器数量：初始 + 2 个延迟足够覆盖大部分场景
-      ;[0, 100, 400].forEach(scheduleResize)
-    }
-
-    stabilizeScale()
-
-    const ro = new ResizeObserver(() => {
-      scheduleResize()
-    })
-    
-    ro.observe(iframe)
-
-    return () => {
-      cancelled = true
-      timers.forEach(clearTimeout)
-      ro.disconnect()
-      contentObserver?.disconnect()
-    }
-  }, [debouncedHtml, refreshKey, pages])
-
-  const handleExport = () => {
-    if (!iframeRef.current) {
-      onToast('预览尚未就绪')
-      return
-    }
-    const doc = iframeRef.current.contentDocument
-    if (!doc) {
-      onToast('预览尚未就绪')
-      return
-    }
-    runExport(async () => {
-      await withScaleReset(doc, async () => {
-        const blob = await captureIframeElement(iframeRef.current!, firstContentElement(doc))
-        const title = htmlTitle || 'html'
-        downloadBlob(blob, `${title}.png`)
-      })
-      return '已导出 PNG'
-    })
-  }
-
-  const handleExportCurrentPage = () => {
-    const iframe = iframeRef.current
-    const doc = iframe?.contentDocument
-    if (!doc || !pages.length) return
-    const page = pages[currentPage]
-    if (!page) return
-    
-    const allNodes = pages.map(p => p.node)
-    runExport(async () => {
-      await withScaleReset(doc, async () => {
-        await withVisiblePage(allNodes, currentPage, async () => {
-          const blob = await captureIframeElement(iframe, page.node)
-          const title = htmlTitle || 'html'
-          downloadBlob(blob, `${title}-page-${currentPage + 1}.png`)
-        })
-      })
-      return `已导出 ${page.label}`
-    })
-  }
-
-  const handleExportPagesZip = () => {
-    const iframe = iframeRef.current
-    const doc = iframe?.contentDocument
-    if (!doc || !pages.length) return
-    
-    const allNodes = pages.map(p => p.node)
-    runExport(async () => {
-      const entries: ZipEntry[] = []
-
-      await withScaleReset(doc, async () => {
-        const title = htmlTitle || 'html'
-        for (let i = 0; i < pages.length; i++) {
-          const blob = await withVisiblePage(allNodes, i, () => captureIframeElement(iframe, pages[i].node))
-          entries.push({
-            filename: `${title}-page-${String(i + 1).padStart(2, '0')}.png`,
-            blob,
-          })
-        }
-      })
-      const title = htmlTitle || 'html'
-      await downloadAsZip(entries, `${title}-pages.zip`)
-      return `已打包 ${pages.length} 页`
-    })
-  }
-  const handleExportPdf = () => {
-    const iframe = iframeRef.current
-    const doc = iframe?.contentDocument
-    if (!doc) {
-      onToast('预览尚未就绪')
-      return
-    }
-
-    runExport(async () => {
-      await withScaleReset(doc, async () => {
-        const title = htmlTitle || 'html'
-        if (pages.length > 0) {
-          // 多页模式：在 iframe 内逐页截图，保留完整样式
-          const { exportIframeToPdf } = await import('@/lib/exportPdf')
-          await exportIframeToPdf(
-            iframe,
-            pages.map(p => p.node),
-            `${title}.pdf`
-          )
-        } else {
-          // 单页模式：直接截取 iframe 全部内容
-          const { exportSinglePageToPdf } = await import('@/lib/exportPdf')
-          await exportSinglePageToPdf(iframe, `${title}.pdf`)
-        }
-      })
-      return 'PDF 导出成功'
-    })
-  }
-
-
-
   const handleCopyPrompt = async (style: DesignStyle) => {
     const ok = await copyText(buildDesignPrompt(style))
     onToast(ok ? `已复制「${style.name}」风格指令` : '复制失败，请重试')
   }
 
-  const toolbarActions: ToolbarItem[] = [
-    {
-      id: 'fullscreen',
-      icon: <Play size={14} />,
-      label: UI_LABELS.toolbar.fullscreen.label,
-      tooltip: UI_LABELS.toolbar.fullscreen.tooltip,
-      onClick: () => previewPaneRef.current?.requestFullscreen?.(),
+  const toolbarActions = useHtmlToolbar({
+    pages,
+    currentPage,
+    expectedPageCount,
+    exporting,
+    uploading,
+    allowScripts,
+    onFullscreen: () => previewPaneRef.current?.requestFullscreen?.(),
+    onRefresh: () => setRefreshKey((n) => n + 1),
+    onOpenPromptLibrary: () => setPromptOpen(true),
+    onUploadImage: triggerUpload,
+    onToggleAllowScripts: (checked) => {
+      setAllowScripts(checked)
+      setRefreshKey((n) => n + 1)
     },
-    {
-      id: 'refresh',
-      icon: <RotateCcw size={14} />,
-      label: UI_LABELS.toolbar.refresh.label,
-      tooltip: UI_LABELS.toolbar.refresh.tooltip,
-      onClick: () => setRefreshKey((n) => n + 1),
+    onChangePage: (delta) => {
+      setCurrentPage((prev) => {
+        const max = Math.max(pages.length - 1, 0)
+        return Math.min(Math.max(prev + delta, 0), max)
+      })
     },
-    ...(pages.length > 1 || expectedPageCount > 1
-      ? [
-          {
-            id: 'pagination',
-            label: '分页控制',
-            node: (
-              <div className="flex items-center gap-0.5 px-1">
-                <Button onClick={() => setCurrentPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0} className="px-2">◀</Button>
-                <span className="text-[12px] text-slate-500 font-medium px-1.5 tabular-nums">
-                  {currentPage + 1} / {Math.max(pages.length, expectedPageCount)}
-                </span>
-                <Button onClick={() => setCurrentPage(Math.min(currentPage + 1, pages.length - 1))} disabled={currentPage >= Math.max(pages.length, expectedPageCount) - 1 || pages.length === 0} className="px-2">▶</Button>
-              </div>
-            ),
-          } as ToolbarItem,
-        ]
-      : []),
-    'separator',
-    {
-      id: 'promptLibrary',
-      icon: <Book size={14} />,
-      label: UI_LABELS.toolbar.promptLibrary.label,
-      tooltip: UI_LABELS.toolbar.promptLibrary.tooltip,
-      onClick: () => setPromptOpen(true),
-      variant: 'primary',
-      className: 'shadow-sm',
-    },
-    'separator',
-    {
-      id: 'uploadImage',
-      icon: <ImageIcon size={14} />,
-      label: uploading ? '上传中…' : UI_LABELS.toolbar.uploadImage.label,
-      tooltip: UI_LABELS.toolbar.uploadImage.tooltip,
-      onClick: triggerUpload,
-      disabled: uploading,
-    },
-    {
-      id: 'allowScripts',
-      label: '互动脚本控制',
-      tooltip: UI_LABELS.toolbar.allowScripts.tooltip,
-      node: (
-        <label className="flex items-center gap-1.5 text-[12px] text-slate-600 hover:text-slate-900 cursor-pointer select-none px-1">
-          <input
-            type="checkbox"
-            checked={allowScripts}
-            onChange={(e) => {
-              setAllowScripts(e.target.checked)
-              setRefreshKey((n) => n + 1)
-            }}
-            className="rounded border-slate-300 accent-[var(--accent)] cursor-pointer"
-          />
-          {UI_LABELS.toolbar.allowScripts.label}
-        </label>
-      ),
-    },
-    'separator',
-  ]
-
-  if (pages.length > 0 || expectedPageCount > 1) {
-    toolbarActions.push({
-      id: 'exportCurrentPage',
-      icon: <ImageIcon size={14} />,
-      label: UI_LABELS.toolbar.exportCurrentPage.label,
-      tooltip: UI_LABELS.toolbar.exportCurrentPage.tooltip,
-      onClick: handleExportCurrentPage,
-      disabled: exporting || pages.length === 0,
-    })
-    toolbarActions.push({
-      id: 'exportZip',
-      icon: <Package size={14} />,
-      label: exporting ? '打包中…' : UI_LABELS.toolbar.exportZip.label,
-      tooltip: UI_LABELS.toolbar.exportZip.tooltip,
-      onClick: handleExportPagesZip,
-      disabled: exporting || pages.length === 0,
-    })
-  }
-
-  toolbarActions.push({
-    id: 'exportSource',
-    icon: <Download size={14} />,
-    label: UI_LABELS.toolbar.exportSource.label,
-    tooltip: UI_LABELS.toolbar.exportSource.tooltip,
-    onClick: () => {
-      const title = htmlTitle || 'html'
-      exportHtmlSource(localHtml, `${title}.html`)
-    },
-  })
-
-  if (pages.length === 0 && expectedPageCount <= 1) {
-    toolbarActions.push({
-      id: 'exportPng',
-      icon: <ImageIcon size={14} />,
-      label: exporting ? '导出中…' : UI_LABELS.toolbar.exportPng.label,
-      tooltip: UI_LABELS.toolbar.exportPng.tooltip,
-      onClick: handleExport,
-      disabled: exporting,
-    })
-  }
-
-  toolbarActions.push({
-    id: 'exportPdf',
-    icon: <Printer size={14} />,
-    label: UI_LABELS.toolbar.exportPdf.label,
-    tooltip: UI_LABELS.toolbar.exportPdf.tooltip,
-    onClick: handleExportPdf,
-    disabled: exporting,
-    variant: 'primary',
-    className: 'shadow-sm',
+    onExportCurrentPage: handleExportCurrentPage,
+    onExportZip: handleExportPagesZip,
+    onExportSource: handleExportSource,
+    onExportPng: handleExport,
+    onExportPdf: handleExportPdf,
   })
 
   return (
@@ -684,9 +221,9 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
                 <span className="text-sm text-slate-500 mt-6">正在渲染画布，请稍候…</span>
               </div>
             )}
-            <HtmlSandbox 
-              ref={iframeRef} 
-              html={debouncedHtml} 
+            <HtmlSandbox
+              ref={iframeRef}
+              html={debouncedHtml}
               refreshKey={refreshKey}
               allowScripts={allowScripts}
               onLoad={() => {
@@ -695,10 +232,7 @@ export function HtmlMode({ html, setHtml, onToast }: HtmlModeProps) {
                   setPreviewLoading(false)
                   return
                 }
-                // 检测页面并批量更新状态，React 会自动批处理
-                const detected = detectPages(iframe.contentDocument!)
-                setPages(detected)
-                setCurrentPage(0)
+                detect()
                 setPreviewLoading(false)
               }}
             />

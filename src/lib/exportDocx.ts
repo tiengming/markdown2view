@@ -8,6 +8,7 @@ import type { DocumentBlock, DocumentSettings } from '@/modes/document/documentM
 import { parseTableMarkdown } from '@/engine/utils/markdownParser'
 import { downloadBlob } from './exportImage'
 import { ensureMathJax } from '@engine/utils/mathRenderer'
+import { ensureMermaid } from '@engine/utils/mermaidRenderer'
 
 // docx 库动态导入（避免影响首屏加载体积）
 let docxModule: typeof import('docx') | null = null
@@ -264,7 +265,7 @@ async function renderFormula(latex: string, displayMode: boolean): Promise<Formu
     const svgEl = node.querySelector('svg')
     if (!svgEl) return null
 
-    // 从 MathJax 的 width/height 属性提取尺寸（形如 "4.5ex"），换算到 px
+    // ── 提取尺寸：ex 属性 → px ──
     const parseEx = (val: string | null): number => {
       if (!val) return 0
       const m = val.match(/([\d.]+)/)
@@ -272,10 +273,28 @@ async function renderFormula(latex: string, displayMode: boolean): Promise<Formu
     }
     let w = parseEx(svgEl.getAttribute('width'))
     let h = parseEx(svgEl.getAttribute('height'))
-    // 兜底：用 BBox
+
+    // 兆底 1：viewBox（MathJax 始终输出 viewBox）
     if (!w || !h) {
-      const bbox = svgEl.getBBox?.()
-      if (bbox) { w = w || bbox.width; h = h || bbox.height }
+      const vb = svgEl.getAttribute('viewBox')
+      if (vb) {
+        const parts = vb.split(/\s+/).map(Number)
+        if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+          w = w || parts[2]
+          h = h || parts[3]
+        }
+      }
+    }
+
+    // 兆底 2：getBBox（必须临时挂载到 DOM 才能返回正确值）
+    if (!w || !h) {
+      document.body.appendChild(node)
+      try {
+        const bbox = svgEl.getBBox?.()
+        if (bbox && bbox.width > 0) { w = w || bbox.width; h = h || bbox.height }
+      } finally {
+        node.remove()
+      }
     }
     if (!w || !h) return null
 
@@ -650,6 +669,92 @@ async function convertImage(
   }
 }
 
+/** mermaid → docx Paragraph（DOM 渲染 + modern-screenshot 截图嵌入） */
+async function convertMermaid(
+  markdown: string,
+  settings: DocumentSettings,
+): Promise<InstanceType<typeof import('docx').Paragraph>> {
+  const { Paragraph, TextRun, ImageRun, AlignmentType } = docxModule!
+
+  // 提取 mermaid 源码（去掉 ```mermaid 和 ``` 围栏）
+  const sourceMatch = markdown.match(/```mermaid[ \t]*\r?\n([\s\S]*?)```/)
+  if (!sourceMatch) {
+    return new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: '[mermaid 图表]', color: '9CA3AF', italics: true })],
+    })
+  }
+  const source = sourceMatch[1].replace(/\s+$/, '')
+
+  const contentWidthPx = settings.pageWidth - settings.marginLeft - settings.marginRight
+
+  try {
+    const mermaid = await ensureMermaid()
+
+    // 创建离屏容器（移到屏幕外，保持 visibility:visible 以确保截图工具能正常捕获内容）
+    // 注意：不能用 visibility:hidden，否则 modern-screenshot 克隆节点时会复制该样式，导致截图空白
+    const host = document.createElement('div')
+    host.style.cssText =
+      `position:fixed;left:-9999px;top:0;width:${contentWidthPx}px;` +
+      `pointer-events:none;z-index:-1;overflow:hidden;background:#fff`
+    document.body.appendChild(host)
+
+    try {
+      const id = `m2v-mermaid-${Math.random().toString(36).slice(2, 10)}`
+      const { svg } = await mermaid.render(id, source, host)
+
+      // 将 SVG 注入容器
+      host.innerHTML = svg
+      const svgEl = host.querySelector('svg')
+      if (svgEl) {
+        // 保留 viewBox + width/height，只用 CSS 约束不超出容器
+        // 注意：不能 removeAttribute('width')，否则 SVG 无固有尺寸，容器高度为 0 → 截图空白
+        svgEl.setAttribute(
+          'style',
+          'max-width:100%;height:auto;display:block;margin:0 auto;',
+        )
+      }
+
+      // 等待两帧确保 SVG 布局完成
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
+
+      // 用 modern-screenshot 直接截取 DOM → PNG（已验证的可靠方案）
+      const { domToBlob } = await import('modern-screenshot')
+      const rect = host.getBoundingClientRect()
+      const w = Math.ceil(rect.width) || contentWidthPx
+      const h = Math.ceil(rect.height) || Math.round(contentWidthPx * 0.6)
+
+      const blob = await domToBlob(host, {
+        scale: 2,
+        type: 'image/png',
+        backgroundColor: '#ffffff',
+        width: w,
+        height: h,
+        fetch: { requestInit: { cache: 'force-cache' } },
+      })
+      if (!blob) throw new Error('截图失败')
+
+      const pngData = await blob.arrayBuffer()
+      const finalW = w
+      const finalH = h
+
+      return new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 120, after: 120 },
+        children: [new ImageRun({ data: pngData, transformation: { width: finalW, height: finalH } } as any)],
+      })
+    } finally {
+      host.remove()
+    }
+  } catch (e) {
+    return new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 120, after: 120 },
+      children: [new TextRun({ text: `[mermaid 图表渲染失败: ${(e as Error).message}]`, color: '9CA3AF', italics: true })],
+    })
+  }
+}
+
 // ================================================================
 // 页眉 / 页脚
 // ================================================================
@@ -773,6 +878,7 @@ async function buildDocument(
       case 'list':      return [await convertList(block, settings)]
       case 'rule':      return [convertRule()]
       case 'image':     return [await convertImage(block.markdown, settings)]
+      case 'mermaid':   return [await convertMermaid(block.markdown, settings)]
       case 'table': {
         const t = convertTable(block.markdown, settings)
         if (t) {
@@ -916,14 +1022,30 @@ export async function exportToDocx(
     mathJaxReady = false
   }
 
+  // 预加载 Mermaid（5s 超时）；失败不阻断导出，图表将降级为文本提示
+  let mermaidReady = false
+  try {
+    await Promise.race([
+      ensureMermaid(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
+    ])
+    mermaidReady = true
+  } catch {
+    mermaidReady = false
+  }
+
   const doc = await buildDocument(blocks, settings)
   const blob = await docxModule!.Packer.toBlob(doc)
   downloadBlob(blob, filename)
 
-  // 检测文档是否含公式，给出针对性提示
+  // 检测文档是否含公式/图表，给出针对性提示
   const hasFormula = blocks.some((b) => /\$\$|(?<!\w)\$[^\n$]+\$(?!\w)/.test(b.markdown))
+  const hasMermaid = blocks.some((b) => b.kind === 'mermaid')
   if (!mathJaxReady && hasFormula) {
     return '已导出 Word 文档（公式渲染需联网，本次已降级为 LaTeX 文本）'
+  }
+  if (!mermaidReady && hasMermaid) {
+    return '已导出 Word 文档（mermaid 图表渲染需联网，本次已降级为文本提示）'
   }
   return '已导出 Word 文档'
 }

@@ -101,16 +101,28 @@ const BOOTSTRAP_SCRIPT = `
         cachedHeads = {};
 
         var previewer = new Paged.Previewer();
-        return previewer
-          .preview(contentHtml, [{ _m2v_: pageCss }], target)
-          .then(function (flow) {
-            if (window.console) console.log('[m2v] 渲染完成，页数=', flow.total);
-            return flow.total;
-          })
-          .catch(function (err) {
-            showError(err);
-            throw err;
-          });
+
+        function doPreview() {
+          return previewer
+            .preview(contentHtml, [{ _m2v_: pageCss }], target)
+            .then(function (flow) {
+              if (window.console) console.log('[m2v] 渲染完成，页数=', flow.total);
+              return flow.total;
+            });
+        }
+
+        return doPreview().catch(function (err) {
+          // Paged.js v0.4.3 偶现 getBoundingClientRect null 错误，等待 DOM 稳定后重试一次
+          if (err && err.message && err.message.indexOf('getBoundingClientRect') !== -1) {
+            if (window.console) console.warn('[m2v] Paged.js 竞态错误，150ms 后重试…', err.message);
+            target.innerHTML = '';
+            return new Promise(function (r) { setTimeout(r, 150); }).then(doPreview);
+          }
+          throw err;
+        }).catch(function (err) {
+          showError(err);
+          throw err;
+        });
       } catch (err) {
         showError(err);
         return Promise.reject(err);

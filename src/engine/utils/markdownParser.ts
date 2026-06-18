@@ -623,13 +623,13 @@ export function parseMarkdown(
         code += lines[i] + '\n'
         i++
       }
-      i++
+      if (i < lines.length) i++ // 仅当找到闭合围栏时才跳过，防止 EOF 时越界
       // mermaid 代码块：从预渲染 map 取 SVG，失败或不传 map 时降级
       if (lang === 'mermaid') {
         const source = code.replace(/\s+$/, '')
         const entry = mermaidMap?.get(`m:${source}`)
         if (entry?.svg) {
-          html += `<section data-block="mermaid" style="max-width:100%;margin:16px auto;text-align:center;break-inside:avoid"><div class="m2v-mermaid-figure" style="display:inline-block;max-width:100%;max-height:var(--m2v-mermaid-max-height,none);overflow:hidden">${entry.svg}</div></section>`
+          html += `<section data-block="mermaid" style="max-width:100%;margin:16px auto;text-align:center;break-inside:avoid"><div class="m2v-mermaid-figure" style="width:100%;max-width:100%;max-height:var(--m2v-mermaid-max-height,none);overflow:hidden">${entry.svg}</div></section>`
         } else if (entry?.error) {
           html += `<section data-block="mermaid-error" style="background:rgb(254,242,242);border-left:3px solid rgb(220,80,80);padding:10px 14px;margin:14px 0;font-size:12.5px;color:rgb(120,30,30)">图表渲染失败：${esc(entry.error)}</section>`
           html += renderCodeBlock(code, 'mermaid')

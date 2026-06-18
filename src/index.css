@@ -245,8 +245,14 @@ body {
 }
 
 /* Document Mode Paragraph Indentation */
-.document-indent-paragraph .document-block p:not(.document-caption) {
+.document-indent-paragraph .document-block:not([data-kind='mermaid']) p:not(.document-caption) {
   text-indent: 2em !important;
+}
+
+/* Mermaid figure SVG: fill container width for responsive sizing across all modes */
+.m2v-mermaid-figure svg {
+  width: 100%;
+  height: auto;
 }
 
 /* Captions centering and sizing */

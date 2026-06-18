@@ -40,9 +40,9 @@ describe('sanitizeHtml (宽松模式)', () => {
     expect(result).toContain('fill="red"')
   })
 
-  it('保留 iframe（添加 sandbox）', () => {
+  it('保留 iframe（添加 sandbox，默认不含 allow-scripts）', () => {
     const html = '<iframe src="https://example.com"></iframe>'
-    expect(sanitizeHtml(html)).toBe('<iframe src="https://example.com" sandbox="allow-scripts"></iframe>')
+    expect(sanitizeHtml(html)).toBe('<iframe src="https://example.com" sandbox="allow-forms"></iframe>')
   })
 
   it('移除 script 标签', () => {
@@ -60,9 +60,9 @@ describe('sanitizeHtml (宽松模式)', () => {
     expect(sanitizeHtml(html)).toBe('<a>link</a>')
   })
 
-  it('保留 http/https 链接', () => {
+  it('保留 http/https 链接，并为 target=_blank 自动补 rel=noopener', () => {
     const html = '<a href="https://example.com" target="_blank">link</a>'
-    expect(sanitizeHtml(html)).toBe(html)
+    expect(sanitizeHtml(html)).toBe('<a href="https://example.com" target="_blank" rel="noopener noreferrer">link</a>')
   })
 
   it('保留相对路径链接', () => {
@@ -90,9 +90,10 @@ describe('sanitizeHtml (宽松模式)', () => {
     expect(sanitizeHtml(html)).toBe('')
   })
 
-  it('移除危险 style 属性（expression）', () => {
+  it('净化危险 style 属性中的 expression（黑名单策略）', () => {
     const html = '<div style="width:expression(alert(1))">x</div>'
-    expect(sanitizeHtml(html)).toBe('<div>x</div>')
+    // 新策略：替换危险 token 为 __removed__，保留属性的其他有效部分
+    expect(sanitizeHtml(html)).toBe('<div style="width:__removed__(alert(1))">x</div>')
   })
 
   it('保留安全 style 属性（含 url()）', () => {
@@ -100,9 +101,10 @@ describe('sanitizeHtml (宽松模式)', () => {
     expect(sanitizeHtml(html)).toBe(html)
   })
 
-  it('移除 style 标签中的 @import', () => {
+  it('净化 style 标签中的 @import（黑名单策略）', () => {
     const html = '<style>@import url("//evil.com"); .a{color:red}</style><p>x</p>'
-    expect(sanitizeHtml(html)).toBe('<p>x</p>')
+    // 新策略：替换危险 token 为 __removed__，保留整个 style 标签与其他 CSS
+    expect(sanitizeHtml(html)).toBe('<style>@__removed__ url("//evil.com"); .a{color:red}</style><p>x</p>')
   })
 
   it('保留完整文档结构', () => {

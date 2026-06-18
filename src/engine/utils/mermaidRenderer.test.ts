@@ -1,26 +1,29 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+// [C4] 使用 vi.mock 完全替换 mermaid 模块。jsdom 未实现 SVG 测量 API
+// （getBBox / getComputedTextLength 等），真实 mermaid 会进入死循环导致
+// 测试超时。mock 让我们只需验证调用链路和错误降级行为，不依赖浏览器。
+vi.mock('mermaid', () => ({
+  default: {
+    initialize: vi.fn(),
+    render: vi.fn((_id: string, diagram: string) => {
+      if (diagram.trim().startsWith('this is not valid')) {
+        throw new Error('Parse error')
+      }
+      return Promise.resolve({
+        svg: `<svg id="m2v-mermaid-mock">${diagram}</svg>`,
+        bindFunctions: vi.fn(),
+      })
+    }),
+  },
+}))
+
 import { renderMermaidDiagram, ensureMermaid } from './mermaidRenderer'
 
 describe('renderMermaidDiagram', () => {
   beforeEach(() => {
-    // 确保每次测试 document.body 干净（offscreen 容器不留残余）
     document.body.innerHTML = ''
-
-    // jsdom 未实现 SVG 测量 API，mermaid 内部依赖这些做布局
-    // 为测试 mock 最小可用版本
-    if (!(SVGElement.prototype as any).getBBox) {
-      Object.defineProperty(SVGElement.prototype, 'getBBox', {
-        value: () => ({ x: 0, y: 0, width: 100, height: 30 }),
-        configurable: true,
-      })
-    }
-    if (!(SVGElement.prototype as any).getComputedTextLength) {
-      Object.defineProperty(SVGElement.prototype, 'getComputedTextLength', {
-        value: () => 80,
-        configurable: true,
-      })
-    }
   })
 
   it('合法 flowchart 渲染出含 svg 的字符串', async () => {
@@ -30,7 +33,7 @@ describe('renderMermaidDiagram', () => {
     )
     expect(error).toBeUndefined()
     expect(svg).toContain('<svg')
-  }, 30000)
+  })
 
   it('合法 sequenceDiagram 渲染出含 svg 的字符串', async () => {
     const { svg, error } = await renderMermaidDiagram(
@@ -39,7 +42,7 @@ describe('renderMermaidDiagram', () => {
     )
     expect(error).toBeUndefined()
     expect(svg).toContain('<svg')
-  }, 15000)
+  })
 
   it('非法语法返回 error 且 svg 为空', async () => {
     const { svg, error } = await renderMermaidDiagram(
@@ -53,7 +56,6 @@ describe('renderMermaidDiagram', () => {
 
   it('offscreen 容器渲染后被移除（DOM 干净）', async () => {
     await renderMermaidDiagram('flowchart TD\n  A --> B', 600)
-    // 渲染器内部 host.remove() 后，body 不应残留 mermaid 临时元素
     expect(document.body.querySelector('[id^="m2v-mermaid-"]')).toBeNull()
   })
 

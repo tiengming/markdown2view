@@ -12,6 +12,8 @@ export interface ImageHostConfig {
   smms?: { token: string }
   oss?: { region: string; accessKeyId: string; accessKeySecret: string; bucket: string }
   cos?: { SecretId: string; SecretKey: string; Bucket: string; Region: string }
+  /** 导出时是否向图床域名发送凭证（Cookie）。默认 false，依赖 cookie 鉴权的私有图床可开启（M3） */
+  sendCredentials?: boolean
 }
 
 /**
@@ -29,6 +31,7 @@ export function stripImageHostSecrets(config: ImageHostConfig): ImageHostConfig 
     cos: config.cos
       ? { Bucket: config.cos.Bucket, Region: config.cos.Region, SecretId: '', SecretKey: '' }
       : undefined,
+    sendCredentials: config.sendCredentials,
   }
 }
 
@@ -140,6 +143,9 @@ export interface AppState {
   // 图床设置
   imageHostConfig: ImageHostConfig
   setImageHostConfig: (config: Partial<ImageHostConfig>) => void
+  // 安全设置：是否允许加载内网资源（默认关闭，企业内网部署场景可开启）（H2/H3）
+  allowIntranetResources: boolean
+  setAllowIntranetResources: (allow: boolean) => void
   // 自定义指令管理
   customInstructions: CustomInstruction[]
   addCustomInstruction: (inst: Omit<CustomInstruction, 'id' | 'createdAt' | 'updatedAt'>) => boolean
@@ -176,6 +182,8 @@ export const useAppStore = create<AppState>()(
       imageHostConfig: DEFAULT_IMAGE_HOST_CONFIG,
       setImageHostConfig: (config) =>
         set((state) => ({ imageHostConfig: { ...state.imageHostConfig, ...config } })),
+      allowIntranetResources: false,
+      setAllowIntranetResources: (allow) => set({ allowIntranetResources: allow }),
       customInstructions: [],
       addCustomInstruction: (inst) => {
         const currentLength = get().customInstructions.length
@@ -266,6 +274,7 @@ export const useAppStore = create<AppState>()(
         accent: state.accent,
         accentDark: state.accentDark,
         imageHostConfig: stripImageHostSecrets(state.imageHostConfig),
+        allowIntranetResources: state.allowIntranetResources,
         customInstructions: state.customInstructions,
       }),
       onRehydrateStorage: () => (state) => {

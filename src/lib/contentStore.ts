@@ -131,20 +131,22 @@ export const useContentStore = create<ContentState>()(
       onRehydrateStorage: () => (state) => {
         if (!state) return
 
+        // 6.3: 仅在重水合状态仍为默认值时才应用遗留 localStorage 键，
+        // 避免 IndexedDB 已有有效数据时被遗留键覆盖。
         const legacy = getInitialContentFromLegacyKeys()
-        if (legacy.articleMarkdown != null) {
+        if (legacy.articleMarkdown != null && state.articleMarkdown === FALLBACK_MARKDOWN) {
           state.articleMarkdown = legacy.articleMarkdown
           state.articleDirty = true
         }
-        if (legacy.documentMarkdown != null) {
+        if (legacy.documentMarkdown != null && state.documentMarkdown === FALLBACK_MARKDOWN) {
           state.documentMarkdown = legacy.documentMarkdown
           state.documentDirty = true
         }
-        if (legacy.cardMarkdown != null) {
+        if (legacy.cardMarkdown != null && state.cardMarkdown === FALLBACK_MARKDOWN) {
           state.cardMarkdown = legacy.cardMarkdown
           state.cardDirty = true
         }
-        if (legacy.html != null) {
+        if (legacy.html != null && state.html === FALLBACK_HTML) {
           state.html = legacy.html
           state.htmlDirty = true
         }

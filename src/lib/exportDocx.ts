@@ -328,11 +328,12 @@ const MATHJAX_EX_PX = 6
  */
 async function renderFormula(latex: string, displayMode: boolean): Promise<FormulaInfo | null> {
   try {
-    const MathJax = (window as any).MathJax
+    const MathJax = window.MathJax
     if (!MathJax?.tex2svg) return null
 
     const node = MathJax.tex2svg(latex.trim(), { display: displayMode })
     const adaptor = MathJax.startup.adaptor
+    if (!adaptor) return null
 
     // 移除无障碍 MathML（docx 只需视觉 SVG）
     const assistive = node.querySelector('mjx-assistive-mml')

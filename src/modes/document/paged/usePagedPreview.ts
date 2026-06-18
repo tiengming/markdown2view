@@ -87,9 +87,7 @@ export function usePagedPreview({
   }, [iframeRef, availableHeight])
 
   const renderNow = useCallback(() => {
-    const win = iframeRef.current?.contentWindow as
-      | (Window & { __m2vRender?: (html: string, css: string) => Promise<number> })
-      | null
+    const win = iframeRef.current?.contentWindow
     if (!win || typeof win.__m2vRender !== 'function') return
     setStatus('rendering')
     try {
@@ -123,9 +121,7 @@ export function usePagedPreview({
     const start = Date.now()
     const poll = () => {
       if (cancelled) return
-      const win = iframeRef.current?.contentWindow as
-        | (Window & { __m2vReady?: boolean; __m2vRender?: unknown })
-        | null
+      const win = iframeRef.current?.contentWindow
       if (win && win.__m2vReady && typeof win.__m2vRender === 'function') {
         readyRef.current = true
         renderNow()

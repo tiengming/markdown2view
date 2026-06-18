@@ -17,7 +17,7 @@ function loadMathJax(): Promise<void> {
 
   // 在加载 MathJax 前注入配置：fontCache='none' 让路径直接内联，
   // 避免 <use xlink:href> 引用（微信编辑器不支持）
-  ;(window as any).MathJax = {
+  window.MathJax = {
     svg: {
       fontCache: 'none',
     },
@@ -27,7 +27,7 @@ function loadMathJax(): Promise<void> {
   }
 
   mathJaxReady = new Promise<void>((resolve, reject) => {
-    if ((window as any).MathJax?.startup?.adaptor) {
+    if (window.MathJax?.startup?.adaptor) {
       resolve()
       return
     }
@@ -36,7 +36,7 @@ function loadMathJax(): Promise<void> {
     import('mathjax/es5/tex-svg.js')
       .then(() => {
         const check = setInterval(() => {
-          if ((window as any).MathJax?.startup?.adaptor) {
+          if (window.MathJax?.startup?.adaptor) {
             clearInterval(check)
             resolve()
           }
@@ -68,9 +68,11 @@ export function preloadMathJax(): void {
 export async function renderMath(formula: string, displayMode: boolean = false): Promise<string> {
   await loadMathJax()
   try {
-    const MathJax = (window as any).MathJax
+    const MathJax = window.MathJax
+    if (!MathJax?.tex2svg) return ''
     const node = MathJax.tex2svg(formula, { display: displayMode })
     const adaptor = MathJax.startup.adaptor
+    if (!adaptor) return ''
 
     const assistive = node.querySelector('mjx-assistive-mml')
     if (assistive) adaptor.remove(assistive)

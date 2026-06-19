@@ -1,4 +1,4 @@
-import { getLocalImage, blobToBase64, localImageUrls, uploadImageFile } from '@/lib/editor/imageStorage'
+import { getLocalImage, blobToBase64, getUrlToIdMap, uploadImageFile } from '@/lib/editor/imageStorage'
 import type { ImageHostConfig } from '@/lib/store'
 import { domToBlob } from 'modern-screenshot'
 
@@ -29,23 +29,6 @@ export async function copyText(text: string): Promise<boolean> {
   } finally {
     document.body.removeChild(ta)
   }
-}
-
-// 构建反向索引：url -> id，用于 O(1) 查找。
-// 惰性重建：通过比对 localImageUrls 的条目数检测增删变化，避免缓存过期。
-const urlToIdCache = new Map<string, string>()
-let cachedEntryCount = -1
-
-function getUrlToIdMap(): Map<string, string> {
-  const currentCount = Object.keys(localImageUrls).length
-  if (currentCount !== cachedEntryCount) {
-    urlToIdCache.clear()
-    for (const [id, url] of Object.entries(localImageUrls)) {
-      urlToIdCache.set(url, id)
-    }
-    cachedEntryCount = currentCount
-  }
-  return urlToIdCache
 }
 
 /**

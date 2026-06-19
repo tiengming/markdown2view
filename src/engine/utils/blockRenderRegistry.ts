@@ -2,7 +2,7 @@ import type { ThemeColors } from '../composables/useTheme'
 import { esc, leaf, parseAttrs } from './helpers'
 import { inlineFormat } from './inlineFormat'
 import { renderCodeBlock } from './codeBlock'
-import { localImageUrls } from '@/lib/editor/imageStorage'
+import { getCachedImageUrl } from '@/lib/editor/imageStorage'
 import { color, fontSize, fontWeight, letterSpacing, lineHeight, neutral, radius, shadowRaw, spacing } from '../tokens'
 import {
   parseCtaBlock,
@@ -640,7 +640,7 @@ const imageRenderer: BlockRenderer = {
     let resolvedSrc = src
     if (src.startsWith('img://')) {
       const id = src.replace('img://', '')
-      resolvedSrc = localImageUrls[id] || src
+      resolvedSrc = getCachedImageUrl(id) || src
     }
     let html = ''
     if (size) {

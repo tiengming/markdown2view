@@ -3,8 +3,9 @@ import {
   clearLocalImageUrlCache,
   compileMarkdownImages,
   createImageUploadFile,
+  getCachedImageUrl,
+  getAllCachedImageIds,
   getLocalImage,
-  localImageUrls,
   preloadImagesFromMarkdown,
   resolveImageUrl,
   revokeImageUrl,
@@ -127,7 +128,7 @@ describe('imageStorage - compileMarkdownImages', () => {
 
     expect(first).toMatch(/^blob:mock-/)
     expect(second).toBe(first)
-    expect(localImageUrls.img_object_url).toBe(first)
+    expect(getCachedImageUrl('img_object_url')).toBe(first)
     expect(createObjectUrlMock).toHaveBeenCalledTimes(1)
   })
 
@@ -138,7 +139,7 @@ describe('imageStorage - compileMarkdownImages', () => {
 
     revokeImageUrl('img_revoke')
 
-    expect(localImageUrls.img_revoke).toBeUndefined()
+    expect(getCachedImageUrl('img_revoke')).toBeUndefined()
     expect(revokeObjectUrlMock).toHaveBeenCalledWith(url)
   })
 
@@ -150,8 +151,8 @@ describe('imageStorage - compileMarkdownImages', () => {
 
     await preloadImagesFromMarkdown(`![keep](img://img_keep)`)
 
-    expect(localImageUrls.img_keep).toBe(keepUrl)
-    expect(localImageUrls.img_drop).toBeUndefined()
+    expect(getCachedImageUrl('img_keep')).toBe(keepUrl)
+    expect(getCachedImageUrl('img_drop')).toBeUndefined()
     expect(revokeObjectUrlMock).toHaveBeenCalledWith(dropUrl)
   })
 
@@ -162,9 +163,9 @@ describe('imageStorage - compileMarkdownImages', () => {
       await resolveImageUrl(id)
     }
 
-    expect(localImageUrls.img_lru_0).toBeUndefined()
-    expect(localImageUrls.img_lru_64).toBeDefined()
-    expect(Object.keys(localImageUrls)).toHaveLength(64)
+    expect(getCachedImageUrl('img_lru_0')).toBeUndefined()
+    expect(getCachedImageUrl('img_lru_64')).toBeDefined()
+    expect(getAllCachedImageIds()).toHaveLength(64)
     expect(revokeObjectUrlMock).toHaveBeenCalledTimes(1)
   })
 

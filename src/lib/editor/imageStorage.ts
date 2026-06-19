@@ -187,7 +187,7 @@ export function compressImage(file: File, maxWidth = 1600, quality = 0.7, output
 // - 每个浏览器 tab 拥有独立的 JS realm，模块级状态天然隔离
 // - ObjectURL 无法跨 realm 使用，模块级缓存与当前 document 绑定是正确语义
 // 测试场景下需在 beforeEach 中调用 clearLocalImageUrlCache() 重置状态，避免用例间污染。
-export const localImageUrls: Record<string, string> = {}
+const localImageUrls: Record<string, string> = {}
 // LRU 顺序表：与 localImageUrls 一一对应，记录访问顺序（Map 迭代顺序 = 插入顺序）。
 const localImageUrlOrder = new Map<string, string>()
 

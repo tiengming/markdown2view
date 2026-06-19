@@ -7,7 +7,7 @@
 **纯前端、零后端** 的 Markdown / HTML 多场景排版与导出工作台。
 
 同一份内容，一键渲染为 **A4 正式文档 · 公众号长图文 · 小红书图文卡片 · 风格化 HTML 画布**，
-并导出为富文本 / 高清 PNG / 矢量 PDF / Word (.docx) / 批量 ZIP。
+并导出为富文本 / 高清 PNG / 矢量 PDF / Word (.docx) / PPT (.pptx) / 批量 ZIP。
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)](https://react.dev/)
@@ -91,6 +91,8 @@
 - **网页 PPT 呈现**：支持生成「电子杂志风格」「瑞士国际主义风格」横向翻页网页 PPT（键盘/手势切换）。
 - **统一指令库**：内置幻灯片、简历、报告、海报、仪表盘、社媒多页图等场景预设，一键复制 AI 指令去生成。
 - **高清导出**：基于 `MutationObserver` 的稳定截图流，支持单页 PNG / PDF 导出与多页 ZIP 打包。
+- **PPT 导出（全图版）**：逐页高清截图嵌入 `pptxgenjs` 幻灯片背景，视觉 100% 保真，适配任意复杂布局。
+- **PPT 导出（可编辑版）**：解析 DOM 叶子节点映射为原生文本框/图片，导出后可编辑文字与调整布局（实验性）。
 
 ---
 
@@ -120,7 +122,7 @@
 | 样式 | Tailwind CSS v4 + Vanilla CSS |
 | 排版引擎 | 自研纯 TS 引擎（移植自 r-markdown），含 KaTeX / MathJax / Mermaid / highlight.js |
 | A4 分页 | Paged.js v0.4.3（iframe 沙箱内运行） |
-| 导出 | modern-screenshot（PNG）/ 浏览器原生打印（PDF）/ docx（Word）/ fflate（ZIP） |
+| 导出 | modern-screenshot（PNG）/ 浏览器原生打印（PDF）/ docx（Word）/ pptxgenjs（PPT）/ fflate（ZIP） |
 | 构建优化 | `manualChunks` 分包 + 云存储 SDK 动态导入 + 模式级懒加载 |
 
 > 📐 完整架构设计详见 [`docs/技术架构设计.md`](./docs/技术架构设计.md)；路线图详见 [`docs/技术路线图.md`](./docs/技术路线图.md)。

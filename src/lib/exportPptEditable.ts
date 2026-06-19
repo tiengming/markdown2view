@@ -14,6 +14,7 @@
  */
 
 import { sanitizeFilename } from './exportImage'
+import { getFontFamilyCss } from './fonts'
 import type PptxGenJS from 'pptxgenjs'
 
 export interface PptExportOptions {
@@ -37,6 +38,34 @@ export function colorToHex(color: string): string | null {
   const g = parseInt(m[2]).toString(16).padStart(2, '0')
   const b = parseInt(m[3]).toString(16).padStart(2, '0')
   return `${r}${g}${b}`
+}
+
+/** 检测文本是否包含中文字符 */
+export function containsChinese(text: string): boolean {
+  return /[\u4e00-\u9fa5]/.test(text)
+}
+
+/**
+ * 从 CSS font-family 字符串中提取第一个可用的字体名称（去除引号和空格）。
+ * 复用项目中 fonts.ts 的字体配置格式。
+ */
+function extractFirstFont(cssValue: string): string {
+  return cssValue.split(',')[0].replace(/['"]/g, '').trim()
+}
+
+/**
+ * 获取适合文本内容的字体。
+ * 复用项目中 fonts.ts 的字体支持范围（宋体 / 仿宋 / 黑体）：
+ * - 中文文本：使用 songti 配置的第一个字体（SimSun），确保所有系统可读
+ * - 英文文本：直接使用从 CSS 提取的原字体
+ *
+ * @param originalFontFamily 从 CSS 获取的原始字体名称
+ * @param text 要显示的文本内容
+ * @returns 适合的字体名称
+ */
+export function getSuitableFontFamily(originalFontFamily: string, text: string): string {
+  if (!containsChinese(text)) return originalFontFamily
+  return extractFirstFont(getFontFamilyCss('songti'))
 }
 
 interface ExtractedText {
@@ -153,6 +182,7 @@ export function extractSlideElements(
           ? (style.textAlign as 'center' | 'right')
           : 'left'
       const fontFamily = style.fontFamily.split(',')[0].replace(/['"]/g, '').trim()
+      const suitableFont = getSuitableFontFamily(fontFamily, directText)
 
       elements.push({
         type: 'text',
@@ -165,7 +195,7 @@ export function extractSlideElements(
         color,
         bold,
         align,
-        fontFamily,
+        fontFamily: suitableFont,
       })
       return // 叶子节点已提取，不再遍历
     }

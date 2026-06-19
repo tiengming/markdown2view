@@ -22,7 +22,7 @@ vi.mock('./exportImage', () => ({
   sanitizeFilename: (name: string) => name,
 }))
 
-import { extractSlideElements, colorToHex } from './exportPptEditable'
+import { extractSlideElements, colorToHex, containsChinese, getSuitableFontFamily } from './exportPptEditable'
 
 /** 给元素设置 getBoundingClientRect 返回值 */
 function mockRect(el: Element, rect: { left: number; top: number; width: number; height: number }) {
@@ -188,5 +188,88 @@ describe('extractSlideElements', () => {
     expect(elements.length).toBe(0)
 
     document.body.removeChild(slide)
+  })
+
+  it('中文文本自动切换为 SimSun 字体', () => {
+    const slide = document.createElement('section')
+    const p = document.createElement('p')
+    p.textContent = '纯前端、零后端的 Markdown / HTML 多场景排版'
+    slide.appendChild(p)
+    document.body.appendChild(slide)
+
+    mockRect(slide, { left: 0, top: 0, width: 1600, height: 900 })
+    mockRect(p, { left: 50, top: 50, width: 600, height: 80 })
+    mockComputed(window, {
+      fontSize: '24px',
+      color: 'rgb(0, 0, 0)',
+      fontWeight: '400',
+      textAlign: 'left',
+      fontFamily: 'Inter, sans-serif',
+      backgroundColor: 'transparent',
+    })
+
+    const { elements } = extractSlideElements(slide, window, 10, 5.625)
+    const textEl = elements.find((e) => e.type === 'text')
+    expect(textEl).toBeDefined()
+    if (textEl && textEl.type === 'text') {
+      expect(textEl.fontFamily).toBe('SimSun')
+      expect(textEl.text).toBe('纯前端、零后端的 Markdown / HTML 多场景排版')
+    }
+
+    document.body.removeChild(slide)
+  })
+
+  it('纯英文文本保持原字体', () => {
+    const slide = document.createElement('section')
+    const p = document.createElement('p')
+    p.textContent = 'Hello World'
+    slide.appendChild(p)
+    document.body.appendChild(slide)
+
+    mockRect(slide, { left: 0, top: 0, width: 1600, height: 900 })
+    mockRect(p, { left: 50, top: 50, width: 200, height: 40 })
+    mockComputed(window, {
+      fontSize: '24px',
+      color: 'rgb(0, 0, 0)',
+      fontWeight: '400',
+      textAlign: 'left',
+      fontFamily: 'Inter, sans-serif',
+      backgroundColor: 'transparent',
+    })
+
+    const { elements } = extractSlideElements(slide, window, 10, 5.625)
+    const textEl = elements.find((e) => e.type === 'text')
+    expect(textEl).toBeDefined()
+    if (textEl && textEl.type === 'text') {
+      expect(textEl.fontFamily).toBe('Inter')
+    }
+
+    document.body.removeChild(slide)
+  })
+})
+
+describe('中文字体工具函数', () => {
+  describe('containsChinese', () => {
+    it('检测中文字符', () => {
+      expect(containsChinese('你好')).toBe(true)
+      expect(containsChinese('Hello World')).toBe(false)
+      expect(containsChinese('Hello 世界')).toBe(true)
+      expect(containsChinese('12345')).toBe(false)
+      expect(containsChinese('')).toBe(false)
+    })
+  })
+
+  describe('getSuitableFontFamily', () => {
+    it('中文文本统一使用项目 songti 配置的第一个字体', () => {
+      expect(getSuitableFontFamily('Inter', '你好')).toBe('SimSun')
+      expect(getSuitableFontFamily('Arial', 'Hello 世界')).toBe('SimSun')
+      expect(getSuitableFontFamily('SimSun', '你好')).toBe('SimSun')
+      expect(getSuitableFontFamily('Microsoft YaHei', '测试')).toBe('SimSun')
+    })
+
+    it('英文文本保持原字体', () => {
+      expect(getSuitableFontFamily('Inter', 'Hello World')).toBe('Inter')
+      expect(getSuitableFontFamily('Arial', '123 Test')).toBe('Arial')
+    })
   })
 })

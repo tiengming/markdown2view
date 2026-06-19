@@ -26,9 +26,12 @@
 
 ## 📸 效果预览
 
-| A4 文档 | 公众号长图文 | 小红书卡片 | HTML 画布 |
-|:---:|:---:|:---:|:---:|
-| ![A4 文档](docs/screenshots/document.png) | ![长图文](docs/screenshots/article.png) | ![卡片](docs/screenshots/card.png) | ![画布](docs/screenshots/html.png) |
+| 模式 | 效果预览 |
+|:---:|:---:|
+| **A4 文档** | ![A4 文档](docs/screenshots/document.png) |
+| **公众号长图文** | ![长图文](docs/screenshots/article.png) |
+| **小红书卡片** | ![卡片](docs/screenshots/card.png) |
+| **HTML 画布** | ![画布](docs/screenshots/html.png) |
 
 <details>
 <summary><strong>📖 目录</strong></summary>

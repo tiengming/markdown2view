@@ -13,7 +13,9 @@ import { buildPagedContentHtml, type MermaidMap } from './paged/pagedContent'
 import { collectMermaidDiagrams, preRenderMermaid } from '@engine'
 import { buildPageCss } from './paged/pagedPageCss'
 import { usePagedPreview } from './paged/usePagedPreview'
-import { buildDocumentAiGuide } from '@/lib/aiGuide'
+import { PromptLibrary } from '@/modes/html/PromptLibrary'
+import { DocTemplateDialog } from './DocTemplateDialog'
+import type { DesignStyle } from '@/data/designPrompts'
 import { copyText } from '@/lib/clipboard'
 import { Input } from '@/components/ui/Input'
 import { FontSelect } from '@/components/ui/FontSelect'
@@ -26,7 +28,7 @@ import { useExportAction } from '@/lib/useExportAction'
 import { UserGuidePopover } from '@/components/ui/UserGuidePopover'
 import { useStore } from '@/lib/store'
 import { ModeLayout } from '@/components/layout/ModeLayout'
-import { Sparkles, Download, Printer, FileText } from '@/components/ui/Icon'
+import { Download, Printer, FileText, Book, Package } from '@/components/ui/Icon'
 
 
 interface DocumentModeProps {
@@ -150,9 +152,20 @@ export function DocumentMode({
     availableHeight: settings.pageHeight - settings.marginTop - settings.marginBottom,
   })
 
-  const handleCopyGuide = async () => {
-    const ok = await copyText(buildDocumentAiGuide())
-    onToast(ok ? '已复制 A4 文档排版指令，可发给 AI 使用' : '复制失败，请重试')
+  const [promptLibraryOpen, setPromptLibraryOpen] = useState(false)
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false)
+
+  const handleCopyGuide = () => {
+    setPromptLibraryOpen(true)
+  }
+
+  const handleCopyStyle = async (style: DesignStyle) => {
+    const ok = await copyText(style.style)
+    onToast(ok ? `已复制「${style.name}」指令` : '复制失败，请重试')
+  }
+
+  const handleApplyTemplate = (markdown: string) => {
+    setMarkdown(markdown)
   }
 
   const [exporting, , runExport] = useExportAction(onToast)
@@ -160,15 +173,22 @@ export function DocumentMode({
   const toolbarActions: ToolbarItem[] = [
     {
       id: 'copyGuide',
-      icon: <Sparkles size={14} />,
-      label: '复制排版指令',
-      tooltip: '复制 A4 文档排版 AI 指令',
+      icon: <Book size={14} />,
+      label: '指令库',
+      tooltip: '打开文档指令库，选择技术文档/公文文档等专用指令',
       onClick: handleCopyGuide,
     },
     {
       id: 'customPrompt',
       label: '自定义指令',
       node: <CustomPromptPopover mode="document" onToast={onToast} />
+    },
+    {
+      id: 'template',
+      icon: <Package size={14} />,
+      label: '模板',
+      tooltip: '选择文档模板，快速填充字段',
+      onClick: () => setTemplateDialogOpen(true),
     },
     'separator',
     {
@@ -311,6 +331,19 @@ export function DocumentMode({
             />
           </div>
         }
+      />
+      <PromptLibrary
+        mode="document"
+        open={promptLibraryOpen}
+        onClose={() => setPromptLibraryOpen(false)}
+        onCopy={handleCopyStyle}
+        onToast={onToast}
+      />
+      <DocTemplateDialog
+        open={templateDialogOpen}
+        onClose={() => setTemplateDialogOpen(false)}
+        onApply={handleApplyTemplate}
+        onToast={onToast}
       />
       <UserGuidePopover
         guideKey="m2v-document-guide-seen"

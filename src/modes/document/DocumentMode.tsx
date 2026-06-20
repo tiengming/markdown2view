@@ -21,7 +21,6 @@ import { Input } from '@/components/ui/Input'
 import { FontSelect } from '@/components/ui/FontSelect'
 import { UI_LABELS } from '@/lib/uiLabels'
 import { PreviewToolbar, type ToolbarItem } from '@/components/layout/PreviewToolbar'
-import { CustomPromptPopover } from '@/components/layout/CustomPromptPopover'
 import { exportMarkdownSource } from '@/lib/exportSource'
 import { exportToDocx } from '@/lib/exportDocx'
 import { useExportAction } from '@/lib/useExportAction'
@@ -177,11 +176,6 @@ export function DocumentMode({
       label: '指令库',
       tooltip: '打开文档指令库，选择技术文档/公文文档等专用指令',
       onClick: handleCopyGuide,
-    },
-    {
-      id: 'customPrompt',
-      label: '自定义指令',
-      node: <CustomPromptPopover mode="document" onToast={onToast} />
     },
     {
       id: 'template',

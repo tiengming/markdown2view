@@ -44,7 +44,7 @@ const NON_HTML_BUILTIN_PROMPTS: Record<string, DesignStyle[]> = {
   document: [
     {
       id: 'document-default',
-      name: 'A4 打印文档',
+      name: '正式文档',
       category: '文档',
       accent: '#2563eb',
       description: '适合 A4 打印、报告导出、正式文档交付，自动分页与页眉页脚。',
@@ -57,7 +57,7 @@ const NON_HTML_BUILTIN_PROMPTS: Record<string, DesignStyle[]> = {
     },
     {
       id: 'document-tech',
-      name: '技术文档',
+      name: '极简报告',
       category: '文档',
       accent: '#0891b2',
       description: '适合 PRD、技术方案、设计文档，支持封面元数据（文档编号、版本号、审核者等）。',
@@ -70,7 +70,7 @@ const NON_HTML_BUILTIN_PROMPTS: Record<string, DesignStyle[]> = {
     },
     {
       id: 'document-gov',
-      name: '公文文档',
+      name: '严肃公文',
       category: '文档',
       accent: '#c0202c',
       description: '符合 GB/T 9704-2012 标准的党政机关公文，红头文件、发文字号、密级标注。',

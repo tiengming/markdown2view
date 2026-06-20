@@ -11,7 +11,7 @@ import { StyleThumbnail } from './StyleThumbnail'
 import { CustomInstructionEditor } from './CustomInstructionEditor'
 import { useStore, type RenderMode, type CustomInstruction } from '@/lib/store'
 import { UI_LABELS } from '@/lib/uiLabels'
-import { buildArticleAiGuide, buildDocumentAiGuide, buildCardAiGuide } from '@/lib/aiGuide'
+import { buildArticleAiGuide, buildDocumentAiGuide, buildCardAiGuide, buildGovDocAiGuide, buildTechDocAiGuide } from '@/lib/aiGuide'
 import { copyText } from '@/lib/clipboard'
 import { Book } from '@/components/ui/Icon'
 
@@ -54,6 +54,32 @@ const NON_HTML_BUILTIN_PROMPTS: Record<string, DesignStyle[]> = {
       displayLevel: 'primary',
       style: buildDocumentAiGuide(),
       previewHtml: '<div style="padding: 30px; font-family: serif; font-size: 13px; color: #000; line-height: 1.8; width: 300px; margin: 0 auto; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"> <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px;">正式研究报告</div> <p style="text-indent: 2em; text-align: justify;">这是一种适合严肃阅读、打印和归档的A4排版风格，支持题注自动居中、强制分页等正式排版特性。</p> </div>',
+    },
+    {
+      id: 'document-tech',
+      name: '技术文档',
+      category: '文档',
+      accent: '#0891b2',
+      description: '适合 PRD、技术方案、设计文档，支持封面元数据（文档编号、版本号、审核者等）。',
+      outputType: '文档',
+      visualTone: '科技',
+      family: 'songti',
+      displayLevel: 'primary',
+      style: buildTechDocAiGuide(),
+      previewHtml: '<div style="padding: 20px; font-family: sans-serif; font-size: 12px; color: #1e293b; line-height: 1.6; width: 280px; margin: 0 auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px;"> <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"> <span style="font-weight: bold;">PRD-2026</span> <span style="background: rgba(8,145,178,0.12); color: #0891b2; padding: 2px 6px; border-radius: 3px; font-size: 10px;">DRAFT</span> </div> <div style="font-size: 15px; font-weight: bold; margin-bottom: 8px;">技术方案文档</div> <div style="font-size: 10px; color: #64748b;">版本 V1.0 | 编写: 张三 | 审核: 李四</div> </div>',
+    },
+    {
+      id: 'document-gov',
+      name: '公文文档',
+      category: '文档',
+      accent: '#c0202c',
+      description: '符合 GB/T 9704-2012 标准的党政机关公文，红头文件、发文字号、密级标注。',
+      outputType: '文档',
+      visualTone: '编辑',
+      family: 'fangsong',
+      displayLevel: 'primary',
+      style: buildGovDocAiGuide(),
+      previewHtml: '<div style="padding: 18px; font-family: FangSong, serif; font-size: 11px; color: #000; line-height: 1.8; width: 280px; margin: 0 auto; background: #fff;"> <div style="text-align: center; font-size: 18px; font-weight: bold; color: #c0202c; font-family: SimSun, serif; margin-bottom: 4px;">XX市人民政府办公厅</div> <div style="text-align: center; font-size: 10px; margin-bottom: 4px;">市政发〔2026〕第1号</div> <div style="height: 2px; background: #c0202c; margin-bottom: 10px;"></div> <div style="text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 8px;">关于推进数字经济发展的通知</div> <div style="text-indent: 2em; text-align: justify;">各区人民政府，市政府各委、办、局：为深入贯彻数字经济发展战略...</div> </div>',
     }
   ],
   card: [

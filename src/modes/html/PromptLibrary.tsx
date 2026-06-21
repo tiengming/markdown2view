@@ -341,20 +341,39 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
                       <span className="text-sm font-semibold text-slate-800">封面与元数据选项</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
+                      {/* 正式封面 Badge */}
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
-                        docCoverMeta.enabled !== false 
-                          ? 'bg-blue-50 text-blue-700 border border-blue-100' 
-                          : 'bg-slate-100 text-slate-500 border border-slate-200'
+                        docCoverMeta.enabled === false 
+                          ? 'bg-slate-100 text-slate-500 border border-slate-200'
+                          : filledCoverFieldsCount > 0
+                            ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                            : 'bg-orange-50 text-orange-700 border border-orange-200'
                       }`}>
-                        📄 正式封面: {docCoverMeta.enabled !== false ? '启用' : '禁用'}
-                        {filledCoverFieldsCount > 0 && ` (已填${filledCoverFieldsCount}项)`}
+                        <span className="flex items-center gap-1.5">
+                          {docCoverMeta.enabled !== false && filledCoverFieldsCount === 0 && (
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                            </span>
+                          )}
+                          正式封面: {docCoverMeta.enabled === false ? '已禁用' : filledCoverFieldsCount > 0 ? `已填${filledCoverFieldsCount}项` : '待填写'}
+                        </span>
                       </span>
+                      {/* 公文元数据 Badge */}
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
                         filledGovFieldsCount > 0 
                           ? 'bg-red-50 text-red-700 border border-red-100' 
-                          : 'bg-slate-100 text-slate-400 border border-slate-200'
+                          : 'bg-orange-50 text-orange-700 border border-orange-200'
                       }`}>
-                        🏛️ 严肃公文: {filledGovFieldsCount > 0 ? `已填${filledGovFieldsCount}项` : '无元数据'}
+                        <span className="flex items-center gap-1.5">
+                          {filledGovFieldsCount === 0 && (
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                            </span>
+                          )}
+                          公文设置: {filledGovFieldsCount > 0 ? `已填${filledGovFieldsCount}项` : '待填写'}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -379,7 +398,7 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
                             : 'text-slate-500 hover:text-slate-700'
                         }`}
                       >
-                        📄 封面元数据
+                        封面元数据
                         {filledCoverFieldsCount > 0 && (
                           <span className="ml-1 rounded bg-blue-50 px-1 text-[10px] text-blue-700 border border-blue-100 font-bold">
                             {filledCoverFieldsCount}
@@ -398,7 +417,7 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
                             : 'text-slate-500 hover:text-slate-700'
                         }`}
                       >
-                        🏛️ 公文元数据
+                        公文元数据
                         {filledGovFieldsCount > 0 && (
                           <span className="ml-1 rounded bg-red-50 px-1 text-[10px] text-red-700 border border-red-100 font-bold">
                             {filledGovFieldsCount}
@@ -515,22 +534,32 @@ export function PromptLibrary({ mode, open, onClose, onCopy, onToast }: PromptLi
                                 {s.id === 'document-gov' ? (
                                   <>
                                     <div className="flex items-center gap-1 font-semibold text-red-700">
-                                      <span>🏛️ 关联：公文元数据</span>
+                                      <span>关联：公文配置</span>
                                       <span className="ml-auto rounded bg-red-50 border border-red-100 px-1 text-[9px] font-bold text-red-700">
                                         {filledGovFieldsCount > 0 ? `已填 ${filledGovFieldsCount} 项` : '未填写'}
                                       </span>
                                     </div>
-                                    <span className="text-slate-400">复制后将生成红头属性：&lt;gov-header&gt;</span>
+                                    <span className="text-slate-400">
+                                      {filledGovFieldsCount > 0 
+                                        ? '将应用已填写的公文数据生成红头' 
+                                        : '当前未配置，生成默认示例红头'}
+                                    </span>
                                   </>
                                 ) : (
                                   <>
                                     <div className="flex items-center gap-1 font-semibold text-blue-700">
-                                      <span>📄 关联：封面元数据</span>
+                                      <span>关联：封面配置</span>
                                       <span className="ml-auto rounded bg-blue-50 border border-blue-100 px-1 text-[9px] font-bold text-blue-700">
-                                        {docCoverMeta.enabled !== false ? `已启用 (${filledCoverFieldsCount}项)` : '未启用'}
+                                        {docCoverMeta.enabled !== false ? `已启用 (${filledCoverFieldsCount}项)` : '已禁用'}
                                       </span>
                                     </div>
-                                    <span className="text-slate-400">复制后将生成封面表格与分页</span>
+                                    <span className="text-slate-400">
+                                      {docCoverMeta.enabled === false
+                                        ? '封面已禁用，直接从正文开始'
+                                        : filledCoverFieldsCount === 0
+                                          ? '将生成默认封面表格 (当前未配置)'
+                                          : '将应用已填写的封面数据'}
+                                    </span>
                                   </>
                                 )}
                               </div>

@@ -204,7 +204,122 @@ const DOCUMENT_COVER_SECTION = `## 三、封面页写法
 - 一级标题只能有一个，作为文档主标题。
 - 信息表格采用四列双键值对格式（字段名 | 值 | 字段名 | 值），每行放两组字段，共四行。字段可根据实际情况增减。
 - 封面页内不要使用列表、代码块、图片等非标题/表格元素。
-- \\\`<page-break/>\\\` 之后开始写正文。`;
+- \\\`<page-break/>\\\` 之后开始写正文。`
+
+const DOCUMENT_NO_COVER_SECTION = `## 三、封面页写法
+
+**本文档不需要封面页。** 请直接从正文开始，不要在开头插入 \\\`<page-break/>\\\`。
+
+- 第一个一级标题作为文档主标题居中展示。
+- 标题后紧随正文内容，不要生成"文档编号、版本号、编写者"等信息表格。
+- 不要在文档开头插入分页符或封面元数据表格。`
+
+/** 正式文档/技术文档封面元数据 */
+export interface DocCoverMetadata {
+  /** 是否生成封面页；undefined 时按默认（需要封面）处理 */
+  enabled?: boolean
+  docNo?: string
+  version?: string
+  author?: string
+  authorDate?: string
+  reviewer?: string
+  reviewDate?: string
+  status?: string
+  classification?: string
+}
+
+/** 公文元数据 */
+export interface GovDocMetadata {
+  issuer?: string
+  docNo?: string
+  classification?: string
+  urgency?: string
+  signer?: string
+  recipient?: string
+  publishDate?: string
+}
+
+function hasDocCoverValues(meta: DocCoverMetadata): boolean {
+  return Boolean(
+    meta.docNo || meta.version || meta.author || meta.authorDate ||
+    meta.reviewer || meta.reviewDate || meta.status || meta.classification
+  )
+}
+
+function buildDocCoverMetadataSection(meta: DocCoverMetadata): string {
+  if (!hasDocCoverValues(meta)) return ''
+  const rows: string[] = []
+  const addRow = (k1: string, v1: string, k2: string, v2: string) => {
+    if (v1 || v2) rows.push(`| ${k1} | ${v1} | ${k2} | ${v2} |`)
+  }
+  addRow('文档编号', meta.docNo || '', '版本号', meta.version || '')
+  addRow('编写', meta.author || '', '编写日期', meta.authorDate || '')
+  addRow('审核', meta.reviewer || '', '审核日期', meta.reviewDate || '')
+  addRow('文档状态', meta.status || '', '机密等级', meta.classification || '')
+
+  if (rows.length === 0) return ''
+
+  return `## 六、封面元数据（用户已确认，请直接使用）
+
+请使用以下元数据生成封面页，表格后必须插入 <page-break/> 再开始正文：
+
+\`\`\`
+# 文档标题（请根据素材生成，不要使用占位符）
+
+${rows.join('\n')}
+| --- | --- | --- | --- |
+
+<page-break/>
+\`\`\`
+
+要求：
+- 上述元数据字段已由用户确认，请原样填入封面页表格，不要修改、补全或省略已填写的字段。
+- 文档标题请根据素材自动生成。
+- 表格采用四列双键值对格式，字段顺序与上面一致；未填写的字段可省略整行。
+- 表格后必须插入 <page-break/> 分页符，再开始正文。`
+}
+
+function buildGovDocMetadataSection(meta: GovDocMetadata): string {
+  const hasValue = meta.issuer || meta.docNo || meta.classification ||
+    meta.urgency || meta.signer || meta.recipient || meta.publishDate
+  if (!hasValue) return ''
+
+  const attrs: string[] = []
+  if (meta.issuer) attrs.push(`issuer="${meta.issuer}"`)
+  if (meta.docNo) attrs.push(`doc-no="${meta.docNo}"`)
+  if (meta.classification) attrs.push(`classification="${meta.classification}"`)
+  if (meta.urgency) attrs.push(`urgency="${meta.urgency}"`)
+  if (meta.signer) attrs.push(`signer="${meta.signer}"`)
+
+  const lines: string[] = []
+  lines.push('## 六、公文元数据（用户已确认，请直接使用）')
+  lines.push('')
+  lines.push('请使用以下元数据生成 <gov-header> 标签：')
+  lines.push('')
+  lines.push('```')
+  lines.push(`<gov-header ${attrs.join(' ')}></gov-header>`)
+  lines.push('```')
+  lines.push('')
+  if (meta.recipient) {
+    lines.push(`主送机关：${meta.recipient}`)
+    lines.push('')
+  }
+  if (meta.publishDate) {
+    lines.push(`成文日期：${meta.publishDate}`)
+    lines.push('')
+  }
+  lines.push('要求：')
+  lines.push('- 上述元数据已由用户确认，请原样填入 <gov-header> 标签属性，不要修改、补全或省略已填写的字段。')
+  lines.push('- 公文标题请根据素材自动生成，不要使用占位符。')
+  if (meta.recipient) {
+    lines.push('- 主送机关请使用上述确认的内容，后跟全角冒号。')
+  }
+  if (meta.publishDate) {
+    lines.push('- 落款日期请使用上述确认的成文日期。')
+  }
+
+  return lines.join('\n')
+}
 
 export function buildArticleAiGuide(): string {
   return [
@@ -242,8 +357,16 @@ export function buildArticleAiGuide(): string {
   ].join("\n");
 }
 
-export function buildDocumentAiGuide(): string {
-  return [
+export function buildDocumentAiGuide(meta?: DocCoverMetadata): string {
+  const coverSection = meta && meta.enabled === false
+    ? DOCUMENT_NO_COVER_SECTION
+    : DOCUMENT_COVER_SECTION
+
+  const metaSection = meta && meta.enabled !== false
+    ? buildDocCoverMetadataSection(meta)
+    : ''
+
+  const parts = [
     "# A4 文档排版 Markdown 语法指令",
     "",
     "你是一位专业的 A4 正式文档编辑与排版助手。请把我提供的素材整理成适合打印、归档、评审或 PDF 交付的正式文档，",
@@ -253,13 +376,18 @@ export function buildDocumentAiGuide(): string {
     "",
     DOCUMENT_STANDARD_SECTION,
     "",
-    DOCUMENT_COVER_SECTION,
+    coverSection,
     "",
     MATH_SECTION,
     "",
     DOCUMENT_RULES_SECTION,
-    "",
-  ].join("\n");
+  ]
+
+  if (metaSection) {
+    parts.push("", metaSection, "")
+  }
+
+  return parts.join("\n")
 }
 
 const GOV_DOC_HEADER_SECTION = `## 三、公文头部写法（<gov-header> 标签）
@@ -294,8 +422,10 @@ const GOV_DOC_RULES_SECTION = `## 四、公文排版规范（重要）
 7. 附录前必须插入 <page-break/>。
 8. 直接输出可粘贴的 Markdown 正文，不要有任何多余的解释。`
 
-export function buildGovDocAiGuide(): string {
-  return [
+export function buildGovDocAiGuide(meta?: GovDocMetadata): string {
+  const metaSection = meta ? buildGovDocMetadataSection(meta) : ''
+
+  const parts = [
     "# 公文排版 Markdown 语法指令",
     "",
     "你是一位专业的党政机关公文编辑与排版助手。请把我提供的素材整理成符合 GB/T 9704-2012 标准的正式公文，",
@@ -310,8 +440,13 @@ export function buildGovDocAiGuide(): string {
     MATH_SECTION,
     "",
     GOV_DOC_RULES_SECTION,
-    "",
-  ].join("\n");
+  ]
+
+  if (metaSection) {
+    parts.push("", metaSection, "")
+  }
+
+  return parts.join("\n")
 }
 
 const TECH_DOC_COVER_SECTION = `## 三、封面页写法（技术文档）
@@ -346,8 +481,24 @@ const TECH_DOC_COVER_SECTION = `## 三、封面页写法（技术文档）
 - 信息表格采用四列双键值对格式，字段可根据实际情况增减。
 - 不需要封面时，直接从正文开始，不要插入 <page-break/>。`
 
-export function buildTechDocAiGuide(): string {
-  return [
+const TECH_DOC_NO_COVER_SECTION = `## 三、封面页写法（技术文档）
+
+**本文档不需要封面页。** 请直接从正文开始，不要在开头插入 <page-break/>。
+
+- 第一个一级标题作为文档主标题居中展示。
+- 标题后紧随正文内容，不要生成"文档编号、版本号、编写者"等信息表格。
+- 不要在文档开头插入分页符或封面元数据表格。`
+
+export function buildTechDocAiGuide(meta?: DocCoverMetadata): string {
+  const coverSection = meta && meta.enabled === false
+    ? TECH_DOC_NO_COVER_SECTION
+    : TECH_DOC_COVER_SECTION
+
+  const metaSection = meta && meta.enabled !== false
+    ? buildDocCoverMetadataSection(meta)
+    : ''
+
+  const parts = [
     "# 技术文档排版 Markdown 语法指令",
     "",
     "你是一位专业的技术文档编辑与排版助手。请把我提供的素材整理成适合技术评审、归档和交付的正式技术文档，",
@@ -357,13 +508,18 @@ export function buildTechDocAiGuide(): string {
     "",
     DOCUMENT_STANDARD_SECTION,
     "",
-    TECH_DOC_COVER_SECTION,
+    coverSection,
     "",
     MATH_SECTION,
     "",
     DOCUMENT_RULES_SECTION,
-    "",
-  ].join("\n");
+  ]
+
+  if (metaSection) {
+    parts.push("", metaSection, "")
+  }
+
+  return parts.join("\n")
 }
 
 export function buildCardAiGuide(aspect: string): string {
